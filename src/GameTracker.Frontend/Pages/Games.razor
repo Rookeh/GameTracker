@@ -1,0 +1,126 @@
+﻿@page "/games";
+
+<PageTitle>Games</PageTitle>
+
+@using GameTracker.Interfaces;
+@using GameTracker.Core;
+@using GameTracker.Models;
+@using MathNet.Numerics.Statistics;
+
+@inject IProviderFactory ProviderFactory;
+@inject ToastService ToastService;
+
+@if (games == null || !games.Any())
+{
+    <p><em>No games loaded. Please configure a game provider.</em></p>
+}
+else
+{
+    <EditForm Model="@gridState">
+        <table class="table">
+            <tbody>
+                @foreach (var gameRow in games.Skip((gridState.CurrentPage - 1) * gridState.ItemsPerPage).Take(gridState.ItemsPerPage).Chunk(gridState.ItemsPerRow))
+                {
+                    <tr>
+                        @foreach (var game in gameRow)
+                        {
+                            <td>
+                                <div>
+                                    <img height="215" width="460" src="@game.Image" alt="@game.Title" />
+                                    <br>
+                                    <a href="@game.LaunchCommand">@game.Title</a>
+                                </div>
+                            </td>
+                        }
+                    </tr>
+                }
+                <tr>
+                    @for(int i = 1; i <= gridState.ItemsPerRow; i++)
+                    {
+                        @if (i == 1)
+                        {
+                            <td><button class="bi bi-arrow-left" @onclick="PreviousPage" /></td>
+                        } 
+                        else if (i == GetMedian(gridState.ItemsPerRow)) 
+                        {                            
+                            <td>
+                                <div>
+                                    Page: @gridState.CurrentPage / @PageCount()
+                                </div>
+                                <div>
+                                    <label>Items per Page</label>
+                                    <InputSelect @bind-Value="@gridState.ItemsPerPage">
+                                        <option value="6">6</option>
+                                        <option value="12">12</option>
+                                        <option value="24">24</option>
+                                        <option value="48">48</option>
+                                    </InputSelect>
+                                </div>                                
+                            </td>
+                        } 
+                        else if (i == gridState.ItemsPerRow) 
+                        {
+                            <td><button class="bi bi-arrow-right" @onclick="NextPage" /></td>
+                        }
+                        else
+                        {
+                            <td/>
+                        }
+                    }
+                </tr>
+            </tbody>
+        </table>
+    </EditForm>
+}
+
+@code {
+
+    private List<Game> games;
+
+    private Models.GridState gridState = new()
+    {
+        CurrentPage = 1,
+        ItemsPerPage = 6,
+        ItemsPerRow = 3
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        games = ProviderFactory.LoadProviders()
+            .ToArray()
+            .SelectMany(p => p.Games)
+            .ToList();
+    }
+
+    private void NextPage()
+    {
+        if (gridState.CurrentPage < PageCount())
+        {
+            gridState.CurrentPage++;
+        }
+    }
+
+    private void PreviousPage()
+    {
+        if (gridState.CurrentPage > 1)
+        {
+            gridState.CurrentPage--;
+        }
+    }
+
+    private void ResetTable()
+    {
+        gridState.CurrentPage = 1;
+    }
+
+    private int PageCount()
+    {
+        return Convert.ToInt32(Math.Ceiling((float)games.Count / (float)gridState.ItemsPerPage));
+    }
+
+    private static int GetMedian(int maxRange)
+    {
+        var pages = Enumerable.Range(1, maxRange).Select(i => Convert.ToDouble(i));
+        return Convert.ToInt32(pages.Median());
+    }
+}

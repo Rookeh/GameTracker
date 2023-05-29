@@ -1,0 +1,179 @@
+﻿@page "/gameproviders";
+
+<PageTitle>Game Providers</PageTitle>
+
+@using GameTracker.Interfaces;
+@using GameTracker.Core;
+
+@inject IProviderFactory ProviderFactory;
+@inject ToastService ToastService;
+
+@if (providers == null || !providers.Any())
+{
+    <p><em>Loading Providers...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Provider Name</th>
+                <th>Required Information</th>
+                <th>Load Game Data</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var provider in providers)
+            {
+                <tr>
+                    <td>@provider.Platform.Name</td>
+                    <td>
+                        <EditForm EditContext="@editContext">
+                            <table class="table">
+                                <tbody>
+                                    @if (!provider.RequiredParameters.Any())
+                                    {
+                                        <div>None</div>
+                                    }
+                                    else
+                                    {
+                                        @foreach (var param in provider.RequiredParameters)
+                                        {
+                                            <tr>
+                                                <td><label>@param.Key</label></td>
+                                                <td>
+                                                    @switch (param.Value)
+                                                    {
+                                                        case Type boolType when boolType == typeof(bool):
+                                                            <input type="checkbox" @bind="boolParameters[provider.Platform.Name + param.Key]" />
+                                                            break;
+                                                        case Type dateType when dateType == typeof(DateTime):
+                                                            <input type="date" @bind="dateParameters[provider.Platform.Name + param.Key]" />
+                                                            break;
+                                                        case Type intType when intType == typeof(int):
+                                                            <input type="number" @bind="intParameters[provider.Platform.Name + param.Key]" />
+                                                            break;
+                                                        case Type stringType when stringType == typeof(string):
+                                                            <input type="text" @bind="stringParameters[provider.Platform.Name + param.Key]" />
+                                                            break;
+                                                        default:
+                                                            <em>Unsupported parameter type.</em>
+                                                            break;
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </EditForm>
+                    </td>
+                    <td>
+                        <button class="btn btn-primary" onclick="@(async () => await LoadGames(provider))">Load Games</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IGameProvider[]? providers;
+    private Dictionary<string, bool> boolParameters;
+    private Dictionary<string, DateTime> dateParameters;
+    private Dictionary<string, string> stringParameters;
+    private Dictionary<string, int> intParameters;
+
+    private EditContext? editContext;
+
+    protected override async Task OnInitializedAsync()
+    {
+        providers = ProviderFactory.LoadProviders().ToArray();
+        editContext = new EditContext(providers);
+        boolParameters = new Dictionary<string, bool>();
+        dateParameters = new Dictionary<string, DateTime>();
+        intParameters = new Dictionary<string, int>();
+        stringParameters = new Dictionary<string, string>();
+
+        foreach (var provider in providers)
+        {
+            foreach (var providerArg in provider.RequiredParameters)
+            {
+                switch (providerArg.Value)
+                {
+                    case Type boolType when boolType == typeof(bool):
+                        boolParameters[provider.Platform.Name + providerArg.Key] = default;
+                        break;
+                    case Type dateType when dateType == typeof(DateTime):
+                        dateParameters[provider.Platform.Name + providerArg.Key] = default;
+                        break;
+                    case Type intType when intType == typeof(int):
+                        intParameters[provider.Platform.Name + providerArg.Key] = default;
+                        break;
+                    case Type stringType when stringType == typeof(string):
+                        stringParameters[provider.Platform.Name + providerArg.Key] = default;
+                        break;
+                }
+            }
+        }
+    }
+
+    private async Task LoadGames(IGameProvider provider)
+    {
+        try
+        {
+            var providerArgValues = new List<object>();
+            foreach (var arg in provider.RequiredParameters)
+            {
+                switch (arg.Value)
+                {
+                    case Type boolType when boolType == typeof(bool):
+                        providerArgValues.Add(boolParameters[provider.Platform.Name + arg.Key]);
+                        break;
+                    case Type dateType when dateType == typeof(DateTime):
+                        providerArgValues.Add(dateParameters[provider.Platform.Name + arg.Key]);
+                        break;
+                    case Type intType when intType == typeof(int):
+                        providerArgValues.Add(intParameters[provider.Platform.Name + arg.Key]);
+                        break;
+                    case Type stringType when stringType == typeof(string):
+                        providerArgValues.Add(stringParameters[provider.Platform.Name + arg.Key]);
+                        break;
+                }
+            }
+
+            if (provider.RequiredParameters.Any() && (!providerArgValues.Any() || providerArgValues.Any(pa => pa == null)))
+            {
+                ToastService.Notify(new ToastMessage
+                {
+                    Type = ToastType.Warning,
+                    Message = $"Cannot load games for provider {provider.Platform.Name}: Required information missing.",
+                });
+            }
+            else
+            {
+                ToastService.Notify(new ToastMessage
+                {
+                    Type = ToastType.Info,
+                    Message = $"Refreshing games for provider {provider.Platform.Name}...",
+                });
+
+                await provider.Refresh(providerArgValues.ToArray());
+
+                ToastService.Notify(new ToastMessage
+                {
+                    Type = ToastType.Success,
+                    Message = $"Successfully loaded {provider.Games.Count()} games from provider {provider.Platform.Name}.",
+                });
+            }
+        }
+        catch (Exception e)
+        {
+            ToastService.Notify(new ToastMessage
+            {
+                Type = ToastType.Danger,
+                Message = $"Failed to load games for provider {provider.Platform.Name}: {e.Message}",
+            });
+        }
+    }
+}

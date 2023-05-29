@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Blazor.Bootstrap" Version="1.7.3" />
+    <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GameTracker.Core\GameTracker.Core.csproj" />
+    <ProjectReference Include="..\GameTracker.Interfaces\GameTracker.Interfaces.csproj" />
+    <ProjectReference Include="..\GameTracker.Plugins.Dummy\GameTracker.Plugins.Dummy.csproj" />
+    <ProjectReference Include="..\GameTracker.Plugins.Steam\GameTracker.Plugins.Steam.csproj" />
+  </ItemGroup>
+
+</Project>

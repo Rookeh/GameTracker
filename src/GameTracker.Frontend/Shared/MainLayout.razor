@@ -1,0 +1,48 @@
+﻿@inherits LayoutComponentBase
+
+<div class="bb-page">    
+    <Sidebar @ref="sidebar"
+             IconName="IconName.BootstrapFill"
+             Title="Blazor Bootstrap"
+             DataProvider="SidebarDataProvider" />
+
+    <main>        
+        <div class="bb-top-row px-4 d-flex justify-content-end">
+            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+        </div>
+
+        <article class="content px-4">
+            <div class="py-2">
+                @Body
+            </div>
+        </article>                
+    </main>    
+</div>
+
+<Toasts class="p-5" AutoHide="true" Delay="4000" Placement="ToastsPlacement.TopRight" />
+
+@code {
+    private Sidebar sidebar = default!;
+    private IEnumerable<NavItem> navItems = default!;
+
+    private async Task<SidebarDataProviderResult> SidebarDataProvider(SidebarDataProviderRequest request)
+    {
+        if (navItems is null)
+            navItems = GetNavItems();
+
+        return await Task.FromResult(request.ApplyTo(navItems));
+    }
+
+    private IEnumerable<NavItem> GetNavItems()
+    {
+        navItems = new List<NavItem>
+        {
+            new NavItem { Id = "1", Href = "/", IconName = IconName.HouseDoorFill, Text = "Home", Match=NavLinkMatch.All},
+            new NavItem { Id = "2", Href = "/gameproviders", IconName = IconName.Plugin, Text = "Game Providers"},
+            new NavItem { Id = "3", Href = "/games", IconName = IconName.Joystick, Text = "All Games"},
+            new NavItem { Id = "4", Href = "/unplayed", IconName = IconName.Star, Text = "Top Unplayed"},
+        };
+
+        return navItems;
+    }
+}

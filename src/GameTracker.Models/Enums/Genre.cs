@@ -1,0 +1,39 @@
+﻿namespace GameTracker.Models.Enums
+{
+    public enum Genre
+    {
+        Action,
+        ActionAdventure,
+        BeatEmUp,
+        BoardGame,
+        CardGame,
+        Casual,
+        ESports,
+        Fighting,
+        FourX,
+        GrandStrategy,
+        Horror,
+        MMORPG,
+        MOBA,
+        OpenWorld,
+        Other,
+        Party,
+        Platformer,
+        Puzzle,
+        RPG,
+        RTS,
+        Racing,
+        Roguelike,
+        Sandbox,
+        Shooter,
+        Simulation,
+        Sports,
+        Stealth,
+        Strategy,
+        Survival,
+        TowerDefense,
+        Trivia,
+        VisualNovel,
+        Wargame
+    }
+}
