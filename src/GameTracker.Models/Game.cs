@@ -10,7 +10,7 @@ namespace GameTracker.Models
 
         public abstract string Description { get; }
         public abstract Genre[] Genres { get; }
-        public abstract Uri Image { get; }
+        public abstract string Image { get; }
         public abstract string LaunchCommand { get; }
         public abstract MultiplayerAvailability[] MultiplayerAvailability { get; }
         public abstract MultiplayerMode[] MultiplayerModes { get; }        

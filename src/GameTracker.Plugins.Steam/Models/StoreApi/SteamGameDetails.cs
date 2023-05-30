@@ -5,6 +5,9 @@ namespace GameTracker.Plugins.Steam.Models.StoreApi
 {
     public class SteamGameDetails
     {
+        [JsonIgnore]
+        public bool IsDefaultValue { get; set; }
+
         [JsonPropertyName("type")]
         public string Type { get; set; }
 

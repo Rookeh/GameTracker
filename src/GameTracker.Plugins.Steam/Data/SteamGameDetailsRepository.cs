@@ -27,7 +27,7 @@ namespace GameTracker.Plugins.Steam.Data
         private readonly ReleaseDateRepository _releaseDateRepository;
 
         public SteamGameDetailsRepository()
-            : base(Constants.SteamGameDetails.ConnectionString, TableName, BootstrapSql)
+            : base(Constants.ConnectionString, TableName, BootstrapSql)
         {
             _categoryRepository = new CategoryRepository();
             _developerRepository = new DeveloperRepository();

@@ -24,7 +24,9 @@ else
                             <div>
                                 <img height="215" width="460" src="@game.Image" alt="@game.Title" />
                                 <br>
-                                @game.Title (@GetAverageScore(game))
+                                @game.Title
+                                Average Review: @GetAverageScore(game)
+                                Playtime: @game.Playtime
                             </div>
                         </td>
 
@@ -44,8 +46,9 @@ else
         games = ProviderFactory.LoadProviders()
             .ToArray()
             .SelectMany(p => p.Games)
-            //.Where(g => g.Reviews.Min(r => r.Score) > 9)
-            .OrderBy(g => g.Playtime)
+            .Where(g => g.Playtime <= TimeSpan.FromHours(1))
+            .OrderByDescending(g => GetAverageScore(g))
+            .ThenBy(g => g.Playtime)            
             .Take(5)
             .ToList();
     }

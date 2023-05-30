@@ -15,7 +15,7 @@ namespace GameTracker.Plugins.Dummy
 
         public override Genre[] Genres => new[] { Genre.Other };
 
-        public override Uri Image => new Uri("https://upload.wikimedia.org/wikipedia/commons/2/21/Hello_World_Brian_Kernighan_1978.jpg");
+        public override string Image => "https://upload.wikimedia.org/wikipedia/commons/2/21/Hello_World_Brian_Kernighan_1978.jpg";
 
         public override string LaunchCommand => "https://en.wikipedia.org/wiki/%22Hello,_World!%22_program";
 

@@ -18,4 +18,10 @@
     <ProjectReference Include="..\GameTracker.Plugins.Steam\GameTracker.Plugins.Steam.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="wwwroot\img\placeholder.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

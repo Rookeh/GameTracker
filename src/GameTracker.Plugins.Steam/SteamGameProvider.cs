@@ -2,7 +2,9 @@
 using GameTracker.Models;
 using GameTracker.Plugins.Steam.Data;
 using GameTracker.Plugins.Steam.Models;
+using GameTracker.Plugins.Steam.Models.StoreApi;
 using GameTracker.Plugins.Steam.Models.WebApi;
+using GameTracker.Plugins.Steam.RateLimiting;
 using System.Text.Json;
 using LinkType = GameTracker.Models.Enums.LinkType;
 
@@ -11,6 +13,7 @@ namespace GameTracker.Plugins.Steam
     public class SteamGameProvider : IGameProvider
     {
         private readonly Platform _platform;
+        private readonly RateLimitedHttpClient<Dictionary<string, SteamGameDetailsRoot>> _rateLimitedHttpClient;
         private readonly SteamGameDetailsRepository _steamGameDetailsRepository;
         
         private List<Game> _games;
@@ -41,6 +44,8 @@ namespace GameTracker.Plugins.Steam
                     }
                 }
             };
+
+            _rateLimitedHttpClient = new RateLimitedHttpClient<Dictionary<string, SteamGameDetailsRoot>>();
             _steamGameDetailsRepository = new SteamGameDetailsRepository();
         }
 
@@ -76,6 +81,7 @@ namespace GameTracker.Plugins.Steam
                 var userSteamApps = steamApps.Where(sa => userGames.Games.Select(ug => ug.AppId).Contains(sa.AppId));
                 
                 _games.AddRange(userSteamApps.Select(usa => new SteamGame(
+                    _rateLimitedHttpClient,
                     _steamGameDetailsRepository,
                     usa.AppId, 
                     userGames.Games.Single(g => g.AppId == usa.AppId).Playtime,
