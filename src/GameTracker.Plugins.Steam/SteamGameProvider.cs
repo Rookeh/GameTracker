@@ -69,6 +69,7 @@ namespace GameTracker.Plugins.Steam
             var userGameJson = await client.GetStringAsync($"https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key={apiKey}&steamid={steamId}");
             var userGames = JsonSerializer.Deserialize<SteamGameResponseRoot>(userGameJson).Response;
 
+            _games.Clear();
             bool moreTitlesToQuery = true;
             int lastAppId = 0;
 
