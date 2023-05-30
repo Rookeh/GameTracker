@@ -4,7 +4,6 @@ using GameTracker.Plugins.Steam.Data;
 using GameTracker.Plugins.Steam.Helpers;
 using GameTracker.Plugins.Steam.Models.StoreApi;
 using GameTracker.Plugins.Steam.RateLimiting;
-using System.Text.Json;
 
 using GenreEnum = GameTracker.Models.Enums.Genre;
 
@@ -92,15 +91,6 @@ namespace GameTracker.Plugins.Steam.Models
 
                 return null;
             }
-        }
-
-        private static async Task<SteamGameDetails> GetGameDetailsFromSteam(int platformId)
-        {
-            using HttpClient client = new();            
-            var gameDetailResponse = await client.GetAsync($"https://store.steampowered.com/api/appdetails?appids={platformId}").ConfigureAwait(false);
-            var gameDetailJson = await gameDetailResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
-            var gameDetailObject = JsonSerializer.Deserialize<Dictionary<string, SteamGameDetailsRoot>>(gameDetailJson)[platformId.ToString()];
-            return gameDetailObject.Details;
         }
 
         #endregion
