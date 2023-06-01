@@ -80,7 +80,7 @@ namespace GameTracker.Plugins.GOG
             var ownedGamesResponse = await httpClient.SendAsync(ownedGamesRequest);            
             if (!ownedGamesResponse.IsSuccessStatusCode)
             {
-                throw new ApplicationException($"Failed to retrieve games from GOG, status code: {ownedGamesResponse.StatusCode}");
+                ThrowOnApiFailure(ownedGamesResponse);
             }
 
             var ownedGames = JsonSerializer.Deserialize<OwnedGames>(await ownedGamesResponse.Content.ReadAsStringAsync());
@@ -94,7 +94,7 @@ namespace GameTracker.Plugins.GOG
 
                 if (!gameDetailsResponse.IsSuccessStatusCode)
                 {
-                    throw new ApplicationException($"Failed to retrieve game details from GOG, status code: {ownedGamesResponse.StatusCode}");
+                    ThrowOnApiFailure(gameDetailsResponse);
                 }
 
                 var gameDetailsJson = await gameDetailsResponse.Content.ReadAsStringAsync();
@@ -108,6 +108,15 @@ namespace GameTracker.Plugins.GOG
                                 string.IsNullOrEmpty(gd.ReleaseDate) ? DateTime.MinValue : DateTime.Parse(gd.ReleaseDate),
                                 gd.Title)));
             }
+        }
+
+        private static void ThrowOnApiFailure(HttpResponseMessage response)
+        {
+            string error = response.StatusCode == System.Net.HttpStatusCode.Unauthorized
+                ? "Token was rejected."
+                : $"GOG API returned status code {response.StatusCode}.";
+
+            throw new ApplicationException(error);
         }
     }
 }

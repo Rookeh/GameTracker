@@ -17,9 +17,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameTracker.Frontend", "Gam
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameTracker.Plugins.Dummy", "GameTracker.Plugins.Dummy\GameTracker.Plugins.Dummy.csproj", "{9E802FB3-FF8F-40B0-8461-987364F00C47}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameTracker.Plugins.GOG", "GameTracker.Plugins.GOG\GameTracker.Plugins.GOG.csproj", "{67638BFB-7827-4025-BCF8-718D6086A894}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameTracker.Plugins.GOG", "GameTracker.Plugins.GOG\GameTracker.Plugins.GOG.csproj", "{67638BFB-7827-4025-BCF8-718D6086A894}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameTracker.Plugins.Common", "GameTracker.Plugins.Common\GameTracker.Plugins.Common.csproj", "{BA43185E-9401-4EA3-9064-8880DEFA2716}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameTracker.Plugins.Common", "GameTracker.Plugins.Common\GameTracker.Plugins.Common.csproj", "{BA43185E-9401-4EA3-9064-8880DEFA2716}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameTracker.Plugins.PlayStation", "GameTracker.Plugins.PlayStation\GameTracker.Plugins.PlayStation.csproj", "{81672A78-0E5F-406B-B98D-95BC09B1A7CB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,6 +61,10 @@ Global
 		{BA43185E-9401-4EA3-9064-8880DEFA2716}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA43185E-9401-4EA3-9064-8880DEFA2716}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA43185E-9401-4EA3-9064-8880DEFA2716}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81672A78-0E5F-406B-B98D-95BC09B1A7CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81672A78-0E5F-406B-B98D-95BC09B1A7CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81672A78-0E5F-406B-B98D-95BC09B1A7CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81672A78-0E5F-406B-B98D-95BC09B1A7CB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -68,6 +74,7 @@ Global
 		{9E802FB3-FF8F-40B0-8461-987364F00C47} = {14500993-18E7-43F8-948A-C93C6584EED1}
 		{67638BFB-7827-4025-BCF8-718D6086A894} = {14500993-18E7-43F8-948A-C93C6584EED1}
 		{BA43185E-9401-4EA3-9064-8880DEFA2716} = {14500993-18E7-43F8-948A-C93C6584EED1}
+		{81672A78-0E5F-406B-B98D-95BC09B1A7CB} = {14500993-18E7-43F8-948A-C93C6584EED1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F42E1040-C5D3-46DD-A6B6-B7DD4CF216DC}

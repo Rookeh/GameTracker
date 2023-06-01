@@ -86,8 +86,19 @@ namespace GameTracker.Plugins.Steam
             var steamId = providerSpecificParameters[1].ToString();
 
             using HttpClient client = new();
-            var userGameJson = await client.GetStringAsync($"https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key={apiKey}&steamid={steamId}");
-            var userGames = JsonSerializer.Deserialize<SteamGameResponseRoot>(userGameJson).Response;
+            var userGameResponse = await client.GetAsync($"https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key={apiKey}&steamid={steamId}");
+
+            if (!userGameResponse.IsSuccessStatusCode)
+            {
+                string error = userGameResponse.StatusCode == System.Net.HttpStatusCode.Unauthorized
+                    ? "API key was rejected."
+                    : $"Steam API returned status code {userGameResponse.StatusCode}.";
+
+                throw new ApplicationException(error);
+            }
+
+            var userGameResponseJson = await userGameResponse.Content.ReadAsStringAsync();
+            var userGames = JsonSerializer.Deserialize<SteamGameResponseRoot>(userGameResponseJson).Response;
 
             _games.Clear();
             bool moreTitlesToQuery = true;
