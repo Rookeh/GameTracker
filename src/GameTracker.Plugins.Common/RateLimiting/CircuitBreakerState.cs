@@ -1,4 +1,4 @@
-﻿namespace GameTracker.Plugins.Steam.RateLimiting
+﻿namespace GameTracker.Plugins.Common.RateLimiting
 {
     internal enum CircuitBreakerState
     {

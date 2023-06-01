@@ -5,9 +5,8 @@ namespace GameTracker.Models
     public abstract class Game
     {
         public int PlatformId { get; set; }
-        public TimeSpan Playtime { get; set; }
-        public string Title { get; set; }
-
+        public abstract TimeSpan Playtime { get; }
+        public abstract string Title { get; }
         public abstract string Description { get; }
         public abstract Genre[] Genres { get; }
         public abstract string Image { get; }

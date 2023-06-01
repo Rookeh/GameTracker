@@ -5,9 +5,11 @@ namespace GameTracker.Plugins.Dummy
 {
     public class DummyGame : Game
     {
+        private readonly string _title;
+
         public DummyGame()
         {
-            Title = "Dummy Title";
+            _title = "Dummy Title";
             PlatformId = 0;
         }
 
@@ -25,6 +27,8 @@ namespace GameTracker.Plugins.Dummy
 
         public override Platform[] Platforms => new[] { new Platform { Name = "Dummy Platform" } } ;
 
+        public override TimeSpan Playtime => TimeSpan.Zero;
+
         public override Publisher Publisher => new Publisher { Name = "Dummy Publisher" };
 
         public override DateTime ReleaseDate => DateTime.Today;
@@ -33,6 +37,8 @@ namespace GameTracker.Plugins.Dummy
 
         public override Studio Studio => new Studio { Name = "Dummy Studio" };
 
-        public override string[] Tags => new[] { "test", "hello", "world" } ;
+        public override string[] Tags => new[] { "test", "hello", "world" } ;        
+
+        public override string Title => _title;
     }
 }

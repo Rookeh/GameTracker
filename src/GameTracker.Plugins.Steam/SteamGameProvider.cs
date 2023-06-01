@@ -4,7 +4,7 @@ using GameTracker.Plugins.Steam.Data;
 using GameTracker.Plugins.Steam.Models;
 using GameTracker.Plugins.Steam.Models.StoreApi;
 using GameTracker.Plugins.Steam.Models.WebApi;
-using GameTracker.Plugins.Steam.RateLimiting;
+using GameTracker.Plugins.Common.RateLimiting;
 using System.Text.Json;
 using LinkType = GameTracker.Models.Enums.LinkType;
 
@@ -12,10 +12,13 @@ namespace GameTracker.Plugins.Steam
 {
     public class SteamGameProvider : IGameProvider
     {
+        private const int BackOffMinutes = 5;
+        private const int MaxRequests = 15;
+
         private readonly Platform _platform;
         private readonly RateLimitedHttpClient<Dictionary<string, SteamGameDetailsRoot>> _rateLimitedHttpClient;
-        private readonly SteamGameDetailsRepository _steamGameDetailsRepository;
-        
+        private readonly SteamGameDetailsRepository _steamGameDetailsRepository;               
+
         private List<Game> _games;
 
         public SteamGameProvider()
@@ -45,7 +48,10 @@ namespace GameTracker.Plugins.Steam
                 }
             };
 
-            _rateLimitedHttpClient = new RateLimitedHttpClient<Dictionary<string, SteamGameDetailsRoot>>();
+            _rateLimitedHttpClient = new RateLimitedHttpClient<Dictionary<string, SteamGameDetailsRoot>>(
+                TimeSpan.FromMinutes(BackOffMinutes),
+                MaxRequests);
+
             _steamGameDetailsRepository = new SteamGameDetailsRepository();
         }
 
@@ -57,6 +63,20 @@ namespace GameTracker.Plugins.Steam
 
         public async Task Refresh(params object[] providerSpecificParameters)
         {
+            /*
+             * https://steamapi.xpaw.me/
+             * https://wiki.teamfortress.com/wiki/User:RJackson/StorefrontAPI
+             * 
+             * This is pretty terrible. We have to make one operation to get the games for the account (fair enough),
+             * but then to get extended metadata, we have to make a query for every single title the user owns individually.
+             * 
+             * Hence, all of the logic to fetch title metadata is delegated to SteamGame.cs, where it will be lazily loaded
+             * (and then cached) on-demand. This is not ideal for when we need to sort the total set of games based on these
+             * extended properties - any games that do not have these available will have some placeholders instead - but there
+             * is not really any way around this unless Valve overhaul their API in the future.
+             * 
+             */
+
             if (providerSpecificParameters.Length != 2)
             {
                 throw new ArgumentException("Steam WebAPI key and SteamID must be provided.");
