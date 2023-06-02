@@ -18,6 +18,7 @@
     <ProjectReference Include="..\GameTracker.Plugins.GOG\GameTracker.Plugins.GOG.csproj" />
     <ProjectReference Include="..\GameTracker.Plugins.PlayStation\GameTracker.Plugins.PlayStation.csproj" />
     <ProjectReference Include="..\GameTracker.Plugins.Steam\GameTracker.Plugins.Steam.csproj" />
+    <ProjectReference Include="..\GameTracker.Plugins.Xbox\GameTracker.Plugins.Xbox.csproj" />
   </ItemGroup>
 
   <ItemGroup>

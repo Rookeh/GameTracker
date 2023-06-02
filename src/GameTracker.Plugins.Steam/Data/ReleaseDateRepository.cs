@@ -13,7 +13,7 @@ namespace GameTracker.Plugins.Steam.Data
                                               );";
 
         public ReleaseDateRepository() 
-            : base(Constants.ConnectionString, TableName, BootstrapSql)
+            : base(Constants.SQLite.ConnectionString, TableName, BootstrapSql)
         {
         }
 

@@ -6,6 +6,7 @@ using GameTracker.Plugins.Steam.Models.StoreApi;
 using GameTracker.Plugins.Common.RateLimiting;
 
 using GenreEnum = GameTracker.Models.Enums.Genre;
+using GameTracker.Plugins.Steam.Models.WebApi;
 
 namespace GameTracker.Plugins.Steam.Models
 {
@@ -20,16 +21,14 @@ namespace GameTracker.Plugins.Steam.Models
 
         internal SteamGame(RateLimitedHttpClient<Dictionary<string, SteamGameDetailsRoot>> rateLimitedHttpClient,
             SteamGameDetailsRepository steamGameDetailsRepository, 
-            int appId,
-            int playTime,
-            string title)
+            SteamApp app,
+            int playTime)
         {
+            PlatformId = app.AppId;            
             _gameDetailsRepository = steamGameDetailsRepository;
-            _rateLimitedHttpClient = rateLimitedHttpClient;
-
-            PlatformId = appId;
-            _playTime = TimeSpan.FromMinutes(playTime);
-            _title = title;
+            _rateLimitedHttpClient = rateLimitedHttpClient;            
+            _title = app.Name;
+            _playTime = TimeSpan.FromMinutes(playTime);            
         }
 
         public override string Description => GameDetails?.ShortDescription ?? string.Empty;
@@ -91,7 +90,7 @@ namespace GameTracker.Plugins.Steam.Models
                 $"https://store.steampowered.com/api/appdetails?appids={PlatformId}",
                 new Dictionary<string, SteamGameDetailsRoot>()
                 {
-                    [PlatformId.ToString()] = Constants.GetDefaultSteamGameDetails()
+                    [PlatformId.ToString()] = Constants.DefaultValues.DefaultSteamGameDetails
                 });
 
             getGameDetailsFromSteamTask.Wait();
@@ -100,17 +99,20 @@ namespace GameTracker.Plugins.Steam.Models
             {
                 var steamGameDetails = getGameDetailsFromSteamTask.Result[PlatformId.ToString()].Details;
 
-                if (!steamGameDetails.IsDefaultValue)
+                if (steamGameDetails != null)
                 {
-                    var updateCacheTask = _gameDetailsRepository.SetGameDetails(steamGameDetails);
-                    updateCacheTask.Wait();
-                    return _gameDetails = steamGameDetails;
-                }
+                    if (!steamGameDetails.IsDefaultValue)
+                    {
+                        var updateCacheTask = _gameDetailsRepository.SetGameDetails(steamGameDetails);
+                        updateCacheTask.Wait();
+                        return _gameDetails = steamGameDetails;
+                    }
 
-                return steamGameDetails;
+                    return steamGameDetails;
+                }
             }
 
-            return null;
+            return Constants.DefaultValues.DefaultSteamGameDetails.Details;
         }
 
         #endregion

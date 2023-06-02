@@ -18,7 +18,8 @@
                     LinkPlatform = Enums.LinkType.Twitter,
                     LinkTarget = "@metacritic"
                 }
-            }
+            },
+            UpperBound = 100
         };
     }
 }

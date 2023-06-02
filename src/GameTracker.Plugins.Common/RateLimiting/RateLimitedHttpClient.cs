@@ -19,9 +19,14 @@ namespace GameTracker.Plugins.Common.RateLimiting
             _operations = new List<DateTime>();
         }
 
-        public async Task<T> GetFromJson(string url, T defaultValue, AuthenticationHeaderValue authHeader = null)
+        public async Task<T> GetFromJson(string url, T defaultValue, NameValueHeaderValue[] headers = null)
         {
-            return await _circuitBreaker.AttemptOperation(() => GetFromJsonImpl(url, defaultValue, authHeader), ShouldBackoff, defaultValue)
+            if (headers == null)
+            {
+                headers = Array.Empty<NameValueHeaderValue>();
+            }
+
+            return await _circuitBreaker.AttemptOperation(() => GetFromJsonImpl(url, defaultValue, headers), ShouldBackoff, defaultValue)
                 .ConfigureAwait(false);
         }
 
@@ -33,10 +38,15 @@ namespace GameTracker.Plugins.Common.RateLimiting
             return _operations.Count() > _maxRequests;
         }
 
-        private async Task<T> GetFromJsonImpl(string url, T defaultValue, AuthenticationHeaderValue authHeader)
+        private async Task<T> GetFromJsonImpl(string url, T defaultValue, NameValueHeaderValue[] headers)
         {
             using HttpClient client = new();
-            client.DefaultRequestHeaders.Authorization = authHeader;
+
+            foreach (NameValueHeaderValue header in headers)
+            {
+                client.DefaultRequestHeaders.Add(header.Name, header.Value);
+            }
+            
             var response = await client.GetAsync(url).ConfigureAwait(false);
             var contentJson = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             var contentObject = JsonSerializer.Deserialize<T>(contentJson);

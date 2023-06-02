@@ -4,6 +4,7 @@
     {
         Always,
         Online,
+        LocalNetwork,
         Local,
         None
     }

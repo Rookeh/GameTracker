@@ -12,95 +12,73 @@ namespace GameTracker.Plugins.Steam.Helpers
     {
         internal static IEnumerable<MultiplayerMode> ParseMultiplayerModes(Category[]? categories)
         {
-            if (categories.Any(c => c.Description.ToLower() == "multi-player"))
+            var multiplayerModes = new List<MultiplayerMode>();
+
+            if (categories == null || !categories.Any())
             {
-                if (categories.Any(c => c.Description.ToLower().Contains("co-op")))
-                {
-                    yield return MultiplayerMode.CoOp;
-                }
+                return multiplayerModes;
+            }
 
-                if (categories.Any(c => c.Description.ToLower().Contains("pve")))
+            foreach (var category in categories)
+            {
+                if (Constants.SteamCategoryMappings.SteamMultiplayerModeMappings.ContainsKey(category.Description))
                 {
-                    yield return MultiplayerMode.PvE;
-                }
-
-                if (categories.Any(c => c.Description.ToLower().Contains("pvp")))
-                {
-                    yield return MultiplayerMode.PvP;
+                    multiplayerModes.Add(Constants.SteamCategoryMappings.SteamMultiplayerModeMappings[category.Description]);
                 }
             }
-            else
-            {
-                yield return MultiplayerMode.None;
-            }
+
+            return multiplayerModes.Distinct();
         }
 
         internal static IEnumerable<MultiplayerAvailability> ParseMultiplayerAvailability(Category[]? categories)
         {
-            if (categories == null)
+            var multiplayerAvailability = new List<MultiplayerAvailability>();
+
+            if (categories == null || !categories.Any())
             {
-                yield break;
+                return multiplayerAvailability;
             }
 
-            if (categories.Any(c => c.Description.ToLower() == "multi-player"))
+            foreach (var category in categories)
             {
-                if (categories.Any(c => c.Description.ToLower().Contains("online")))
+                if (Constants.SteamCategoryMappings.SteamMultiplayerAvailMappings.ContainsKey(category.Description))
                 {
-                    yield return MultiplayerAvailability.Online;
+                    multiplayerAvailability.Add(Constants.SteamCategoryMappings.SteamMultiplayerAvailMappings[category.Description]);
                 }
+            }
 
-                if (categories.Any(c => c.Description.ToLower().Contains("local")))
-                {
-                    yield return MultiplayerAvailability.Local;
-                }
-            }
-            else
-            {
-                yield return MultiplayerAvailability.None;
-            }
+            return multiplayerAvailability.Distinct();
         }
 
         internal static IEnumerable<GenreEnum> ParseGenres(Genre[]? genres)
         {
-            if (genres == null)
+            if (genres == null || !genres.Any())
             {
                 yield break;
             }
 
             foreach (var genre in genres)
             {
-                switch (genre.Description.ToLower())
-                {
-                    case "action":
-                        yield return GenreEnum.Action;
-                        break;
-                    case "adventure":
-                        yield return GenreEnum.ActionAdventure;
-                        break;
-                    default:
-                        yield return GenreEnum.Other;
-                        break;
-                }
+                yield return Constants.SteamCategoryMappings.SteamGenreMappings.ContainsKey(genre.Description)
+                    ? Constants.SteamCategoryMappings.SteamGenreMappings[genre.Description]
+                    : GenreEnum.Other;
             }
         }
 
         internal static Review[] ParseMetacriticReview(Game game, MetacriticScore? metacritic)
         {
-            if (metacritic == null)
-            {
-                return Array.Empty<Review>();
-            }
-
-            return new[]
-            {
-                new Review
+            return metacritic == null
+                ? Array.Empty<Review>()
+                : (new[]
                 {
-                    Critic = WellKnownCritics.Metacritic,
-                    Game = game,
-                    Content = metacritic.Url,
-                    Score = metacritic.Score
-                }
-            };
+                    new Review
+                    {
+                        Critic = WellKnownCritics.Metacritic,
+                        Game = game,
+                        Content = metacritic.Url,
+                        Score = metacritic.Score
+                    }
+                });
         }
 
         internal static IEnumerable<Platform> ParsePlatforms(Platforms? platforms)

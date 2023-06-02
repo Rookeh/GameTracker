@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace GameTracker.Plugins.GOG.Models
+namespace GameTracker.Plugins.GOG.Models.GOGApi
 {
     public class InDevelopment
     {

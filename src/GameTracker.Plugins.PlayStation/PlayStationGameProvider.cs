@@ -32,14 +32,14 @@ namespace GameTracker.Plugins.PlayStation
 
         public Dictionary<string, Type> RequiredParameters => new()
         {
-            { "PSN NPSSO Token", typeof(string) }
+            { "PSN NPSSO Code", typeof(string) }
         };
 
         public async Task Refresh(params object[] providerSpecificParameters)
         {
             if (!(providerSpecificParameters[0] is string))
             {
-                throw new ArgumentException("PSN NPSSO token must be provided.");
+                throw new ArgumentException("PSN NPSSO Code must be provided.");
             }
 
             var npsso = providerSpecificParameters[0] as string;

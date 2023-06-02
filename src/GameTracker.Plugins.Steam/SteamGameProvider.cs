@@ -13,7 +13,7 @@ namespace GameTracker.Plugins.Steam
     public class SteamGameProvider : IGameProvider
     {
         private const int BackOffMinutes = 5;
-        private const int MaxRequests = 15;
+        private const int MaxRequests = 18;
 
         private readonly Platform _platform;
         private readonly RateLimitedHttpClient<Dictionary<string, SteamGameDetailsRoot>> _rateLimitedHttpClient;
@@ -100,9 +100,9 @@ namespace GameTracker.Plugins.Steam
             var userGameResponseJson = await userGameResponse.Content.ReadAsStringAsync();
             var userGames = JsonSerializer.Deserialize<SteamGameResponseRoot>(userGameResponseJson).Response;
 
-            _games.Clear();
             bool moreTitlesToQuery = true;
             int lastAppId = 0;
+            _games.Clear();
 
             while (moreTitlesToQuery && _games.Count < userGames.GameCount)
             {
@@ -111,13 +111,12 @@ namespace GameTracker.Plugins.Steam
                 var steamApps = steamAppResponse.Response.Apps;
 
                 var userSteamApps = steamApps.Where(sa => userGames.Games.Select(ug => ug.AppId).Contains(sa.AppId));
-                
+
                 _games.AddRange(userSteamApps.Select(usa => new SteamGame(
                     _rateLimitedHttpClient,
                     _steamGameDetailsRepository,
-                    usa.AppId, 
-                    userGames.Games.Single(g => g.AppId == usa.AppId).Playtime,
-                    usa.Name)));
+                    usa, 
+                    userGames.Games.Single(g => g.AppId == usa.AppId).Playtime)));
 
                 lastAppId = steamAppResponse.Response.LastAppId;
                 moreTitlesToQuery = steamAppResponse.Response.HasMoreResults;

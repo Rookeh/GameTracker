@@ -13,7 +13,7 @@ namespace GameTracker.Plugins.Steam.Data
                                               );";
 
         public MetacriticScoreRepository() 
-            : base(Constants.ConnectionString, TableName, BootstrapSql)
+            : base(Constants.SQLite.ConnectionString, TableName, BootstrapSql)
         {
         }
 

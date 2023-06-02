@@ -3,6 +3,7 @@ using GameTracker.Models;
 using GameTracker.Models.Enums;
 using GameTracker.Plugins.GOG.Helpers;
 using GameTracker.Plugins.GOG.Models;
+using GameTracker.Plugins.GOG.Models.GOGApi;
 using System.Net.Http.Headers;
 using System.Text.Json;
 

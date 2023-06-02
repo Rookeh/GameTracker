@@ -1,6 +1,6 @@
 ﻿using GameTracker.Models;
 using GameTracker.Models.Constants;
-using GameTracker.Plugins.GOG.Models;
+using GameTracker.Plugins.GOG.Models.GOGApi;
 
 namespace GameTracker.Plugins.GOG.Helpers
 {

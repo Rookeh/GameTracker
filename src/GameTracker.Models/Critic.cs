@@ -4,5 +4,6 @@ namespace GameTracker.Models
 {
     public class Critic : CorporateEntity
     {
+        public int UpperBound { get; set; }
     }
 }
