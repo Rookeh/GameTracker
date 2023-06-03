@@ -1,10 +1,10 @@
 ﻿using System.Web;
 
-namespace GameTracker.Plugins.PlayStation.Helpers
+namespace GameTracker.Plugins.Common.Helpers
 {
-    internal class UriHelper
+    public class UriHelper
     {
-        internal static Uri BuildQueryString(string baseUrl, Dictionary<string, string> queryParameters)
+        public static Uri BuildQueryString(string baseUrl, Dictionary<string, string> queryParameters)
         {
             var uriBuilder = new UriBuilder(baseUrl);
             var query = HttpUtility.ParseQueryString(uriBuilder.Query);
@@ -19,7 +19,7 @@ namespace GameTracker.Plugins.PlayStation.Helpers
             return uriBuilder.Uri;
         }
 
-        internal static Dictionary<string, string> ExtractQueryString(string uri)
+        public static Dictionary<string, string> ExtractQueryString(string uri)
         {
             var uriBuilder = new UriBuilder(uri);
             var query = HttpUtility.ParseQueryString(uriBuilder.Query);

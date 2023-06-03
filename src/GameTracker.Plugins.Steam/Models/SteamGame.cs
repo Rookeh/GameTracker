@@ -34,15 +34,21 @@ namespace GameTracker.Plugins.Steam.Models
         public override string Description => GameDetails?.ShortDescription ?? string.Empty;
         public override GenreEnum[] Genres => SteamGameHelpers.ParseGenres(GameDetails?.Genres).ToArray();
         public override string Image => GameDetails?.HeaderImage ?? "img\\placeholder.png";
-        public override string LaunchCommand => $"steam://run/{PlatformId}";
+        public override LaunchCommand LaunchCommand => new LaunchCommand
+        {
+            Icon = "Steam",
+            NewTab = false,
+            Text = "Launch via Steam",
+            Uri = $"steam://run/{PlatformId}"
+        };
         public override MultiplayerAvailability[] MultiplayerAvailability => SteamGameHelpers.ParseMultiplayerAvailability(GameDetails?.Categories).ToArray();
         public override MultiplayerMode[] MultiplayerModes => SteamGameHelpers.ParseMultiplayerModes(GameDetails?.Categories).ToArray();
         public override Platform[] Platforms => SteamGameHelpers.ParsePlatforms(GameDetails?.Platforms).ToArray();
         public override TimeSpan Playtime => _playTime;
-        public override Publisher Publisher => new Publisher { Name = GameDetails?.Publishers.FirstOrDefault() ?? "Unknown" };
+        public override Publisher Publisher => new Publisher { Name = GameDetails?.Publishers?.FirstOrDefault() ?? "Unknown" };
         public override DateTime ReleaseDate => DateTime.Parse(GameDetails?.ReleaseDate.Date ?? DateTime.MinValue.ToString());
         public override Review[] Reviews => SteamGameHelpers.ParseMetacriticReview(this, GameDetails?.Metacritic) ?? Array.Empty<Review>();
-        public override Studio Studio => new Studio { Name = GameDetails?.Developers.FirstOrDefault() ?? "Unknown" };
+        public override Studio Studio => new Studio { Name = GameDetails?.Developers?.FirstOrDefault() ?? "Unknown" };
         public override string[] Tags => GameDetails?.Categories.Select(c => c.Description).ToArray() ?? Array.Empty<string>();        
         public override string Title => _title;
 

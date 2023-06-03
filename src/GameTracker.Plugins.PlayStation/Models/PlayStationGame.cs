@@ -28,7 +28,13 @@ namespace GameTracker.Plugins.PlayStation.Models
 
         public override string Image => _psnGame.Image.URL;
 
-        public override string LaunchCommand => GetLaunchCommand();
+        public override LaunchCommand LaunchCommand => new LaunchCommand
+        {
+            Icon = "Playstation",
+            NewTab = true,
+            Text = "View in PlayStation Store",
+            Uri = GetLaunchCommand()
+        };
 
         public override MultiplayerAvailability[] MultiplayerAvailability => Array.Empty<MultiplayerAvailability>();
 

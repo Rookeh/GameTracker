@@ -10,6 +10,7 @@ namespace GameTracker.Plugins.Xbox.Helpers
         {
             internal const string PC = "PC";
             internal const string Win32 = "Win32";
+            internal const string Xbox360 = "Xbox360";
         }
 
         internal static class OpenXBL

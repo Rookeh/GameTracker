@@ -7,7 +7,7 @@ namespace GameTracker.Plugins.GOG.Models
     {
         private readonly string _description;
         private readonly string _imageUrl;
-        private readonly string _launchCommand;
+        private readonly string _launchUri;
         private readonly Platform[] _platforms;
         private readonly DateTime _releaseDate;
         private readonly string _title;
@@ -17,7 +17,7 @@ namespace GameTracker.Plugins.GOG.Models
         {
             _description = description;
             _imageUrl = imageUrl;
-            _launchCommand = launchCommand;
+            _launchUri = launchCommand;
             _platforms = platforms;
             _releaseDate = releaseDate;
             _title = title;
@@ -29,7 +29,13 @@ namespace GameTracker.Plugins.GOG.Models
 
         public override string Image => _imageUrl;
 
-        public override string LaunchCommand => _launchCommand;
+        public override LaunchCommand LaunchCommand => new LaunchCommand
+        {
+            NewTab = false,
+            Icon = "PcDisplay",
+            Text = "Launch via GOG Galaxy",
+            Uri = _launchUri
+        };
 
         public override MultiplayerAvailability[] MultiplayerAvailability => Array.Empty<MultiplayerAvailability>();
 

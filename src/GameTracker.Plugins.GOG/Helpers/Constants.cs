@@ -5,6 +5,11 @@ namespace GameTracker.Plugins.GOG.Helpers
 {
     internal class Constants
     {
+        internal class Authentication
+        {
+            internal static string AuthenticationBaseUrl => "https://auth.gog.com";
+        }
+
         internal static GameDetails DefaultGameDetails => new GameDetails
         {
             IsDefaultValue = true,

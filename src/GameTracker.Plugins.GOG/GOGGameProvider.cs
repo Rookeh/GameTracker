@@ -50,7 +50,7 @@ namespace GameTracker.Plugins.GOG
 
         public Dictionary<string, Type> RequiredParameters => new()
         {
-            { "GOG Auth Token", typeof(string) }
+            { "GOG Auth Code", typeof(string) }
         };
 
         public async Task Refresh(params object[] providerSpecificParameters)
@@ -66,13 +66,12 @@ namespace GameTracker.Plugins.GOG
 
             if (providerSpecificParameters.Length != 1 || !(providerSpecificParameters[0] is string))
             {
-                throw new ArgumentException("GOG Auth Token must be provided.");
+                throw new ArgumentException("GOG Auth Code must be provided.");
             }            
 
-            var gogToken = providerSpecificParameters[0] as string;
-            var authHeader = new AuthenticationHeaderValue("Bearer", gogToken);
-
-            _games.Clear();
+            var gogAuthCode = providerSpecificParameters[0] as string;
+            var gogAuthToken = await AuthenticationHelper.ExchangeGogAuthCodeForToken(gogAuthCode);
+            var authHeader = new AuthenticationHeaderValue("Bearer", gogAuthToken.AccessToken);
 
             using HttpClient httpClient = new();
             var ownedGamesRequest = new HttpRequestMessage(HttpMethod.Get, "https://embed.gog.com/user/data/games");
@@ -86,6 +85,8 @@ namespace GameTracker.Plugins.GOG
 
             var ownedGames = JsonSerializer.Deserialize<OwnedGames>(await ownedGamesResponse.Content.ReadAsStringAsync());
             var ownedGameChunks = ownedGames.Owned.Chunk(50);
+
+            _games.Clear();
 
             foreach (var chunk in ownedGameChunks)
             {

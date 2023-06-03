@@ -32,7 +32,7 @@ namespace GameTracker.Plugins.Xbox
         {
             { "OpenXBL API Key", typeof(string) },
             { "Include Game Pass Titles", typeof(bool) },
-            { "Include PC only Titles", typeof(bool) }
+            { "Include Legacy Titles", typeof(bool) }
         };
 
         public async Task Refresh(params object[] providerSpecificParameters)
@@ -52,30 +52,30 @@ namespace GameTracker.Plugins.Xbox
 
             if (!(providerSpecificParameters[2] is bool))
             {
-                throw new ArgumentException("Include PC only Titles must be boolean.");
+                throw new ArgumentException("Include Legacy Titles must be boolean.");
             }
 
             var apiKey = providerSpecificParameters[0].ToString();
             var includeGamePassTitles = (bool)providerSpecificParameters[1];
-            var includePcOnlyTitles = (bool)providerSpecificParameters[2];
+            var includeLegacyTitles = (bool)providerSpecificParameters[2];
 
             var authHeader = new NameValueHeaderValue(Constants.OpenXBL.AuthHeader, apiKey);
             var response = await _rateLimitedHttpClient.GetFromJson(Constants.OpenXBL.TitleHistoryUrl, Constants.DefaultTitleResponse, new[] { authHeader });
-            var xboxTitles = response.Titles;
+            var titlesToInclude = response.Titles;
 
             if (!includeGamePassTitles)
             {
-                xboxTitles = xboxTitles.Where(g => !g.GamePass.IsGamePass).ToArray();
+                titlesToInclude = titlesToInclude.Where(g => !g.GamePass.IsGamePass).ToArray();
             }
 
-            if (!includePcOnlyTitles)
+            if (!includeLegacyTitles)
             {
-                var pcOnlyTitles = xboxTitles.Where(g => g.Devices.Length == 1 && new[] { Constants.Devices.PC, Constants.Devices.Win32 }.Contains(g.Devices[0])).ToArray();
-                xboxTitles = xboxTitles.Where(x => !pcOnlyTitles.Contains(x)).ToArray();
+                var legacyTitles = titlesToInclude.Where(g => g.Devices.Contains(Constants.Devices.Win32) || g.Devices.Contains(Constants.Devices.Xbox360));
+                titlesToInclude = titlesToInclude.Where(x => !legacyTitles.Contains(x)).ToArray();
             }
 
             _games.Clear();
-            _games.AddRange(xboxTitles.Select(x => new XboxGame(x)));
+            _games.AddRange(titlesToInclude.Select(x => new XboxGame(x)));
         }
     }
 }

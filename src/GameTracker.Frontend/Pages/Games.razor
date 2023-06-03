@@ -2,12 +2,14 @@
 
 <PageTitle>Games</PageTitle>
 
+@using GameTracker.Frontend.Pages.Components;
 @using GameTracker.Interfaces;
 @using GameTracker.Core;
 @using GameTracker.Models;
 @using MathNet.Numerics.Statistics;
 
 @inject IProviderFactory ProviderFactory;
+@inject NavigationManager NavigationManager;
 @inject ToastService ToastService;
 
 @if (games == null || !games.Any())
@@ -26,9 +28,8 @@ else
                         {
                             <td>
                                 <div>
-                                    <img height="215" width="460" src="@game.Image" alt="@game.Title" />
-                                    <br>
-                                    <a href="@game.LaunchCommand">@game.Title</a>
+                                    <Modal @ref="modal" IsVerticallyCentered=true/>
+                                    <img height="215" width="460" src="@game.Image" alt="@game.Title" @onclick="@(e => OnShowGameModalClick(game))" />
                                 </div>
                             </td>
                         }
@@ -76,6 +77,7 @@ else
 @code {
 
     private List<Game> games;
+    private Modal modal;
 
     private Models.GridState gridState = new()
     {
@@ -90,6 +92,13 @@ else
             .ToArray()
             .SelectMany(p => p.Games)
             .ToList();
+    }
+
+    private async Task OnShowGameModalClick(Game game)
+    {
+        var modalParams = new Dictionary<string, object>();
+        modalParams.Add("Game", game);
+        await modal.ShowAsync<GameModal>(title: game.Title, parameters: modalParams);
     }
 
     private void NextPage()

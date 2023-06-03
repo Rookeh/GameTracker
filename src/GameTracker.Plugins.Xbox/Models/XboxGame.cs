@@ -24,7 +24,13 @@ namespace GameTracker.Plugins.Xbox.Models
 
         public override string Image => _xboxTitle.DisplayImage;
 
-        public override string LaunchCommand => $"ms-windows-store://pdp/?PFN={_xboxTitle.PFN}";
+        public override LaunchCommand LaunchCommand => new LaunchCommand
+        {
+            Icon = "Xbox",
+            NewTab = false,
+            Text = "Launch via Microsoft Store",
+            Uri = $"ms-windows-store://pdp/?PFN={_xboxTitle.PFN}"
+        };
 
         public override MultiplayerAvailability[] MultiplayerAvailability => Array.Empty<MultiplayerAvailability>();
 
