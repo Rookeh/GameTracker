@@ -32,14 +32,14 @@ namespace GameTracker.Plugins.EpicGames
 
         public Dictionary<string, Type> RequiredParameters => new()
         {
-            { "Semicolon-separated list of titles", typeof(string) }
+            { "Semicolon-delimited list of titles", typeof(string) }
         };
 
         public async Task Refresh(params object[] providerSpecificParameters)
         {
             if (providerSpecificParameters[0] == null || !(providerSpecificParameters[0] is string))
             {
-                throw new ArgumentException("Semicolon-separated list of titles must be provided.");
+                throw new ArgumentException("Semicolon-delimited list of titles must be provided.");
             }
 
             var gameTitles = providerSpecificParameters[0].ToString().Split(';');

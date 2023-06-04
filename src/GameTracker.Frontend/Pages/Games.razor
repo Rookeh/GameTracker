@@ -41,7 +41,7 @@ else
                         @if (i == 1)
                         {
                             <td>
-                                <Button Color="ButtonColor.Secondary" @onclick="PreviousPage">
+                                <Button Color="ButtonColor.Secondary" @ref="previousButton" @onclick="PreviousPage">
                                     <Icon Name="IconName.CaretLeftFill" />
                                 </Button>
                             </td>
@@ -66,7 +66,7 @@ else
                         else if (i == gridState.ItemsPerRow)
                         {
                             <td>
-                                <Button Color="ButtonColor.Secondary" @onclick="NextPage">
+                                <Button Color="ButtonColor.Secondary" @ref="nextButton" @onclick="NextPage">
                                     <Icon Name="IconName.CaretRightFill"/>
                                 </Button>
                             </td>
@@ -87,6 +87,9 @@ else
     private List<Game> games;
     private Modal modal;
 
+    private Button previousButton;
+    private Button nextButton;
+
     private Models.GridState gridState = new()
         {
             CurrentPage = 1,
@@ -102,6 +105,13 @@ else
             .ToList();
     }
 
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        previousButton?.HideLoading();
+        nextButton?.HideLoading();
+        return base.OnAfterRenderAsync(firstRender);
+    }
+
     private async Task OnShowGameModalClick(Game game)
     {
         var modalParams = new Dictionary<string, object>();
@@ -113,6 +123,7 @@ else
     {
         if (gridState.CurrentPage < PageCount())
         {
+            nextButton.ShowLoading("Loading...");
             gridState.CurrentPage++;
         }
     }
@@ -121,6 +132,7 @@ else
     {
         if (gridState.CurrentPage > 1)
         {
+            previousButton.ShowLoading("Loading...");
             gridState.CurrentPage--;
         }
     }
