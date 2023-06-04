@@ -22,29 +22,31 @@ namespace GameTracker.Plugins.Dummy
         public override LaunchCommand LaunchCommand => new LaunchCommand
         {
             NewTab = true,
-            Icon = "App",
+            Icon = "Egg",
             Text = "Hello, world",
             Uri = "https://en.wikipedia.org/wiki/%22Hello,_World!%22_program"
         };     
 
         public override MultiplayerAvailability[] MultiplayerAvailability => new[] { Models.Enums.MultiplayerAvailability.None };
 
-        public override MultiplayerMode[] MultiplayerModes => new[] { MultiplayerMode.None } ;
+        public override GameplayMode[] GameplayModes => new[] { GameplayMode.Singleplayer } ;
 
-        public override Platform[] Platforms => new[] { new Platform { Name = "Dummy Platform" } } ;
+        public override DateTime? LastPlayed => DateTime.UnixEpoch;
 
-        public override TimeSpan Playtime => TimeSpan.Zero;
+        public override Platform[] Platforms => new[] { new Platform { Name = "Dummy Platform", Icon = "EggFried" } } ;
+
+        public override TimeSpan? Playtime => TimeSpan.Zero;
 
         public override Publisher Publisher => new Publisher { Name = "Dummy Publisher" };
 
-        public override DateTime ReleaseDate => DateTime.Today;
+        public override DateTime? ReleaseDate => DateTime.Today;
 
-        public override Review[] Reviews => new[] { new Review { Score = new Random().Next(11) } } ;
+        public override Review[] Reviews => new[] { new Review { Score = new Random().Next(11), Critic = new Critic { Name = "Dummy Critic", UpperBound = 10 } } } ;
 
         public override Studio Studio => new Studio { Name = "Dummy Studio" };
 
         public override string[] Tags => new[] { "test", "hello", "world" } ;        
 
-        public override string Title => _title;
+        public override string Title => _title;      
     }
 }

@@ -18,11 +18,13 @@ namespace GameTracker.Plugins.PlayStation.Models
             PlatformId = Convert.ToInt32(psnGame.ConceptId);
         }
 
-        public override TimeSpan Playtime => TimeSpan.Zero;
+        public override TimeSpan? Playtime => null;
 
         public override string Title => _psnGame.Name;
 
         public override string Description => string.Empty;
+
+        public override GameplayMode[] GameplayModes => Array.Empty<GameplayMode>();
 
         public override Genre[] Genres => Array.Empty<Genre>();
 
@@ -38,17 +40,17 @@ namespace GameTracker.Plugins.PlayStation.Models
 
         public override MultiplayerAvailability[] MultiplayerAvailability => Array.Empty<MultiplayerAvailability>();
 
-        public override MultiplayerMode[] MultiplayerModes => Array.Empty<MultiplayerMode>();
+        public override DateTime? LastPlayed => _psnGame.LastPlayedDateTime;
 
         public override Platform[] Platforms => GetPlatforms().ToArray();
 
-        public override Publisher Publisher => new Publisher { Name = "Unknown" };
+        public override Publisher? Publisher => null;
 
-        public override DateTime ReleaseDate => DateTime.MinValue;
+        public override DateTime? ReleaseDate => null;
 
         public override Review[] Reviews => Array.Empty<Review>();
 
-        public override Studio Studio => new Studio { Name = "Unknown" };
+        public override Studio? Studio => null;
 
         public override string[] Tags => Array.Empty<string>();
 

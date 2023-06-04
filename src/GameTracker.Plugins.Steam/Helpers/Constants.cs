@@ -44,16 +44,16 @@ namespace GameTracker.Plugins.Steam.Helpers
                 ["LAN Co-op"] = MultiplayerAvailability.LocalNetwork
             };
 
-            internal static Dictionary<string, MultiplayerMode> SteamMultiplayerModeMappings => new Dictionary<string, MultiplayerMode>
+            internal static Dictionary<string, GameplayMode> SteamMultiplayerModeMappings => new Dictionary<string, GameplayMode>
             {
-                ["Online PvP"] = MultiplayerMode.PvP,
-                ["Online Co-op"] = MultiplayerMode.CoOp,
-                ["MMO"] = MultiplayerMode.PvE,
-                ["Single-player"] = MultiplayerMode.None,
-                ["Shared/Split Screen PvP"] = MultiplayerMode.PvP,
-                ["Shared/Split Screen Co-op"] = MultiplayerMode.CoOp,
-                ["LAN PvP"] = MultiplayerMode.PvP,
-                ["LAN Co-op"] = MultiplayerMode.CoOp
+                ["Online PvP"] = GameplayMode.PvP,
+                ["Online Co-op"] = GameplayMode.CoOp,
+                ["MMO"] = GameplayMode.PvE,
+                ["Single-player"] = GameplayMode.Singleplayer,
+                ["Shared/Split Screen PvP"] = GameplayMode.PvP,
+                ["Shared/Split Screen Co-op"] = GameplayMode.CoOp,
+                ["LAN PvP"] = GameplayMode.PvP,
+                ["LAN Co-op"] = GameplayMode.CoOp
             };
         }
 
@@ -74,11 +74,6 @@ namespace GameTracker.Plugins.Steam.Helpers
                         HeaderImage = "img\\placeholder.png",
                         IsFree = false,
                         Languages = string.Empty,
-                        Metacritic = new MetacriticScore
-                        {
-                            Score = 0,
-                            Url = string.Empty,
-                        },
                         Name = "Pending...",
                         Platforms = new Platforms
                         {
@@ -89,7 +84,7 @@ namespace GameTracker.Plugins.Steam.Helpers
                         Publishers = Array.Empty<string>(),
                         ReleaseDate = new ReleaseDate
                         {
-                            Date = DateTime.MaxValue.ToString(),
+                            Date = null,
                             Unreleased = true
                         },
                         ShortDescription = "Pending...",

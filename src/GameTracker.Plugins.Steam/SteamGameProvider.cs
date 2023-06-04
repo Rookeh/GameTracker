@@ -115,8 +115,9 @@ namespace GameTracker.Plugins.Steam
                 _games.AddRange(userSteamApps.Select(usa => new SteamGame(
                     _rateLimitedHttpClient,
                     _steamGameDetailsRepository,
-                    usa, 
-                    userGames.Games.Single(g => g.AppId == usa.AppId).Playtime)));
+                    usa,
+                    userGames.Games.Single(g => g.AppId == usa.AppId).Playtime,
+                    userGames.Games.Single(g => g.AppId == usa.AppId).LastPlayedTimestamp)));
 
                 lastAppId = steamAppResponse.Response.LastAppId;
                 moreTitlesToQuery = steamAppResponse.Response.HasMoreResults;

@@ -18,6 +18,7 @@
 }
 else
 {
+    <Modal @ref="modal" IsVerticallyCentered=true Size="ModalSize.Large" />
     <EditForm Model="@gridState">
         <table class="table">
             <tbody>
@@ -28,7 +29,6 @@ else
                         {
                             <td>
                                 <div>
-                                    <Modal @ref="modal" IsVerticallyCentered=true/>
                                     <img height="215" width="460" src="@game.Image" alt="@game.Title" @onclick="@(e => OnShowGameModalClick(game))" />
                                 </div>
                             </td>
@@ -36,14 +36,18 @@ else
                     </tr>
                 }
                 <tr>
-                    @for(int i = 1; i <= gridState.ItemsPerRow; i++)
+                    @for (int i = 1; i <= gridState.ItemsPerRow; i++)
                     {
                         @if (i == 1)
                         {
-                            <td><button class="bi bi-arrow-left" @onclick="PreviousPage" /></td>
-                        } 
-                        else if (i == GetMedian(gridState.ItemsPerRow)) 
-                        {                            
+                            <td>
+                                <Button Color="ButtonColor.Secondary" @onclick="PreviousPage">
+                                    <Icon Name="IconName.CaretLeftFill" />
+                                </Button>
+                            </td>
+                        }
+                        else if (i == GetMedian(gridState.ItemsPerRow))
+                        {
                             <td>
                                 <div>
                                     Page: @gridState.CurrentPage / @PageCount()
@@ -56,16 +60,20 @@ else
                                         <option value="24">24</option>
                                         <option value="48">48</option>
                                     </InputSelect>
-                                </div>                                
+                                </div>
                             </td>
-                        } 
-                        else if (i == gridState.ItemsPerRow) 
+                        }
+                        else if (i == gridState.ItemsPerRow)
                         {
-                            <td><button class="bi bi-arrow-right" @onclick="NextPage" /></td>
+                            <td>
+                                <Button Color="ButtonColor.Secondary" @onclick="NextPage">
+                                    <Icon Name="IconName.CaretRightFill"/>
+                                </Button>
+                            </td>
                         }
                         else
                         {
-                            <td/>
+                            <td />
                         }
                     }
                 </tr>
@@ -80,11 +88,11 @@ else
     private Modal modal;
 
     private Models.GridState gridState = new()
-    {
-        CurrentPage = 1,
-        ItemsPerPage = 6,
-        ItemsPerRow = 3
-    };
+        {
+            CurrentPage = 1,
+            ItemsPerPage = 6,
+            ItemsPerRow = 3
+        };
 
     protected override async Task OnInitializedAsync()
     {

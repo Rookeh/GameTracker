@@ -1,60 +1,56 @@
 ﻿using GameTracker.Models;
 using GameTracker.Models.Enums;
+using GameTracker.Plugins.GOG.Helpers;
+using GameTracker.Plugins.GOG.Models.GOGApi;
 
 namespace GameTracker.Plugins.GOG.Models
 {
     public class GOGGame : Game
     {
-        private readonly string _description;
-        private readonly string _imageUrl;
-        private readonly string _launchUri;
-        private readonly Platform[] _platforms;
-        private readonly DateTime _releaseDate;
-        private readonly string _title;
+        private readonly GameDetails _gameDetails;
 
-        public GOGGame(string description, string imageUrl, string launchCommand, Platform[] platforms,
-            DateTime releaseDate, string title)
+        public GOGGame(GameDetails gameDetails)
         {
-            _description = description;
-            _imageUrl = imageUrl;
-            _launchUri = launchCommand;
-            _platforms = platforms;
-            _releaseDate = releaseDate;
-            _title = title;
+            PlatformId = gameDetails.Id;
+            _gameDetails = gameDetails;
         }
 
-        public override string Description => _description;
+        public override string Description => _gameDetails.Description?.Full ?? string.Empty;
+
+        public override GameplayMode[] GameplayModes => Array.Empty<GameplayMode>();
 
         public override Genre[] Genres => Array.Empty<Genre>();
 
-        public override string Image => _imageUrl;
+        public override string Image => _gameDetails.Images?.Background ?? "img\\placeholder.png";
 
         public override LaunchCommand LaunchCommand => new LaunchCommand
         {
             NewTab = false,
             Icon = "PcDisplay",
             Text = "Launch via GOG Galaxy",
-            Uri = _launchUri
+            Uri = $"goggalaxy://openGameView/{PlatformId}"
         };
 
-        public override MultiplayerAvailability[] MultiplayerAvailability => Array.Empty<MultiplayerAvailability>();
+        public override MultiplayerAvailability[] MultiplayerAvailability => Array.Empty<MultiplayerAvailability>();        
 
-        public override MultiplayerMode[] MultiplayerModes => Array.Empty<MultiplayerMode>();
+        public override DateTime? LastPlayed => null;
 
-        public override Platform[] Platforms => _platforms;
+        public override Platform[] Platforms => _gameDetails.ContentSystemCompatibility.FromContentSystemCompatibility();
 
-        public override TimeSpan Playtime => TimeSpan.Zero;
+        public override TimeSpan? Playtime => null;
 
-        public override Publisher Publisher => new Publisher { Name = "Unknown", Description = "Unknown" };
+        public override Publisher? Publisher => null;
 
-        public override DateTime ReleaseDate => _releaseDate;
+        public override DateTime? ReleaseDate => string.IsNullOrEmpty(_gameDetails.ReleaseDate) 
+            ? null 
+            : DateTime.Parse(_gameDetails.ReleaseDate);
 
         public override Review[] Reviews => Array.Empty<Review>();
 
-        public override Studio Studio => new Studio { Name = "Unknown", Description = "Unknown" };
+        public override Studio? Studio => null;
 
         public override string[] Tags => Array.Empty<string>();
 
-        public override string Title => _title;        
+        public override string Title => _gameDetails.Title;        
     }
 }

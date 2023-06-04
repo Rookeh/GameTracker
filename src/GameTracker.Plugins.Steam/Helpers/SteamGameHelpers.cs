@@ -10,9 +10,9 @@ namespace GameTracker.Plugins.Steam.Helpers
 {
     internal static class SteamGameHelpers
     {
-        internal static IEnumerable<MultiplayerMode> ParseMultiplayerModes(Category[]? categories)
+        internal static IEnumerable<GameplayMode> ParseMultiplayerModes(Category[]? categories)
         {
-            var multiplayerModes = new List<MultiplayerMode>();
+            var multiplayerModes = new List<GameplayMode>();
 
             if (categories == null || !categories.Any())
             {
@@ -102,6 +102,16 @@ namespace GameTracker.Plugins.Steam.Helpers
             {
                 yield return WellKnownPlatforms.MacOS;
             }
+        }
+
+        internal static Publisher? ParsePublisher(SteamGameDetails gameDetails)
+        {
+            if (gameDetails.Publishers == null || !gameDetails.Publishers.Any())
+            {
+                return null;
+            }
+
+            return new Publisher { Name = gameDetails.Publishers.First() };
         }
     }
 }

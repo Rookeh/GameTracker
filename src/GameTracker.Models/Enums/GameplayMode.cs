@@ -1,10 +1,10 @@
 ﻿namespace GameTracker.Models.Enums
 {
-    public enum MultiplayerMode
+    public enum GameplayMode
     {
         CoOp,
         PvE,
         PvP,
-        None
+        Singleplayer
     }
 }

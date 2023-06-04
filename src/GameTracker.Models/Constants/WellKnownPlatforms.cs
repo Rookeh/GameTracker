@@ -8,6 +8,7 @@ namespace GameTracker.Models.Constants
         {            
             Name = "Windows",
             Description = "Microsoft Windows is a group of several proprietary graphical operating system families developed and marketed by Microsoft.",
+            Icon = "Windows",
             Links = new SocialLink[]
                     {
                         new SocialLink
@@ -21,6 +22,7 @@ namespace GameTracker.Models.Constants
         public static Platform Linux => new Platform
         {
             Name = "Linux",
+            Icon = "Ubuntu",
             Description = "Linux is a family of open-source Unix-like operating systems based on the Linux kernel, an operating system kernel first released on September 17, 1991, by Linus Torvalds.",
             Links = new SocialLink[]
                     {
@@ -35,6 +37,7 @@ namespace GameTracker.Models.Constants
         public static Platform MacOS => new Platform
         {
             Name = "macOS",
+            Icon = "Apple",
             Description = "macOS is a Unix operating system developed and marketed by Apple Inc. since 2001. It is the primary operating system for Apple's Mac computers.",
             Links = new SocialLink[]
                     {

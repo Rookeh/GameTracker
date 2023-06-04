@@ -102,13 +102,7 @@ namespace GameTracker.Plugins.GOG
                 var gameDetailsJson = await gameDetailsResponse.Content.ReadAsStringAsync();
                 var gameDetails = JsonSerializer.Deserialize<GameDetails[]>(gameDetailsJson);
 
-                _games.AddRange(gameDetails.Select(gd => 
-                    new GOGGame(gd.Description?.Full ?? string.Empty,
-                                gd.Images?.Logo2x ?? "img\\placeholder.png",
-                                $"goggalaxy://openGameView/{gd.Id}",
-                                gd.ContentSystemCompatibility.FromContentSystemCompatibility(),
-                                string.IsNullOrEmpty(gd.ReleaseDate) ? DateTime.MinValue : DateTime.Parse(gd.ReleaseDate),
-                                gd.Title)));
+                _games.AddRange(gameDetails.Select(gd => new GOGGame(gd)));
             }
         }
 

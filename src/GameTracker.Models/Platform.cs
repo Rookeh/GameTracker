@@ -4,6 +4,6 @@ namespace GameTracker.Models
 {
     public class Platform : CorporateEntity
     {
-        public byte[] Icon { get; set; }
+        public string Icon { get; set; }
     }
 }
