@@ -35,7 +35,7 @@ namespace GameTracker.Plugins.PlayStation.Models
             Icon = "Playstation",
             NewTab = true,
             Text = "View in PlayStation Store",
-            Uri = GetLaunchCommand()
+            Uri = GetLaunchUri()
         };
 
         public override MultiplayerAvailability[] MultiplayerAvailability => Array.Empty<MultiplayerAvailability>();
@@ -56,7 +56,7 @@ namespace GameTracker.Plugins.PlayStation.Models
 
         #region Private methods
 
-        private string GetLaunchCommand()
+        private string GetLaunchUri()
         {
             return string.IsNullOrEmpty(_psnGame.ProductId)
                 ? string.Format(Constants.LaunchCommands.Media, _locale, _psnGame.Platform.ToLower())
