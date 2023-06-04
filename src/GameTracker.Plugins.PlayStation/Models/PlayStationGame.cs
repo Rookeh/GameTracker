@@ -11,7 +11,7 @@ namespace GameTracker.Plugins.PlayStation.Models
         private readonly PSNGame _psnGame;
         private readonly string _locale;
 
-        public PlayStationGame(PSNGame psnGame)
+        internal PlayStationGame(PSNGame psnGame)
         {
             _locale = CultureInfo.CurrentCulture.Name.ToLower();
             _psnGame = psnGame;

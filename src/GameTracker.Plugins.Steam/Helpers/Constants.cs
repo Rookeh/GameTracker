@@ -17,7 +17,7 @@ namespace GameTracker.Plugins.Steam.Helpers
             internal static Dictionary<string, GenreEnum> SteamGenreMappings => new Dictionary<string, GenreEnum>
             {
                 ["Action"] = GenreEnum.Action,
-                ["Adventure"] = GenreEnum.ActionAdventure,
+                ["Adventure"] = GenreEnum.Adventure,
                 ["Casual"] = GenreEnum.Casual,
                 ["Early Access"] = GenreEnum.EarlyAccess,
                 ["FreeToPlay"] = GenreEnum.FreeToPlay,

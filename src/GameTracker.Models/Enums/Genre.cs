@@ -3,7 +3,7 @@
     public enum Genre
     {
         Action,
-        ActionAdventure,
+        Adventure,
         BeatEmUp,
         BoardGame,
         CardGame,

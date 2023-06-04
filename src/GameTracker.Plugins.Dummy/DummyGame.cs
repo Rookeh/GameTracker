@@ -7,7 +7,7 @@ namespace GameTracker.Plugins.Dummy
     {
         private readonly string _title;
 
-        public DummyGame()
+        internal DummyGame()
         {
             _title = "Dummy Title";
             PlatformId = 0;

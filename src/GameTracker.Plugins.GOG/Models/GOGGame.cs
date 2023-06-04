@@ -9,7 +9,7 @@ namespace GameTracker.Plugins.GOG.Models
     {
         private readonly GameDetails _gameDetails;
 
-        public GOGGame(GameDetails gameDetails)
+        internal GOGGame(GameDetails gameDetails)
         {
             PlatformId = gameDetails.Id;
             _gameDetails = gameDetails;
