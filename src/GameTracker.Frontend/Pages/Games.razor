@@ -17,8 +17,7 @@
     <p><em>No games loaded. Please configure a game provider.</em></p>
 }
 else
-{
-    <Modal @ref="modal" IsVerticallyCentered=true Size="ModalSize.Large" />
+{    
     <EditForm Model="@gridState">
         <table class="table">
             <tbody>
@@ -29,7 +28,7 @@ else
                         {
                             <td>
                                 <div>
-                                    <img height="215" width="460" src="@game.Image" alt="@game.Title" @onclick="@(e => OnShowGameModalClick(game))" />
+                                    <GameCell Game="@game"/>                                    
                                 </div>
                             </td>
                         }
@@ -85,7 +84,6 @@ else
 @code {
 
     private List<Game> games;
-    private Modal modal;
 
     private Button previousButton;
     private Button nextButton;
@@ -105,25 +103,10 @@ else
             .ToList();
     }
 
-    protected override Task OnAfterRenderAsync(bool firstRender)
-    {
-        previousButton?.HideLoading();
-        nextButton?.HideLoading();
-        return base.OnAfterRenderAsync(firstRender);
-    }
-
-    private async Task OnShowGameModalClick(Game game)
-    {
-        var modalParams = new Dictionary<string, object>();
-        modalParams.Add("Game", game);
-        await modal.ShowAsync<GameModal>(title: game.Title, parameters: modalParams);
-    }
-
     private void NextPage()
     {
         if (gridState.CurrentPage < PageCount())
         {
-            nextButton.ShowLoading("Loading...");
             gridState.CurrentPage++;
         }
     }
@@ -132,7 +115,6 @@ else
     {
         if (gridState.CurrentPage > 1)
         {
-            previousButton.ShowLoading("Loading...");
             gridState.CurrentPage--;
         }
     }

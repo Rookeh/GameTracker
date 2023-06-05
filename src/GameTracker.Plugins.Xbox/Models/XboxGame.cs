@@ -17,13 +17,23 @@ namespace GameTracker.Plugins.Xbox.Models
             _xboxTitle = xboxTitle;
         }
 
+        public override Task Preload()
+        {
+            return Task.CompletedTask;
+        }
+
         public override string Title => _xboxTitle.Name;
 
         public override string Description => string.Empty;
 
         public override Genre[] Genres => Array.Empty<Genre>();
 
-        public override string Image => _xboxTitle.DisplayImage;
+        public override Image Image => new Image
+        {
+            Url = _xboxTitle.DisplayImage,
+            Width = 310,
+            Height = 310
+        };
 
         public override DateTime? LastPlayed => _xboxTitle.TitleHistory.LastTimePlayed;
 

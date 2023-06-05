@@ -22,12 +22,14 @@ namespace GameTracker.Models
             }
         }
 
+        public abstract Task Preload();
+
         public abstract TimeSpan? Playtime { get; }
         public abstract DateTime? LastPlayed { get; }
         public abstract string Title { get; }
         public abstract string Description { get; }
         public abstract Genre[] Genres { get; }
-        public abstract string Image { get; }
+        public abstract Image Image { get; }
         public abstract LaunchCommand LaunchCommand { get; }
         public abstract MultiplayerAvailability[] MultiplayerAvailability { get; }
         public abstract GameplayMode[] GameplayModes { get; }        

@@ -33,17 +33,25 @@ namespace GameTracker.Plugins.PlayStation
 
         public Dictionary<string, Type> RequiredParameters => new()
         {
-            { "PSN NPSSO Code", typeof(string) }
+            { "PSN NPSSO Code", typeof(string) },
+            { "Include Non-Game Titles", typeof(bool) }
         };
 
         public async Task Refresh(params object[] providerSpecificParameters)
         {
             if (!(providerSpecificParameters[0] is string))
             {
-                throw new ArgumentException("PSN NPSSO Code must be provided.");
+                throw new ArgumentException("PSN NPSSO Code must be a string.");
+            }
+
+            if (!(providerSpecificParameters[1] is bool))
+            {
+                throw new ArgumentException("Include Non-Game Titles must be a boolean.");
             }
 
             var npsso = providerSpecificParameters[0] as string;
+            var includeNonGameTitles = (bool)providerSpecificParameters[1];
+
             var authCode = await AuthenticationHelper.ExchangeNpssoForCode(npsso);
             var authToken = await AuthenticationHelper.ExchangeCodeForToken(authCode);
             var authHeader = new AuthenticationHeaderValue("Bearer", authToken);
@@ -81,8 +89,14 @@ namespace GameTracker.Plugins.PlayStation
 
             if (psnGames != null && psnGames.Data.GameLibraryTitlesRetrieve.Games.Any())
             {
+                var gameTitles = psnGames.Data.GameLibraryTitlesRetrieve.Games;
+                if (!includeNonGameTitles)
+                {
+                    gameTitles = gameTitles.Where(g => !string.IsNullOrEmpty(g.ProductId)).ToArray();
+                }
+
                 _games.Clear();
-                _games.AddRange(psnGames.Data.GameLibraryTitlesRetrieve.Games.Select(g => new PlayStationGame(g)));
+                _games.AddRange(gameTitles.Select(g => new PlayStationGame(g)));
             }            
         }
     }

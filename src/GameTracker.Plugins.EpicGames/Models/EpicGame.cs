@@ -17,6 +17,11 @@ namespace GameTracker.Plugins.EpicGames.Models
             _element = element;
         }
 
+        public override Task Preload()
+        {
+            return Task.CompletedTask;
+        }
+
         public override TimeSpan? Playtime => null;
 
         public override DateTime? LastPlayed => null;
@@ -27,7 +32,12 @@ namespace GameTracker.Plugins.EpicGames.Models
 
         public override Genre[] Genres => Array.Empty<Genre>();
 
-        public override string Image => _element.KeyImages?.FirstOrDefault()?.Url ?? "img//placeholder.png";
+        public override Image Image => new Image
+        {
+            Url = _element.KeyImages?.FirstOrDefault(i => i.Type == "OfferImageWide")?.Url ?? "img//placeholder.png",
+            Width = 460,
+            Height = 259
+        };
 
         public override LaunchCommand LaunchCommand => GetLaunchCommand();
 

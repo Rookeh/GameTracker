@@ -18,6 +18,11 @@ namespace GameTracker.Plugins.PlayStation.Models
             PlatformId = Convert.ToInt32(psnGame.ConceptId);
         }
 
+        public override Task Preload()
+        {
+            return Task.CompletedTask;
+        }
+
         public override TimeSpan? Playtime => null;
 
         public override string Title => _psnGame.Name;
@@ -28,7 +33,12 @@ namespace GameTracker.Plugins.PlayStation.Models
 
         public override Genre[] Genres => Array.Empty<Genre>();
 
-        public override string Image => _psnGame.Image.URL;
+        public override Image Image => new Image
+        {
+            Url = _psnGame.Image.URL,
+            Width = 338,
+            Height = 338
+        };
 
         public override LaunchCommand LaunchCommand => new LaunchCommand
         {

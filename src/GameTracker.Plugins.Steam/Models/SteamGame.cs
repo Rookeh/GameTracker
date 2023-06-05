@@ -12,7 +12,7 @@ namespace GameTracker.Plugins.Steam.Models
 {
     public class SteamGame : Game
     {
-        private SteamGameDetails _gameDetails;
+        private SteamGameDetails? _gameDetails;
         private readonly SteamGameDetailsRepository _gameDetailsRepository;
         private readonly RateLimitedHttpClient<Dictionary<string, SteamGameDetailsRoot>> _rateLimitedHttpClient;
 
@@ -35,10 +35,21 @@ namespace GameTracker.Plugins.Steam.Models
             _playTime = TimeSpan.FromMinutes(playTime);            
         }
 
-        public override string Description => GameDetails?.ShortDescription ?? string.Empty;
-        public override GameplayMode[] GameplayModes => SteamGameHelpers.ParseMultiplayerModes(GameDetails?.Categories).ToArray();
-        public override GenreEnum[] Genres => SteamGameHelpers.ParseGenres(GameDetails?.Genres).ToArray();
-        public override string Image => GameDetails?.HeaderImage ?? "img\\placeholder.png";
+        public override async Task Preload()
+        {
+            _gameDetails = await LazyLoadGameDetails();
+        }
+
+        public override string Description => _gameDetails?.ShortDescription ?? string.Empty;
+        public override GameplayMode[] GameplayModes => SteamGameHelpers.ParseMultiplayerModes(_gameDetails?.Categories).ToArray();
+        public override GenreEnum[] Genres => SteamGameHelpers.ParseGenres(_gameDetails?.Genres).ToArray();
+        public override Image Image => new Image()
+        {            
+            Url = _gameDetails?.HeaderImage ?? "img\\placeholder.png",
+            Width = 460,
+            Height = 215
+        };
+            
         public override DateTime? LastPlayed => _lastPlayed;
         public override LaunchCommand LaunchCommand => new LaunchCommand
         {
@@ -47,14 +58,14 @@ namespace GameTracker.Plugins.Steam.Models
             Text = "Launch via Steam",
             Uri = $"steam://run/{PlatformId}"
         };
-        public override MultiplayerAvailability[] MultiplayerAvailability => SteamGameHelpers.ParseMultiplayerAvailability(GameDetails?.Categories).ToArray();        
-        public override Platform[] Platforms => SteamGameHelpers.ParsePlatforms(GameDetails?.Platforms).ToArray();
+        public override MultiplayerAvailability[] MultiplayerAvailability => SteamGameHelpers.ParseMultiplayerAvailability(_gameDetails?.Categories).ToArray();        
+        public override Platform[] Platforms => SteamGameHelpers.ParsePlatforms(_gameDetails?.Platforms).ToArray();
         public override TimeSpan? Playtime => _playTime;
-        public override Publisher? Publisher => SteamGameHelpers.ParsePublisher(GameDetails);
-        public override DateTime? ReleaseDate => GameDetails?.ReleaseDate?.Date != null ? DateTime.Parse(GameDetails.ReleaseDate.Date) : null;
-        public override Review[] Reviews => SteamGameHelpers.ParseMetacriticReview(this, GameDetails?.Metacritic) ?? Array.Empty<Review>();
-        public override Studio? Studio => GameDetails.Developers.Any() ? new Studio { Name = GameDetails.Developers.First() } : null;
-        public override string[] Tags => GameDetails?.Categories.Select(c => c.Description).ToArray() ?? Array.Empty<string>();        
+        public override Publisher? Publisher => SteamGameHelpers.ParsePublisher(_gameDetails);
+        public override DateTime? ReleaseDate => _gameDetails?.ReleaseDate?.Date != null ? DateTime.Parse(_gameDetails.ReleaseDate.Date) : null;
+        public override Review[] Reviews => SteamGameHelpers.ParseMetacriticReview(this, _gameDetails?.Metacritic) ?? Array.Empty<Review>();
+        public override Studio? Studio => _gameDetails.Developers.Any() ? new Studio { Name = _gameDetails.Developers.First() } : null;
+        public override string[] Tags => _gameDetails?.Categories.Select(c => c.Description).ToArray() ?? Array.Empty<string>();        
         public override string Title => _title;
 
         #region Private methods
@@ -74,49 +85,32 @@ namespace GameTracker.Plugins.Steam.Models
          * 
          */
 
-        private SteamGameDetails? GameDetails
-        {
-            get
-            {
-                // Have we cached the game details in memory?
-                return _gameDetails ?? LazyLoadGameDetails();
-            }
-        }
-
-        private SteamGameDetails? LazyLoadGameDetails()
+        private async Task<SteamGameDetails?> LazyLoadGameDetails()
         {
             // Have we cached the game details in Sqlite?
-            var getGameDetailsFromCacheTask = _gameDetailsRepository.GetGameDetails(PlatformId);
-            getGameDetailsFromCacheTask.Wait();
-
-            if (getGameDetailsFromCacheTask.IsCompleted
-                && !getGameDetailsFromCacheTask.IsFaulted
-                && getGameDetailsFromCacheTask.Result != null)
+            var cachedGameDetails = await _gameDetailsRepository.GetGameDetails(PlatformId);
+            if (cachedGameDetails != null)
             {
-                return _gameDetails = getGameDetailsFromCacheTask.Result;
+                return cachedGameDetails;
             }
 
             // Otherwise, we have to fetch the game details from Steam (this is expensive, and we may be rate limited).
-            var getGameDetailsFromSteamTask = _rateLimitedHttpClient.GetFromJson(
+            var steamApiResults = await _rateLimitedHttpClient.GetFromJson(
                 $"https://store.steampowered.com/api/appdetails?appids={PlatformId}",
                 new Dictionary<string, SteamGameDetailsRoot>()
                 {
                     [PlatformId.ToString()] = Constants.DefaultValues.DefaultSteamGameDetails
                 });
 
-            getGameDetailsFromSteamTask.Wait();
-
-            if (getGameDetailsFromSteamTask.IsCompleted && !getGameDetailsFromSteamTask.IsFaulted)
+            if (steamApiResults != null && steamApiResults.ContainsKey(PlatformId.ToString()))
             {
-                var steamGameDetails = getGameDetailsFromSteamTask.Result[PlatformId.ToString()].Details;
+                var steamGameDetails = steamApiResults[PlatformId.ToString()].Details;
 
                 if (steamGameDetails != null)
                 {
                     if (!steamGameDetails.IsDefaultValue)
                     {
-                        var updateCacheTask = _gameDetailsRepository.SetGameDetails(steamGameDetails);
-                        updateCacheTask.Wait();
-                        return _gameDetails = steamGameDetails;
+                        await _gameDetailsRepository.SetGameDetails(steamGameDetails);
                     }
 
                     return steamGameDetails;
@@ -127,6 +121,5 @@ namespace GameTracker.Plugins.Steam.Models
         }
 
         #endregion
-
     }
 }

@@ -1,5 +1,6 @@
 ﻿using GameTracker.Models;
 using GameTracker.Models.Enums;
+using System.Xml.Linq;
 
 namespace GameTracker.Plugins.Dummy
 {
@@ -13,11 +14,21 @@ namespace GameTracker.Plugins.Dummy
             PlatformId = 0;
         }
 
+        public override Task Preload()
+        {
+            return Task.CompletedTask;
+        }
+
         public override string Description => "Dummy Description";
 
         public override Genre[] Genres => new[] { Genre.Other };
 
-        public override string Image => "https://upload.wikimedia.org/wikipedia/commons/2/21/Hello_World_Brian_Kernighan_1978.jpg";
+        public override Image Image => new Image
+        {
+            Url = "https://upload.wikimedia.org/wikipedia/commons/2/21/Hello_World_Brian_Kernighan_1978.jpg",
+            Width = 460,
+            Height = 215
+        };
 
         public override LaunchCommand LaunchCommand => new LaunchCommand
         {
@@ -47,6 +58,6 @@ namespace GameTracker.Plugins.Dummy
 
         public override string[] Tags => new[] { "test", "hello", "world" } ;        
 
-        public override string Title => _title;      
+        public override string Title => _title;
     }
 }

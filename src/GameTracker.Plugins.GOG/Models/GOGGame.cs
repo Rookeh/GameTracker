@@ -15,13 +15,23 @@ namespace GameTracker.Plugins.GOG.Models
             _gameDetails = gameDetails;
         }
 
+        public override Task Preload()
+        {
+            return Task.CompletedTask;
+        }
+
         public override string Description => _gameDetails.Description?.Full ?? string.Empty;
 
         public override GameplayMode[] GameplayModes => Array.Empty<GameplayMode>();
 
         public override Genre[] Genres => Array.Empty<Genre>();
 
-        public override string Image => _gameDetails.Images?.Background ?? "img\\placeholder.png";
+        public override Image Image => new Image
+        {
+            Url = _gameDetails.Images?.Logo2x ?? "img\\placeholder.png",
+            Width = 200,
+            Height = 120
+        };
 
         public override LaunchCommand LaunchCommand => new LaunchCommand
         {

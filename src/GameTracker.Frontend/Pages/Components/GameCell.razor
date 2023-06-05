@@ -1,0 +1,39 @@
+﻿@using GameTracker.Models;
+
+@if (Game != null)
+{
+    <Modal @ref="modal" IsVerticallyCentered=true Size="ModalSize.Large" />
+    @if (canShowGameDetails)
+    {        
+        <img height="@Game.Image.Height" width="@Game.Image.Width" src="@Game.Image.Url" alt="@Game.Title" @onclick="@(e => OnShowGameModalClick(Game))" />
+    }
+    else
+    {
+        <div class="spinner-border" role="status">
+            <span class="sr-only"/>
+        </div>
+    }
+}
+
+@code {
+
+    [Parameter]
+    public Game Game { get; set; }
+
+    private bool canShowGameDetails = false;
+    private Modal modal;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        canShowGameDetails = false;
+        await Game.Preload();
+        canShowGameDetails = true;
+    }
+
+    private async Task OnShowGameModalClick(Game game)
+    {
+        var modalParams = new Dictionary<string, object>();
+        modalParams.Add("Game", game);
+        await modal.ShowAsync<GameModal>(title: game.Title, parameters: modalParams);
+    }
+}

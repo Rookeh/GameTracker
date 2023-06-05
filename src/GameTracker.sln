@@ -25,7 +25,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameTracker.Plugins.PlaySta
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameTracker.Plugins.Xbox", "GameTracker.Plugins.Xbox\GameTracker.Plugins.Xbox.csproj", "{045DB14C-A507-49FB-9D9F-1DBFA4D1EB56}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameTracker.Plugins.EpicGames", "GameTracker.Plugins.EpicGames\GameTracker.Plugins.EpicGames.csproj", "{FC65F3A9-1335-4B58-86FA-D88FF49EEB7E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameTracker.Plugins.EpicGames", "GameTracker.Plugins.EpicGames\GameTracker.Plugins.EpicGames.csproj", "{FC65F3A9-1335-4B58-86FA-D88FF49EEB7E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
