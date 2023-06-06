@@ -2,6 +2,7 @@
 
 <PageTitle>Games</PageTitle>
 
+@using GameTracker.Frontend.Models;
 @using GameTracker.Frontend.Pages.Components;
 @using GameTracker.Interfaces;
 @using GameTracker.Core;
@@ -17,83 +18,129 @@
     <p><em>No games loaded. Please configure a game provider.</em></p>
 }
 else
-{    
-    <EditForm Model="@gridState">
-        <table class="table">
-            <tbody>
-                @foreach (var gameRow in games.Skip((gridState.CurrentPage - 1) * gridState.ItemsPerPage).Take(gridState.ItemsPerPage).Chunk(gridState.ItemsPerRow))
-                {
-                    <tr>
-                        @foreach (var game in gameRow)
-                        {
-                            <td>
-                                <div>
-                                    <GameCell Game="@game"/>                                    
-                                </div>
-                            </td>
-                        }
-                    </tr>
-                }
-                <tr>
-                    @for (int i = 1; i <= gridState.ItemsPerRow; i++)
-                    {
-                        @if (i == 1)
-                        {
-                            <td>
-                                <Button Color="ButtonColor.Secondary" @ref="previousButton" @onclick="PreviousPage">
-                                    <Icon Name="IconName.CaretLeftFill" />
-                                </Button>
-                            </td>
-                        }
-                        else if (i == GetMedian(gridState.ItemsPerRow))
-                        {
-                            <td>
-                                <div>
-                                    Page: @gridState.CurrentPage / @PageCount()
-                                </div>
-                                <div>
-                                    <label>Items per Page</label>
-                                    <InputSelect @bind-Value="@gridState.ItemsPerPage">
-                                        <option value="6">6</option>
-                                        <option value="12">12</option>
-                                        <option value="24">24</option>
-                                        <option value="48">48</option>
-                                    </InputSelect>
-                                </div>
-                            </td>
-                        }
-                        else if (i == gridState.ItemsPerRow)
-                        {
-                            <td>
-                                <Button Color="ButtonColor.Secondary" @ref="nextButton" @onclick="NextPage">
-                                    <Icon Name="IconName.CaretRightFill"/>
-                                </Button>
-                            </td>
-                        }
-                        else
-                        {
-                            <td />
-                        }
-                    }
-                </tr>
-            </tbody>
-        </table>
-    </EditForm>
+{
+    <Accordion>
+        <AccordionItem>
+            <TitleTemplate>
+                <Icon Name="IconName.Search" Class="me-1" />Title Search
+            </TitleTemplate>
+            <Content>
+                <AutoComplete @bind-Value="filterProperties.Name"
+                              TItem="Game"
+                              DataProvider="GameTitleProvider"
+                              PropertyName="Title"
+                              Placeholder="Search for a game title..." />
+            </Content>
+        </AccordionItem>
+        <AccordionItem>
+            <TitleTemplate>
+                <Icon Name="IconName.Calendar" Class="me-1" /> Released Since...
+            </TitleTemplate>
+            <Content>
+                <DateInput TValue="DateOnly?" @bind-Value="@filterProperties.Date" Placeholder="Released since..." />
+            </Content>
+        </AccordionItem>
+        <AccordionItem>
+            <TitleTemplate>
+                <Icon Name="IconName.Hourglass" Class="me-1" /> Time Played...
+            </TitleTemplate>
+            <Content>
+                <NumberInput TValue="int?" @bind-Value="@filterProperties.UpperHours" Placeholder="Upper bound (hours)"/>
+                <NumberInput TValue="int?" @bind-Value="@filterProperties.LowerHours" Placeholder="Lower bound (hours)" />
+            </Content>
+        </AccordionItem>
+        <AccordionItem>
+            <TitleTemplate>
+                <Icon Name="IconName.Star" Class="me-1" /> Minimum Review Score...
+            </TitleTemplate>
+            <Content>
+                <NumberInput TValue="int?" @bind-Value="@filterProperties.MinimumReviewScore" Placeholder="Minimum score (%)"/>
+            </Content>
+        </AccordionItem>
+    </Accordion>
+    <Grid TItem="GameRow"
+          Class="table table-hover table-bordered table-striped"
+          Data="GameRows"
+          AllowFiltering="false"
+          AllowPaging="true"          
+          PageSize="4"
+          PageSizeSelectorVisible="true"
+          PageSizeSelectorItems="@(new int[] { 4,8,16 })"
+          PaginationItemsTextFormat="{0} - {1} of {2} rows"          
+          Responsive="true">
+        <GridColumn TItem="GameRow" PropertyName="Game1" Filterable="false" Sortable="false">
+            <ChildContent>
+                <GameCell Game="@context.Game1" />
+            </ChildContent>
+        </GridColumn>
+        <GridColumn TItem="GameRow" PropertyName="Game2" Filterable="false" Sortable="false">
+            <ChildContent>
+                <GameCell Game="@context.Game2" />
+            </ChildContent>
+        </GridColumn>
+        <GridColumn TItem="GameRow" PropertyName="Game3" Filterable="false" Sortable="false">
+            <ChildContent>
+                <GameCell Game="@context.Game3" />
+            </ChildContent>
+        </GridColumn>
+    </Grid>
 }
 
 @code {
 
     private List<Game> games;
+    private FilterProperties filterProperties = new();
 
-    private Button previousButton;
-    private Button nextButton;
+    private async Task<AutoCompleteDataProviderResult<Game>> GameTitleProvider(AutoCompleteDataProviderRequest<Game> request)
+    {
+        return await Task.FromResult(request.ApplyTo(games));
+    }
 
-    private Models.GridState gridState = new()
+    private List<Game> FilteredGames
+    {
+        get
         {
-            CurrentPage = 1,
-            ItemsPerPage = 6,
-            ItemsPerRow = 3
-        };
+            var filteredGames = new List<Game>(games);
+
+            if (!string.IsNullOrEmpty(filterProperties.Name))
+            {
+                filteredGames = filteredGames.Where(g => g.Title.Contains(filterProperties.Name)).ToList();
+            }
+
+            if (filterProperties.Date != null)
+            {
+                var filterDateTime = new DateTime(filterProperties.Date.Value.Year, filterProperties.Date.Value.Month, filterProperties.Date.Value.Day);
+                filteredGames = filteredGames.Where(g => g.ReleaseDate.HasValue && g.ReleaseDate.Value >= filterDateTime).ToList();
+            }
+
+            if (filterProperties.UpperHours != null && filterProperties.LowerHours != null)
+            {
+                var lower = TimeSpan.FromHours(filterProperties.LowerHours.Value);
+                var upper = TimeSpan.FromHours(filterProperties.UpperHours.Value);
+                filteredGames = filteredGames.Where(g => g.Playtime != null && g.Playtime >= lower && g.Playtime <= upper).ToList();
+            }
+
+            if (filterProperties.MinimumReviewScore != null)
+            {
+                filteredGames = filteredGames.Where(g => g.AverageCriticalReview.HasValue && g.AverageCriticalReview > filterProperties.MinimumReviewScore).ToList();
+            }
+
+            return filteredGames;
+        }
+    }
+
+    private List<GameRow> GameRows
+    {
+        get
+        {
+            return FilteredGames.Chunk(3).Select(c => new GameRow
+                {
+                    Game1 = c[0],
+                    Game2 = c.Length >= 2 ? c[1] : null,
+                    Game3 = c.Length >= 3 ? c[2] : null
+                }).ToList();
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -101,37 +148,5 @@ else
             .ToArray()
             .SelectMany(p => p.Games)
             .ToList();
-    }
-
-    private void NextPage()
-    {
-        if (gridState.CurrentPage < PageCount())
-        {
-            gridState.CurrentPage++;
-        }
-    }
-
-    private void PreviousPage()
-    {
-        if (gridState.CurrentPage > 1)
-        {
-            gridState.CurrentPage--;
-        }
-    }
-
-    private void ResetTable()
-    {
-        gridState.CurrentPage = 1;
-    }
-
-    private int PageCount()
-    {
-        return Convert.ToInt32(Math.Ceiling((float)games.Count / (float)gridState.ItemsPerPage));
-    }
-
-    private static int GetMedian(int maxRange)
-    {
-        var pages = Enumerable.Range(1, maxRange).Select(i => Convert.ToDouble(i));
-        return Convert.ToInt32(pages.Median());
     }
 }

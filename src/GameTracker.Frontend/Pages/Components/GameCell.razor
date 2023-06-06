@@ -25,9 +25,12 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        canShowGameDetails = false;
-        await Game.Preload();
-        canShowGameDetails = true;
+        if (Game != null)
+        {
+            canShowGameDetails = false;
+            await Game.Preload();
+            canShowGameDetails = true;
+        }
     }
 
     private async Task OnShowGameModalClick(Game game)

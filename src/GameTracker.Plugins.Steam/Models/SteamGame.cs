@@ -21,18 +21,18 @@ namespace GameTracker.Plugins.Steam.Models
         private readonly string _title;
 
         internal SteamGame(RateLimitedHttpClient<Dictionary<string, SteamGameDetailsRoot>> rateLimitedHttpClient,
-            SteamGameDetailsRepository steamGameDetailsRepository, 
+            SteamGameDetailsRepository steamGameDetailsRepository,
             SteamApp app,
             int playTime,
             long lastPlayed)
         {
-            PlatformId = app.AppId;            
+            PlatformId = app.AppId;
             _gameDetailsRepository = steamGameDetailsRepository;
-            _rateLimitedHttpClient = rateLimitedHttpClient;            
+            _rateLimitedHttpClient = rateLimitedHttpClient;
             _title = app.Name;
-            
+
             _lastPlayed = DateTime.UnixEpoch.AddSeconds(lastPlayed);
-            _playTime = TimeSpan.FromMinutes(playTime);            
+            _playTime = TimeSpan.FromMinutes(playTime);
         }
 
         public override async Task Preload()
@@ -44,12 +44,12 @@ namespace GameTracker.Plugins.Steam.Models
         public override GameplayMode[] GameplayModes => SteamGameHelpers.ParseMultiplayerModes(_gameDetails?.Categories).ToArray();
         public override GenreEnum[] Genres => SteamGameHelpers.ParseGenres(_gameDetails?.Genres).ToArray();
         public override Image Image => new Image()
-        {            
+        {
             Url = _gameDetails?.HeaderImage ?? "img\\placeholder.png",
             Width = 460,
             Height = 215
         };
-            
+
         public override DateTime? LastPlayed => _lastPlayed;
         public override LaunchCommand LaunchCommand => new LaunchCommand
         {
@@ -58,11 +58,25 @@ namespace GameTracker.Plugins.Steam.Models
             Text = "Launch via Steam",
             Uri = $"steam://run/{PlatformId}"
         };
-        public override MultiplayerAvailability[] MultiplayerAvailability => SteamGameHelpers.ParseMultiplayerAvailability(_gameDetails?.Categories).ToArray();        
+        public override MultiplayerAvailability[] MultiplayerAvailability => SteamGameHelpers.ParseMultiplayerAvailability(_gameDetails?.Categories).ToArray();
         public override Platform[] Platforms => SteamGameHelpers.ParsePlatforms(_gameDetails?.Platforms).ToArray();
         public override TimeSpan? Playtime => _playTime;
         public override Publisher? Publisher => SteamGameHelpers.ParsePublisher(_gameDetails);
-        public override DateTime? ReleaseDate => _gameDetails?.ReleaseDate?.Date != null ? DateTime.Parse(_gameDetails.ReleaseDate.Date) : null;
+        public override DateTime? ReleaseDate
+        {
+            get
+            {
+                if (_gameDetails?.ReleaseDate?.Date != null)
+                {
+                    if (DateTime.TryParse(_gameDetails.ReleaseDate.Date, out var releaseDate))
+                    {
+                        return releaseDate;
+                    }                    
+                }
+
+                return null;
+            }
+        }
         public override Review[] Reviews => SteamGameHelpers.ParseMetacriticReview(this, _gameDetails?.Metacritic) ?? Array.Empty<Review>();
         public override Studio? Studio => _gameDetails.Developers.Any() ? new Studio { Name = _gameDetails.Developers.First() } : null;
         public override string[] Tags => _gameDetails?.Categories.Select(c => c.Description).ToArray() ?? Array.Empty<string>();        
