@@ -22,6 +22,7 @@ namespace GameTracker.Plugins.PlayStation
             {
                 Name = "PlayStation Network",
                 Description = "PlayStation Network",
+                Icon = "Playstation"
             };
         }
 

@@ -1,0 +1,9 @@
+﻿.btn-container {
+    display: flex;
+    justify-content: center;
+}
+
+.platform-container {
+    display: flex;
+    justify-content: right;
+}

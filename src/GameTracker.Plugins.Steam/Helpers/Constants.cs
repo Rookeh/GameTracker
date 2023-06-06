@@ -26,7 +26,8 @@ namespace GameTracker.Plugins.Steam.Helpers
                 ["RPG"] = GenreEnum.RPG,
                 ["Racing"] = GenreEnum.Racing,
                 ["Simulation"] = GenreEnum.Simulation,
-                ["Massively Multiplayer"] = GenreEnum.MMO
+                ["Massively Multiplayer"] = GenreEnum.MMO,
+                ["VR"] = GenreEnum.VR
             };
 
             internal static Dictionary<string, MultiplayerAvailability> SteamMultiplayerAvailMappings => new Dictionary<string, MultiplayerAvailability>

@@ -37,6 +37,7 @@
         TowerDefense,
         Trivia,
         VisualNovel,
+        VR,
         Wargame
     }
 }

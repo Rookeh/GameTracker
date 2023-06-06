@@ -7,6 +7,7 @@
 @using GameTracker.Interfaces;
 @using GameTracker.Core;
 @using GameTracker.Models;
+@using GameTracker.Models.Enums;
 @using MathNet.Numerics.Statistics;
 
 @inject IProviderFactory ProviderFactory;
@@ -19,45 +20,104 @@
 }
 else
 {
-    <Accordion>
-        <AccordionItem>
-            <TitleTemplate>
-                <Icon Name="IconName.Search" Class="me-1" />Title Search
-            </TitleTemplate>
-            <Content>
-                <AutoComplete @bind-Value="filterProperties.Name"
-                              TItem="Game"
-                              DataProvider="GameTitleProvider"
-                              PropertyName="Title"
-                              Placeholder="Search for a game title..." />
-            </Content>
-        </AccordionItem>
-        <AccordionItem>
-            <TitleTemplate>
-                <Icon Name="IconName.Calendar" Class="me-1" /> Released Since...
-            </TitleTemplate>
-            <Content>
-                <DateInput TValue="DateOnly?" @bind-Value="@filterProperties.Date" Placeholder="Released since..." />
-            </Content>
-        </AccordionItem>
-        <AccordionItem>
-            <TitleTemplate>
-                <Icon Name="IconName.Hourglass" Class="me-1" /> Time Played...
-            </TitleTemplate>
-            <Content>
-                <NumberInput TValue="int?" @bind-Value="@filterProperties.UpperHours" Placeholder="Upper bound (hours)"/>
-                <NumberInput TValue="int?" @bind-Value="@filterProperties.LowerHours" Placeholder="Lower bound (hours)" />
-            </Content>
-        </AccordionItem>
-        <AccordionItem>
-            <TitleTemplate>
-                <Icon Name="IconName.Star" Class="me-1" /> Minimum Review Score...
-            </TitleTemplate>
-            <Content>
-                <NumberInput TValue="int?" @bind-Value="@filterProperties.MinimumReviewScore" Placeholder="Minimum score (%)"/>
-            </Content>
-        </AccordionItem>
-    </Accordion>
+    <table class="table">
+        <tr>
+            <td>
+                <Accordion>
+                    <AccordionItem>
+                        <TitleTemplate>
+                            <Icon Name="IconName.Search" Class="me-1" />Title Search
+                        </TitleTemplate>
+                        <Content>
+                            <AutoComplete @bind-Value="filterProperties.Name"
+                                          TItem="Game"
+                                          DataProvider="GameFilterProvider"
+                                          PropertyName="Title"
+                                          Placeholder="Search for a game title..."
+                                          OnChanged="(Game game) => OnAutoComplete(game)" />
+                        </Content>
+                    </AccordionItem>
+                    <AccordionItem>
+                        <TitleTemplate>
+                            <Icon Name="IconName.Calendar" Class="me-1" /> Released Since...
+                        </TitleTemplate>
+                        <Content>
+                            <DateInput TValue="DateOnly?" @bind-Value="@ReleaseDateFilter" Placeholder="Released since..." />
+                        </Content>
+                    </AccordionItem>
+                    <AccordionItem>
+                        <TitleTemplate>
+                            <Icon Name="IconName.Hourglass" Class="me-1" /> Time Played...
+                        </TitleTemplate>
+                        <Content>
+                            <NumberInput TValue="int?" @bind-Value="@UpperHoursFilter" Placeholder="Upper bound (hours)" />
+                            <NumberInput TValue="int?" @bind-Value="@LowerHoursFilter" Placeholder="Lower bound (hours)" />
+                        </Content>
+                    </AccordionItem>
+                    <AccordionItem>
+                        <TitleTemplate>
+                            <Icon Name="IconName.Star" Class="me-1" /> Minimum Review Score...
+                        </TitleTemplate>
+                        <Content>
+                            <NumberInput TValue="int?" @bind-Value="@MinimumReviewScoreFilter" Placeholder="Minimum score (%)" />
+                        </Content>
+                    </AccordionItem>
+                </Accordion>
+            </td>
+            <td>
+                <Accordion>
+                    <AccordionItem>
+                        <TitleTemplate>
+                            <Icon Name="IconName.CodeSlash" Class="me-1"/> Studio Search...
+                        </TitleTemplate>
+                        <Content>
+                            <AutoComplete @bind-Value="filterProperties.Studio"
+                                          TItem="Studio"
+                                          DataProvider="StudioFilterProvider"
+                                          PropertyName="Name"
+                                          Placeholder="Search for a development studio..."
+                                          OnChanged="(Studio studio) => OnAutoComplete(studio)" />
+                        </Content>
+                    </AccordionItem>
+                    <AccordionItem>
+                        <TitleTemplate>
+                            <Icon Name="IconName.Building" Class="me-1" /> Publisher Search...
+                        </TitleTemplate>
+                        <Content>
+                            <AutoComplete @bind-Value="filterProperties.Publisher"
+                                          TItem="Publisher"
+                                          DataProvider="PublisherFilterProvider"
+                                          PropertyName="Name"
+                                          Placeholder="Search for a publisher..."
+                                          OnChanged="(Publisher publisher) => OnAutoComplete(publisher)" />
+                        </Content>
+                    </AccordionItem>
+                    <AccordionItem>
+                        <TitleTemplate>
+                            <Icon Name="IconName.Clock" Class="me-1" /> Last Played...
+                        </TitleTemplate>
+                        <Content>
+                            <DateInput TValue="DateTime?" @bind-Value="@LastPlayedFilter" Placeholder="Not played after..." />
+                        </Content>
+                    </AccordionItem>
+                    <AccordionItem>
+                        <TitleTemplate>
+                            <Icon Name="IconName.Controller" Class="me-1" /> Genre Search...
+                        </TitleTemplate>
+                        <Content>
+                            <AutoComplete @bind-Value="filterProperties.Genre"
+                                          TItem="FilterableGenre"
+                                          DataProvider="GenreFilterProvider"
+                                          PropertyName="Name"
+                                          Placeholder="Search for a genre..."
+                                          OnChanged="(FilterableGenre genre) => OnAutoComplete(genre)" />
+                        </Content>
+                    </AccordionItem>
+                </Accordion>
+            </td>
+        </tr>
+    </table>
+
     <Grid TItem="GameRow"
           Class="table table-hover table-bordered table-striped"
           Data="GameRows"
@@ -91,9 +151,43 @@ else
     private List<Game> games;
     private FilterProperties filterProperties = new();
 
-    private async Task<AutoCompleteDataProviderResult<Game>> GameTitleProvider(AutoCompleteDataProviderRequest<Game> request)
+    private async Task<AutoCompleteDataProviderResult<Game>> GameFilterProvider(AutoCompleteDataProviderRequest<Game> request)
     {
         return await Task.FromResult(request.ApplyTo(games));
+    }
+
+    private async Task<AutoCompleteDataProviderResult<FilterableGenre>> GenreFilterProvider(AutoCompleteDataProviderRequest<FilterableGenre> request)
+    {
+        var genres = games.SelectMany(g => g.Genres)
+            .Distinct()
+            .Select(g => new FilterableGenre { Name = g.ToString() })
+            .ToList();
+
+        return await Task.FromResult(new AutoCompleteDataProviderResult<FilterableGenre>
+        {
+            Data = genres,
+            TotalCount = genres.Count()
+        });
+    }
+
+    private async Task<AutoCompleteDataProviderResult<Publisher>> PublisherFilterProvider(AutoCompleteDataProviderRequest<Publisher> request)
+    {
+        var publishers = games.Where(g => g.Publisher != null).Select(g => g.Publisher).DistinctBy(p => p.Name);
+        return await Task.FromResult(new AutoCompleteDataProviderResult<Publisher>
+        {
+            Data = publishers,
+            TotalCount = publishers.Count()
+        });
+    }
+
+    private async Task<AutoCompleteDataProviderResult<Studio>> StudioFilterProvider(AutoCompleteDataProviderRequest<Studio> request)
+    {
+        var studios = games.Where(g => g.Studio != null).Select(g => g.Studio).DistinctBy(p => p.Name);
+        return await Task.FromResult(new AutoCompleteDataProviderResult<Studio>
+        {
+            Data = studios,
+            TotalCount = studios.Count()
+        });
     }
 
     private List<Game> FilteredGames
@@ -107,17 +201,42 @@ else
                 filteredGames = filteredGames.Where(g => g.Title.Contains(filterProperties.Name)).ToList();
             }
 
-            if (filterProperties.Date != null)
+            if (!string.IsNullOrEmpty(filterProperties.Studio))
             {
-                var filterDateTime = new DateTime(filterProperties.Date.Value.Year, filterProperties.Date.Value.Month, filterProperties.Date.Value.Day);
+                filteredGames = filteredGames.Where(g => g.StudioName != null && g.StudioName.Contains(filterProperties.Studio)).ToList();
+            }
+
+            if (!string.IsNullOrEmpty(filterProperties.Publisher))
+            {
+                filteredGames = filteredGames.Where(g => g.PublisherName != null && g.PublisherName.Contains(filterProperties.Publisher)).ToList();
+            }
+
+            if (!string.IsNullOrEmpty(filterProperties.Genre))
+            {
+                filteredGames = filteredGames.Where(g => g.Genres != null && g.Genres.Any(g => g.ToString() == filterProperties.Genre)).ToList();
+            }
+
+            if (filterProperties.ReleaseDate != null)
+            {
+                var filterDateTime = new DateTime(filterProperties.ReleaseDate.Value.Year, filterProperties.ReleaseDate.Value.Month, filterProperties.ReleaseDate.Value.Day);
                 filteredGames = filteredGames.Where(g => g.ReleaseDate.HasValue && g.ReleaseDate.Value >= filterDateTime).ToList();
             }
 
-            if (filterProperties.UpperHours != null && filterProperties.LowerHours != null)
+            if (filterProperties.LastPlayed != null)
             {
-                var lower = TimeSpan.FromHours(filterProperties.LowerHours.Value);
+                filteredGames = filteredGames.Where(g => g.LastPlayed.HasValue && g.LastPlayed.Value <= filterProperties.LastPlayed).ToList();
+            }
+
+            if (filterProperties.LowerHours != null)
+            {
+                var lower = TimeSpan.FromHours(filterProperties.LowerHours.Value);                
+                filteredGames = filteredGames.Where(g => g.Playtime != null && g.Playtime >= lower).ToList();
+            }
+
+            if (filterProperties.UpperHours != null)
+            {
                 var upper = TimeSpan.FromHours(filterProperties.UpperHours.Value);
-                filteredGames = filteredGames.Where(g => g.Playtime != null && g.Playtime >= lower && g.Playtime <= upper).ToList();
+                filteredGames = FilteredGames.Where(g => g.Playtime != null && g.Playtime <= upper).ToList();
             }
 
             if (filterProperties.MinimumReviewScore != null)
@@ -140,6 +259,64 @@ else
                     Game3 = c.Length >= 3 ? c[2] : null
                 }).ToList();
         }
+    }
+
+    private DateOnly? ReleaseDateFilter
+    {
+        get => filterProperties.ReleaseDate;
+        set
+        {
+            filterProperties.ReleaseDate = value;
+            this.StateHasChanged();
+        }
+    }
+
+    private DateTime? LastPlayedFilter
+    {
+        get => filterProperties.LastPlayed;
+        set
+        {
+            filterProperties.LastPlayed = value;
+            this.StateHasChanged();
+        }
+    }
+
+    private int? LowerHoursFilter
+    {
+        get => filterProperties.LowerHours;
+        set
+        {
+            filterProperties.LowerHours = value;
+            this.StateHasChanged();
+        }
+    }
+
+    private int? UpperHoursFilter
+    {
+        get => filterProperties.UpperHours;
+        set
+        {
+            filterProperties.UpperHours = value;
+            this.StateHasChanged();
+        }
+    }
+
+    private int? MinimumReviewScoreFilter
+    {
+        get => filterProperties.MinimumReviewScore;
+        set
+        {
+            filterProperties.MinimumReviewScore = value;
+            this.StateHasChanged();
+        }
+    }
+
+    private void OnAutoComplete(object state)
+    {
+        if (state != null)
+        {
+            this.StateHasChanged();
+        }        
     }
 
     protected override async Task OnInitializedAsync()

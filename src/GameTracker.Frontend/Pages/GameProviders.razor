@@ -2,6 +2,8 @@
 
 <PageTitle>Game Providers</PageTitle>
 
+@using GameTracker.Frontend.Helpers;
+@using GameTracker.Frontend.Pages.Components
 @using GameTracker.Interfaces;
 @using GameTracker.Core;
 
@@ -14,67 +16,49 @@
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Provider Name</th>
-                <th>Required Information</th>
-                <th>Load Game Data</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var provider in providers)
-            {
-                <tr>
-                    <td>@provider.Platform.Name</td>
-                    <td>
-                        <EditForm EditContext="@editContext">
-                            <table class="table">
-                                <tbody>
-                                    @if (!provider.RequiredParameters.Any())
-                                    {
-                                        <div>None</div>
-                                    }
-                                    else
-                                    {
-                                        @foreach (var param in provider.RequiredParameters)
-                                        {
-                                            <tr>
-                                                <td><label>@param.Key</label></td>
-                                                <td>
-                                                    @switch (param.Value)
-                                                    {
-                                                        case Type boolType when boolType == typeof(bool):
-                                                            <input type="checkbox" @bind="boolParameters[provider.Platform.Name + param.Key]" />
-                                                            break;
-                                                        case Type dateType when dateType == typeof(DateTime):
-                                                            <input type="date" @bind="dateParameters[provider.Platform.Name + param.Key]" />
-                                                            break;
-                                                        case Type intType when intType == typeof(int):
-                                                            <input type="number" @bind="intParameters[provider.Platform.Name + param.Key]" />
-                                                            break;
-                                                        case Type stringType when stringType == typeof(string):
-                                                            <input type="text" @bind="stringParameters[provider.Platform.Name + param.Key]" />
-                                                            break;
-                                                        default:
-                                                            <em>Unsupported parameter type.</em>
-                                                            break;
-                                                    }
-                                                </td>
-                                            </tr>
-                                        }
-                                    }
-                                </tbody>
-                            </table>
-                        </EditForm>
-                    </td>
-                    <td>
-                        <button class="btn btn-primary" onclick="@(async () => await LoadGames(provider))">Load Games</button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <Grid TItem="IGameProvider"
+          Class="table table-hover table-bordered table-striped"
+          Data="providers"
+          AllowFiltering="false"
+          AllowPaging="false"
+          PageSizeSelectorVisible="false"
+          PageSizeSelectorItems="@(new int[] { })"
+          PaginationItemsTextFormat="">
+        <GridColumn TItem="IGameProvider" PropertyName="Platform">
+            <HeaderContent>
+                Platform
+            </HeaderContent>
+            <ChildContent>
+                <div class="platform-container">
+                    @if (string.IsNullOrEmpty(context.Platform.Icon))
+                    {
+                        @context.Platform.Name
+                    }
+                    else
+                    {
+                        <Icon Size="IconSize.x2" Name="@IconHelper.GetIconEnum(@context.Platform.Icon)" />
+                    }                                       
+                </div>
+            </ChildContent>
+        </GridColumn>
+        <GridColumn TItem="IGameProvider" PropertyName="RequiredParameters">
+            <HeaderContent>
+                Required Parameters
+            </HeaderContent>
+            <ChildContent>
+                <GameProviderParams GameProvider="@context"
+                                    BoolParameters=@boolParameters
+                                    DateParameters=@dateParameters
+                                    StringParameters=@stringParameters
+                                    IntParameters=@intParameters />
+            </ChildContent>
+        </GridColumn>
+        <GridColumn TItem="IGameProvider" PropertyName="Refresh">
+            <div class="btn-container">
+                <button class="btn btn-primary" onclick="@(async () => await LoadGames(context))">Load Games</button>
+            </div>            
+        </GridColumn>
+    </Grid>
 }
 
 @code {
@@ -145,35 +129,35 @@ else
             if (provider.RequiredParameters.Any() && (!providerArgValues.Any() || providerArgValues.Any(pa => pa == null)))
             {
                 ToastService.Notify(new ToastMessage
-                {
-                    Type = ToastType.Warning,
-                    Message = $"Cannot load games for provider {provider.Platform.Name}: Required information missing.",
-                });
+                    {
+                        Type = ToastType.Warning,
+                        Message = $"Cannot load games for provider {provider.Platform.Name}: Required information missing.",
+                    });
             }
             else
             {
                 ToastService.Notify(new ToastMessage
-                {
-                    Type = ToastType.Info,
-                    Message = $"Refreshing games for provider {provider.Platform.Name}...",
-                });
+                    {
+                        Type = ToastType.Info,
+                        Message = $"Refreshing games for provider {provider.Platform.Name}...",
+                    });
 
                 await provider.Refresh(providerArgValues.ToArray());
 
                 ToastService.Notify(new ToastMessage
-                {
-                    Type = ToastType.Success,
-                    Message = $"Successfully loaded {provider.Games.Count()} games from provider {provider.Platform.Name}.",
-                });
+                    {
+                        Type = ToastType.Success,
+                        Message = $"Successfully loaded {provider.Games.Count()} games from provider {provider.Platform.Name}.",
+                    });
             }
         }
         catch (Exception e)
         {
             ToastService.Notify(new ToastMessage
-            {
-                Type = ToastType.Danger,
-                Message = $"Failed to load games for provider {provider.Platform.Name}: {e.Message}",
-            });
+                {
+                    Type = ToastType.Danger,
+                    Message = $"Failed to load games for provider {provider.Platform.Name}: {e.Message}",
+                });
         }
     }
 }

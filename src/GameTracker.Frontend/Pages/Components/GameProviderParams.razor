@@ -1,0 +1,61 @@
+﻿@using GameTracker.Interfaces;
+
+@if (GameProvider.RequiredParameters?.Any() ?? false)
+{
+    <Grid TItem="KeyValuePair<string, Type>"
+          Class="table table-bordered"
+          Data="GameProvider.RequiredParameters"
+          AllowFiltering="false"
+          AllowPaging="false"
+          PageSizeSelectorVisible="false"
+          PageSizeSelectorItems="@(new int[] { })"
+          PaginationItemsTextFormat="">
+        <GridColumn TItem="KeyValuePair<string, Type>" PropertyName="Key">
+            <HeaderContent/>
+            <ChildContent>
+                @context.Key
+            </ChildContent>            
+        </GridColumn>
+        <GridColumn TItem="KeyValuePair<string, Type>" PropertyName="Value">
+            <HeaderContent/>
+            <ChildContent>
+                @switch (context.Value)
+                {
+                    case Type boolType when boolType == typeof(bool):
+                        <input type="checkbox" @bind="BoolParameters[GameProvider.Platform.Name + context.Key]" />
+                        break;
+                    case Type dateType when dateType == typeof(DateTime):
+                        <input type="date" @bind="DateParameters[GameProvider.Platform.Name + context.Key]" />
+                        break;
+                    case Type intType when intType == typeof(int):
+                        <input type="number" @bind="IntParameters[GameProvider.Platform.Name + context.Key]" />
+                        break;
+                    case Type stringType when stringType == typeof(string):
+                        <input type="text" @bind="StringParameters[GameProvider.Platform.Name + context.Key]" />
+                        break;
+                    default:
+                        <em>Unsupported parameter type.</em>
+                        break;
+                }
+            </ChildContent>
+        </GridColumn>
+    </Grid>
+}
+
+@code {
+
+    [Parameter]
+    public IGameProvider GameProvider { get; set; }
+
+    [Parameter]
+    public Dictionary<string, bool> BoolParameters { get; set; }
+
+    [Parameter]
+    public Dictionary<string, DateTime> DateParameters { get; set; }
+
+    [Parameter]
+    public Dictionary<string, string> StringParameters { get; set; }
+
+    [Parameter]
+    public Dictionary<string, int> IntParameters { get; set; }
+}

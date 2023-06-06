@@ -70,7 +70,7 @@ namespace GameTracker.Plugins.EpicGames.Models
 
                 return new LaunchCommand
                 {
-                    Icon = "PlayFill",
+                    Icon = "Controller",
                     NewTab = false,
                     Text = "Launch via Epic Games Launcher",
                     Uri = $"com.epicgames.launcher://apps/{nameSpace}?action=launch&silent=true"

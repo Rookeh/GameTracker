@@ -28,6 +28,7 @@ namespace GameTracker.Plugins.Steam
             {
                 Name = "Steam",
                 Description = "Steam is a video game digital distribution service and storefront from Valve. It was launched as a software client in September 2003 as a way for Valve to provide automatic updates for their games, and expanded to distributing third-party game publishers' titles in late 2005.",
+                Icon = "Steam",
                 Links = new[]
                 {
                     new SocialLink

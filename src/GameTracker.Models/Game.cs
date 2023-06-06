@@ -22,8 +22,11 @@ namespace GameTracker.Models
             }
         }
 
-        public abstract Task Preload();
+        public string StudioName => Studio?.Name ?? string.Empty;
+        public string PublisherName => Publisher?.Name ?? string.Empty;
+        public string GenreString => Genres.Any() ? string.Join(',', Genres) : string.Empty;
 
+        public abstract Task Preload();
         public abstract TimeSpan? Playtime { get; }
         public abstract DateTime? LastPlayed { get; }
         public abstract string Title { get; }

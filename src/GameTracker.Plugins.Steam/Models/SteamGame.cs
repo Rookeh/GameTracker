@@ -78,7 +78,7 @@ namespace GameTracker.Plugins.Steam.Models
             }
         }
         public override Review[] Reviews => SteamGameHelpers.ParseMetacriticReview(this, _gameDetails?.Metacritic) ?? Array.Empty<Review>();
-        public override Studio? Studio => _gameDetails.Developers.Any() ? new Studio { Name = _gameDetails.Developers.First() } : null;
+        public override Studio? Studio => _gameDetails?.Developers?.Any() ?? false ? new Studio { Name = _gameDetails.Developers.First() } : null;
         public override string[] Tags => _gameDetails?.Categories.Select(c => c.Description).ToArray() ?? Array.Empty<string>();        
         public override string Title => _title;
 

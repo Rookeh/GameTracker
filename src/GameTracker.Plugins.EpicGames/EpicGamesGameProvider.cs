@@ -20,7 +20,6 @@ namespace GameTracker.Plugins.EpicGames
         {
             Name = "Epic Games",
             Description = "The Epic Games Store is a digital video game storefront for Microsoft Windows and macOS, operated by Epic Games.",
-            Icon = "Bag",
             Links = new[]
             {
                 new SocialLink { LinkPlatform = LinkType.Web, LinkTarget = "https://store.epicgames.com" },
