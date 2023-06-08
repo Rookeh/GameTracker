@@ -2,6 +2,6 @@
 {
     public interface IProviderFactory
     {
-        IEnumerable<IGameProvider> LoadProviders();
+        IEnumerable<IGameProvider> GetProviders();
     }
 }

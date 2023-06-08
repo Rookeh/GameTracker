@@ -2,9 +2,7 @@
 using GameTracker.Models;
 using GameTracker.Plugins.Steam.Data;
 using GameTracker.Plugins.Steam.Models;
-using GameTracker.Plugins.Steam.Models.StoreApi;
 using GameTracker.Plugins.Steam.Models.WebApi;
-using GameTracker.Plugins.Common.RateLimiting;
 using System.Text.Json;
 using LinkType = GameTracker.Models.Enums.LinkType;
 
@@ -12,14 +10,11 @@ namespace GameTracker.Plugins.Steam
 {
     public class SteamGameProvider : IGameProvider
     {
-        private const int BackOffMinutes = 5;
-        private const int MaxRequests = 18;
-
-        private readonly Platform _platform;
-        private readonly RateLimitedHttpClient<Dictionary<string, SteamGameDetailsRoot>> _rateLimitedHttpClient;
+        private readonly Platform _platform;        
         private readonly SteamGameDetailsRepository _steamGameDetailsRepository;               
-
-        private List<Game> _games;
+        private readonly List<Game> _games;
+        
+        private bool _initialized;
 
         public SteamGameProvider()
         {
@@ -49,20 +44,23 @@ namespace GameTracker.Plugins.Steam
                 }
             };
 
-            _rateLimitedHttpClient = new RateLimitedHttpClient<Dictionary<string, SteamGameDetailsRoot>>(
-                TimeSpan.FromMinutes(BackOffMinutes),
-                MaxRequests);
-
             _steamGameDetailsRepository = new SteamGameDetailsRepository();
         }
 
         public IEnumerable<Game> Games => _games;
 
+        public bool Initialized => _initialized;
+
         public Platform Platform => _platform;
 
         public Guid ProviderId => new Guid("C53E9BCB-B519-4888-A16C-849BE2B7B77B");
 
-        public async Task Refresh(params object[] providerSpecificParameters)
+        public async Task Load(ParameterCache parameterCache)
+        {
+            await Refresh(parameterCache.UserId, parameterCache.Parameters);
+        }
+
+        public async Task<ParameterCache> Refresh(string userId, params object[] providerSpecificParameters)
         {
             /*
              * https://steamapi.xpaw.me/
@@ -114,7 +112,6 @@ namespace GameTracker.Plugins.Steam
                 var userSteamApps = steamApps.Where(sa => userGames.Games.Select(ug => ug.AppId).Contains(sa.AppId));
 
                 _games.AddRange(userSteamApps.Select(usa => new SteamGame(
-                    _rateLimitedHttpClient,
                     _steamGameDetailsRepository,
                     usa,
                     userGames.Games.Single(g => g.AppId == usa.AppId).Playtime,
@@ -123,6 +120,15 @@ namespace GameTracker.Plugins.Steam
                 lastAppId = steamAppResponse.Response.LastAppId;
                 moreTitlesToQuery = steamAppResponse.Response.HasMoreResults;
             }
+
+            _initialized = true;
+
+            return new ParameterCache
+            {
+                Parameters = providerSpecificParameters,
+                ProviderId = ProviderId,
+                UserId = userId
+            };
         }
 
         public Dictionary<string, Type> RequiredParameters => new()

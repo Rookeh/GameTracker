@@ -1,7 +1,7 @@
 ﻿using GameTracker.Interfaces;
 using System.Reflection;
 
-namespace GameTracker.Core
+namespace GameTracker.Core.Factories
 {
     public class ProviderFactory : IProviderFactory
     {
@@ -12,7 +12,7 @@ namespace GameTracker.Core
             _cachedProviders = new List<IGameProvider>();
         }
 
-        public IEnumerable<IGameProvider> LoadProviders()
+        public IEnumerable<IGameProvider> GetProviders()
         {
             try
             {
@@ -40,7 +40,7 @@ namespace GameTracker.Core
 
             foreach (var pluginAssemblyPath in pluginAssemblyPaths)
             {
-                var pluginAssembly = Assembly.LoadFrom(pluginAssemblyPath);                
+                var pluginAssembly = Assembly.LoadFrom(pluginAssemblyPath);
                 var pluginGameProviders = pluginAssembly.GetExportedTypes().Where(t => t.GetInterfaces().Any(i => i == typeof(IGameProvider)));
                 foreach (var pluginGameProvider in pluginGameProviders)
                 {

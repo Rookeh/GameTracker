@@ -27,6 +27,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameTracker.Plugins.Xbox", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameTracker.Plugins.EpicGames", "GameTracker.Plugins.EpicGames\GameTracker.Plugins.EpicGames.csproj", "{FC65F3A9-1335-4B58-86FA-D88FF49EEB7E}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameTracker.Data", "GameTracker.Data\GameTracker.Data.csproj", "{99958866-B97B-4888-B88C-E81C179E2A9C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +79,10 @@ Global
 		{FC65F3A9-1335-4B58-86FA-D88FF49EEB7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC65F3A9-1335-4B58-86FA-D88FF49EEB7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC65F3A9-1335-4B58-86FA-D88FF49EEB7E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{99958866-B97B-4888-B88C-E81C179E2A9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99958866-B97B-4888-B88C-E81C179E2A9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99958866-B97B-4888-B88C-E81C179E2A9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99958866-B97B-4888-B88C-E81C179E2A9C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

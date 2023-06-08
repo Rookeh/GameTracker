@@ -3,10 +3,10 @@ using GameTracker.Models.Enums;
 using GameTracker.Plugins.Steam.Data;
 using GameTracker.Plugins.Steam.Helpers;
 using GameTracker.Plugins.Steam.Models.StoreApi;
-using GameTracker.Plugins.Common.RateLimiting;
 
 using GenreEnum = GameTracker.Models.Enums.Genre;
 using GameTracker.Plugins.Steam.Models.WebApi;
+using GameTracker.Plugins.Steam.Singletons;
 
 namespace GameTracker.Plugins.Steam.Models
 {
@@ -14,21 +14,18 @@ namespace GameTracker.Plugins.Steam.Models
     {
         private SteamGameDetails? _gameDetails;
         private readonly SteamGameDetailsRepository _gameDetailsRepository;
-        private readonly RateLimitedHttpClient<Dictionary<string, SteamGameDetailsRoot>> _rateLimitedHttpClient;
 
         private readonly DateTime _lastPlayed;
         private readonly TimeSpan _playTime;
         private readonly string _title;
 
-        internal SteamGame(RateLimitedHttpClient<Dictionary<string, SteamGameDetailsRoot>> rateLimitedHttpClient,
-            SteamGameDetailsRepository steamGameDetailsRepository,
+        internal SteamGame(SteamGameDetailsRepository steamGameDetailsRepository,
             SteamApp app,
             int playTime,
             long lastPlayed)
         {
             PlatformId = app.AppId;
             _gameDetailsRepository = steamGameDetailsRepository;
-            _rateLimitedHttpClient = rateLimitedHttpClient;
             _title = app.Name;
 
             _lastPlayed = DateTime.UnixEpoch.AddSeconds(lastPlayed);
@@ -109,26 +106,16 @@ namespace GameTracker.Plugins.Steam.Models
             }
 
             // Otherwise, we have to fetch the game details from Steam (this is expensive, and we may be rate limited).
-            var steamApiResults = await _rateLimitedHttpClient.GetFromJson(
-                $"https://store.steampowered.com/api/appdetails?appids={PlatformId}",
-                new Dictionary<string, SteamGameDetailsRoot>()
-                {
-                    [PlatformId.ToString()] = Constants.DefaultValues.DefaultSteamGameDetails
-                });
+            var steamGameDetails = await RateLimitedSteamApiClient.GetSteamGameDetails(PlatformId);
 
-            if (steamApiResults != null && steamApiResults.ContainsKey(PlatformId.ToString()))
+            if (steamGameDetails != null)
             {
-                var steamGameDetails = steamApiResults[PlatformId.ToString()].Details;
-
-                if (steamGameDetails != null)
+                if (!steamGameDetails.IsDefaultValue)
                 {
-                    if (!steamGameDetails.IsDefaultValue)
-                    {
-                        await _gameDetailsRepository.SetGameDetails(steamGameDetails);
-                    }
-
-                    return steamGameDetails;
+                    await _gameDetailsRepository.SetGameDetails(steamGameDetails);
                 }
+
+                return steamGameDetails;
             }
 
             return Constants.DefaultValues.DefaultSteamGameDetails.Details;

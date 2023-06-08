@@ -1,4 +1,5 @@
-﻿using GameTracker.Plugins.Steam.Helpers;
+﻿using GameTracker.Data.Repositories;
+using GameTracker.Plugins.Steam.Helpers;
 using GameTracker.Plugins.Steam.Models.StoreApi;
 
 namespace GameTracker.Plugins.Steam.Data

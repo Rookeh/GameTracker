@@ -1,0 +1,65 @@
+﻿@page "/unplayed";
+
+<PageTitle>Top Unplayed</PageTitle>
+
+@using GameTracker.Interfaces;
+@using GameTracker.Core;
+@using GameTracker.Models;
+
+@inject IProviderFactory ProviderFactory;
+
+@if (games == null || !games.Any())
+{
+    <p><em>No games loaded. Please configure a game provider.</em></p>
+}
+else
+{
+    <table class="table">
+        <tbody>
+            <tr>
+                @foreach (var game in games)
+                {
+                    <tr>
+                        <td>
+                            <div>
+                                <img height="215" width="460" src="@game.Image" alt="@game.Title" />
+                                <br>
+                                @game.Title
+                                Average Review: @GetAverageScore(game)
+                                Playtime: @game.Playtime
+                            </div>
+                        </td>
+
+                    </tr>
+                }
+            </tr>
+        </tbody>
+    </table>
+}
+
+@code {
+
+    private List<Game> games;
+
+    protected override async Task OnInitializedAsync()
+    {
+        games = ProviderFactory.GetProviders()
+            .ToArray()
+            .SelectMany(p => p.Games)
+            .Where(g => g.Playtime <= TimeSpan.FromHours(1))
+            .OrderByDescending(g => GetAverageScore(g))
+            .ThenBy(g => g.Playtime)            
+            .Take(5)
+            .ToList();
+    }
+
+    private float GetAverageScore(Game game)
+    {
+        if (!game.Reviews.Any())
+        {
+            return 0;
+        }
+
+        return game.Reviews.Average(g => g.Score);
+    }
+}

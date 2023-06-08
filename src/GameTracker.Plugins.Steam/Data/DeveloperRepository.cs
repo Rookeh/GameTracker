@@ -1,4 +1,5 @@
-﻿using GameTracker.Plugins.Steam.Helpers;
+﻿using GameTracker.Data.Repositories;
+using GameTracker.Plugins.Steam.Helpers;
 
 namespace GameTracker.Plugins.Steam.Data
 {

@@ -10,10 +10,10 @@
     <PackageReference Include="Dapper" Version="2.0.123" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.5" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="RateLimiter" Version="2.2.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\GameTracker.Data\GameTracker.Data.csproj" />
     <ProjectReference Include="..\GameTracker.Interfaces\GameTracker.Interfaces.csproj" />
     <ProjectReference Include="..\GameTracker.Plugins.Common\GameTracker.Plugins.Common.csproj" />
   </ItemGroup>

@@ -8,6 +8,7 @@ namespace GameTracker.Plugins.EpicGames
     public class EpicGamesGameProvider : IGameProvider
     {
         private readonly List<Game> _games;
+        private bool _initialized;
 
         public EpicGamesGameProvider()
         {
@@ -34,7 +35,14 @@ namespace GameTracker.Plugins.EpicGames
             { "Semicolon-delimited list of titles", typeof(string) }
         };
 
-        public async Task Refresh(params object[] providerSpecificParameters)
+        public bool Initialized => _initialized;
+
+        public async Task Load(ParameterCache parameterCache)
+        {
+            await Refresh(parameterCache.UserId, parameterCache.Parameters);
+        }
+
+        public async Task<ParameterCache> Refresh(string userId, params object[] providerSpecificParameters)
         {
             if (providerSpecificParameters[0] == null || !(providerSpecificParameters[0] is string))
             {
@@ -51,6 +59,15 @@ namespace GameTracker.Plugins.EpicGames
                 .ToList();
 
             _games.AddRange(epicGames);
+
+            _initialized = true;
+
+            return new ParameterCache
+            {
+                Parameters = providerSpecificParameters,
+                ProviderId = ProviderId,
+                UserId = userId
+            };
         }
     }
 }

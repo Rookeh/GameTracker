@@ -1,13 +1,14 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="bb-page">    
+<div class="bb-page">
     <Sidebar @ref="sidebar"
              IconName="IconName.Joystick"
              Title="Game Tracker"
              DataProvider="SidebarDataProvider" />
 
-    <main>        
+    <main>
         <div class="bb-top-row px-4 d-flex justify-content-end">
+            <LoginDisplay />
             <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
         </div>
 
@@ -15,15 +16,19 @@
             <div class="py-2">
                 @Body
             </div>
-        </article>                
-    </main>    
+        </article>
+    </main>
 </div>
 
+<Preload />
 <Toasts class="p-5" AutoHide="true" Delay="4000" Placement="ToastsPlacement.TopRight" />
 
 @code {
     private Sidebar sidebar = default!;
-    private IEnumerable<NavItem> navItems = default!;
+    private List<NavItem> navItems = default!;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
 
     private async Task<SidebarDataProviderResult> SidebarDataProvider(SidebarDataProviderRequest request)
     {
@@ -33,14 +38,24 @@
         return await Task.FromResult(request.ApplyTo(navItems));
     }
 
-    private IEnumerable<NavItem> GetNavItems()
+    private List<NavItem> GetNavItems()
     {
+        authenticationStateTask.Wait();
+        var authState = authenticationStateTask.Result;
+
         navItems = new List<NavItem>
         {
             new NavItem { Id = "1", Href = "/", IconName = IconName.HouseDoorFill, Text = "Home", Match=NavLinkMatch.All},
-            new NavItem { Id = "2", Href = "/gameproviders", IconName = IconName.Plugin, Text = "Game Providers"},
-            new NavItem { Id = "3", Href = "/games", IconName = IconName.Joystick, Text = "All Games"}
         };
+
+        if (authState?.User?.Identity?.IsAuthenticated ?? false)
+        {
+            navItems.AddRange(new List<NavItem>
+            {
+                new NavItem { Id = "2", Href = "/gameproviders", IconName = IconName.Plugin, Text = "Game Providers"},
+                new NavItem { Id = "3", Href = "/games", IconName = IconName.Joystick, Text = "All Games"}
+            });
+        }
 
         return navItems;
     }

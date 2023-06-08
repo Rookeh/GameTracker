@@ -14,6 +14,8 @@ namespace GameTracker.Plugins.GOG
         private readonly List<GOGGame> _games;
         private readonly Platform _platform;
 
+        private bool _initialized;
+
         public GOGGameProvider()
         {
             _games = new List<GOGGame>();
@@ -53,7 +55,14 @@ namespace GameTracker.Plugins.GOG
             { "GOG Auth Code", typeof(string) }
         };
 
-        public async Task Refresh(params object[] providerSpecificParameters)
+        public bool Initialized => _initialized;
+
+        public async Task Load(ParameterCache parameterCache)
+        {
+            await Refresh(parameterCache.UserId, parameterCache.Parameters);
+        }
+
+        public async Task<ParameterCache> Refresh(string userId, params object[] providerSpecificParameters)
         {
             /*
              * 
@@ -104,6 +113,15 @@ namespace GameTracker.Plugins.GOG
 
                 _games.AddRange(gameDetails.Select(gd => new GOGGame(gd)));
             }
+
+            _initialized = true;
+
+            return new ParameterCache
+            {
+                Parameters = providerSpecificParameters,
+                ProviderId = ProviderId,
+                UserId = userId
+            };
         }
 
         private static void ThrowOnApiFailure(HttpResponseMessage response)

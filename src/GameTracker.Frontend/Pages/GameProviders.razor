@@ -2,15 +2,25 @@
 
 <PageTitle>Game Providers</PageTitle>
 
+@using GameTracker.Data.Repositories;
 @using GameTracker.Frontend.Helpers;
 @using GameTracker.Frontend.Pages.Components
 @using GameTracker.Interfaces;
 @using GameTracker.Core;
+@using GameTracker.Interfaces.Data;
 
-@inject IProviderFactory ProviderFactory;
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject ToastService ToastService;
 
-@if (providers == null || !providers.Any())
+@inject IGameLibraryManager GameLibraryManager;
+@inject IProviderFactory ProviderFactory;
+@inject IParameterCacheRepository ParameterCacheRepository;
+
+@if (!isAuthenticated)
+{
+    <p><em>Unauthorized.</em></p>
+}
+else if (providers == null || !providers.Any())
 {
     <p><em>Loading Providers...</em></p>
 }
@@ -68,12 +78,24 @@ else
     private Dictionary<string, string> stringParameters;
     private Dictionary<string, int> intParameters;
 
-    private EditContext? editContext;
+    private bool isAuthenticated;
+    private string userName;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        providers = ProviderFactory.LoadProviders().ToArray();
-        editContext = new EditContext(providers);
+        var authState = await authenticationStateTask;
+        isAuthenticated = authState?.User?.Identity?.IsAuthenticated ?? false;
+
+        if (!isAuthenticated)
+        {
+            return;
+        }
+
+        userName = authState?.User?.Identity?.Name ?? string.Empty;
+        providers = ProviderFactory.GetProviders().ToArray();
         boolParameters = new Dictionary<string, bool>();
         dateParameters = new Dictionary<string, DateTime>();
         intParameters = new Dictionary<string, int>();
@@ -81,23 +103,31 @@ else
 
         foreach (var provider in providers)
         {
+            var parameterCache = await ParameterCacheRepository.GetParameters(userName, provider.ProviderId);
+            var existingParams = parameterCache?.Parameters;
+
+            int paramIndex = 0;
             foreach (var providerArg in provider.RequiredParameters)
             {
+                var existingValue = existingParams.Any() ? existingParams[paramIndex] : null;
+
                 switch (providerArg.Value)
                 {
                     case Type boolType when boolType == typeof(bool):
-                        boolParameters[provider.Platform.Name + providerArg.Key] = default;
+                        boolParameters[provider.Platform.Name + providerArg.Key] = existingValue != null ? bool.Parse(existingValue.ToString()) : default;
                         break;
                     case Type dateType when dateType == typeof(DateTime):
-                        dateParameters[provider.Platform.Name + providerArg.Key] = default;
+                        dateParameters[provider.Platform.Name + providerArg.Key] = existingValue != null ? DateTime.Parse(existingValue.ToString()) : default;
                         break;
                     case Type intType when intType == typeof(int):
-                        intParameters[provider.Platform.Name + providerArg.Key] = default;
+                        intParameters[provider.Platform.Name + providerArg.Key] = existingValue != null ? Convert.ToInt32(existingValue) : default;
                         break;
                     case Type stringType when stringType == typeof(string):
-                        stringParameters[provider.Platform.Name + providerArg.Key] = default;
+                        stringParameters[provider.Platform.Name + providerArg.Key] = existingValue != null ? existingValue.ToString() : string.Empty;
                         break;
                 }
+
+                paramIndex++;
             }
         }
     }
@@ -129,35 +159,35 @@ else
             if (provider.RequiredParameters.Any() && (!providerArgValues.Any() || providerArgValues.Any(pa => pa == null)))
             {
                 ToastService.Notify(new ToastMessage
-                    {
-                        Type = ToastType.Warning,
-                        Message = $"Cannot load games for provider {provider.Platform.Name}: Required information missing.",
-                    });
+                {
+                    Type = ToastType.Warning,
+                    Message = $"Cannot load games for provider {provider.Platform.Name}: Required information missing.",
+                });
             }
             else
             {
                 ToastService.Notify(new ToastMessage
-                    {
-                        Type = ToastType.Info,
-                        Message = $"Refreshing games for provider {provider.Platform.Name}...",
-                    });
+                {
+                    Type = ToastType.Info,
+                    Message = $"Refreshing games for provider {provider.Platform.Name}...",
+                });
 
-                await provider.Refresh(providerArgValues.ToArray());
+                await GameLibraryManager.RefreshProvider(userName, provider.ProviderId, providerArgValues.ToArray());
 
                 ToastService.Notify(new ToastMessage
-                    {
-                        Type = ToastType.Success,
-                        Message = $"Successfully loaded {provider.Games.Count()} games from provider {provider.Platform.Name}.",
-                    });
+                {
+                    Type = ToastType.Success,
+                    Message = $"Successfully loaded {provider.Games.Count()} games from provider {provider.Platform.Name}.",
+                });
             }
         }
         catch (Exception e)
         {
             ToastService.Notify(new ToastMessage
-                {
-                    Type = ToastType.Danger,
-                    Message = $"Failed to load games for provider {provider.Platform.Name}: {e.Message}",
-                });
+            {
+                Type = ToastType.Danger,
+                Message = $"Failed to load games for provider {provider.Platform.Name}: {e.Message}",
+            });
         }
     }
 }

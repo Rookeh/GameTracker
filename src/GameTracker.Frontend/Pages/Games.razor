@@ -8,13 +8,21 @@
 @using GameTracker.Core;
 @using GameTracker.Models;
 @using GameTracker.Models.Enums;
-@using MathNet.Numerics.Statistics;
 
-@inject IProviderFactory ProviderFactory;
 @inject NavigationManager NavigationManager;
+@inject PreloadService PreloadService;
 @inject ToastService ToastService;
 
-@if (games == null || !games.Any())
+@inject IGameLibraryManager GameLibraryManager;
+
+@if (!isAuthenticated)
+{
+    <p><em>Unauthorized.</em></p>
+}
+else if (isInitializing)
+{
+}
+else if (GameLibraryManager.Games == null || !GameLibraryManager.Games.Any())
 {
     <p><em>No games loaded. Please configure a game provider.</em></p>
 }
@@ -148,17 +156,37 @@ else
 
 @code {
 
-    private List<Game> games;
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
     private FilterProperties filterProperties = new();
+    private bool isAuthenticated;
+    private bool isInitializing;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authenticationStateTask;
+        isAuthenticated = authState?.User?.Identity?.IsAuthenticated ?? false;
+        var userName = authState?.User?.Identity?.Name;
+
+        if (!isAuthenticated || string.IsNullOrEmpty(userName))
+        {
+            return;
+        }
+
+        PreloadService.Show();
+        await GameLibraryManager.InitialiseProviders(userName);
+        PreloadService.Hide();
+    }
 
     private async Task<AutoCompleteDataProviderResult<Game>> GameFilterProvider(AutoCompleteDataProviderRequest<Game> request)
     {
-        return await Task.FromResult(request.ApplyTo(games));
+        return await Task.FromResult(request.ApplyTo(GameLibraryManager.Games));
     }
 
     private async Task<AutoCompleteDataProviderResult<FilterableGenre>> GenreFilterProvider(AutoCompleteDataProviderRequest<FilterableGenre> request)
     {
-        var genres = games.SelectMany(g => g.Genres)
+        var genres = GameLibraryManager.Games.SelectMany(g => g.Genres)
             .Distinct()
             .Select(g => new FilterableGenre { Name = g.ToString() })
             .ToList();
@@ -172,7 +200,7 @@ else
 
     private async Task<AutoCompleteDataProviderResult<Publisher>> PublisherFilterProvider(AutoCompleteDataProviderRequest<Publisher> request)
     {
-        var publishers = games.Where(g => g.Publisher != null).Select(g => g.Publisher).DistinctBy(p => p.Name);
+        var publishers = GameLibraryManager.Games.Where(g => g.Publisher != null).Select(g => g.Publisher).DistinctBy(p => p.Name);
         return await Task.FromResult(new AutoCompleteDataProviderResult<Publisher>
         {
             Data = publishers,
@@ -182,7 +210,7 @@ else
 
     private async Task<AutoCompleteDataProviderResult<Studio>> StudioFilterProvider(AutoCompleteDataProviderRequest<Studio> request)
     {
-        var studios = games.Where(g => g.Studio != null).Select(g => g.Studio).DistinctBy(p => p.Name);
+        var studios = GameLibraryManager.Games.Where(g => g.Studio != null).Select(g => g.Studio).DistinctBy(p => p.Name);
         return await Task.FromResult(new AutoCompleteDataProviderResult<Studio>
         {
             Data = studios,
@@ -194,7 +222,7 @@ else
     {
         get
         {
-            var filteredGames = new List<Game>(games);
+            var filteredGames = new List<Game>(GameLibraryManager.Games);
 
             if (!string.IsNullOrEmpty(filterProperties.Name))
             {
@@ -317,13 +345,5 @@ else
         {
             this.StateHasChanged();
         }        
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
-        games = ProviderFactory.LoadProviders()
-            .ToArray()
-            .SelectMany(p => p.Games)
-            .ToList();
     }
 }

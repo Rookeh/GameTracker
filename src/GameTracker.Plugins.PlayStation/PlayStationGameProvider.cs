@@ -14,6 +14,8 @@ namespace GameTracker.Plugins.PlayStation
     {
         private readonly Platform _platform;
         private readonly List<PlayStationGame> _games;
+        
+        private bool _initialized;
 
         public PlayStationGameProvider()
         {
@@ -38,7 +40,14 @@ namespace GameTracker.Plugins.PlayStation
             { "Include Non-Game Titles", typeof(bool) }
         };
 
-        public async Task Refresh(params object[] providerSpecificParameters)
+        public bool Initialized => _initialized;
+
+        public async Task Load(ParameterCache parameterCache)
+        {
+            await Refresh(parameterCache.UserId, parameterCache.Parameters);
+        }
+
+        public async Task<ParameterCache> Refresh(string userId, params object[] providerSpecificParameters)
         {
             if (!(providerSpecificParameters[0] is string))
             {
@@ -98,7 +107,16 @@ namespace GameTracker.Plugins.PlayStation
 
                 _games.Clear();
                 _games.AddRange(gameTitles.Select(g => new PlayStationGame(g)));
-            }            
+            }
+
+            _initialized = true;
+
+            return new ParameterCache
+            {
+                Parameters = providerSpecificParameters,
+                ProviderId = ProviderId,
+                UserId = userId
+            };
         }
     }
 }

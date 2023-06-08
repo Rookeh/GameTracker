@@ -16,6 +16,8 @@ namespace GameTracker.Plugins.Xbox
 
         private readonly List<XboxGame> _games;
 
+        private bool _initialized;
+
         public XboxGameProvider()
         {
             _rateLimitedHttpClient = new RateLimitedHttpClient<XboxLiveTitleResponse>(TimeSpan.FromHours(BackOffHours), MaxRequests);
@@ -35,7 +37,14 @@ namespace GameTracker.Plugins.Xbox
             { "Include Legacy Titles", typeof(bool) }
         };
 
-        public async Task Refresh(params object[] providerSpecificParameters)
+        public bool Initialized => _initialized;
+
+        public async Task Load(ParameterCache parameterCache)
+        {
+            await Refresh(parameterCache.UserId, parameterCache.Parameters);
+        }
+
+        public async Task<ParameterCache> Refresh(string userId, params object[] providerSpecificParameters)
         {
             // https://xbl.io/console
             // n.b. Personal API keys are rate-limited to 150 requests per hour.
@@ -76,6 +85,15 @@ namespace GameTracker.Plugins.Xbox
 
             _games.Clear();
             _games.AddRange(titlesToInclude.Select(x => new XboxGame(x)));
+
+            _initialized = true;
+
+            return new ParameterCache
+            {
+                Parameters = providerSpecificParameters,
+                ProviderId = ProviderId,
+                UserId = userId
+            };
         }
     }
 }
