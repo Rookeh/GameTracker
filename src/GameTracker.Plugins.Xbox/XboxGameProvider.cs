@@ -2,6 +2,7 @@
 using GameTracker.Models;
 using GameTracker.Plugins.Common.RateLimiting;
 using GameTracker.Plugins.Xbox.Helpers;
+using GameTracker.Plugins.Xbox.Interfaces;
 using GameTracker.Plugins.Xbox.Models;
 using GameTracker.Plugins.Xbox.Models.OpenXBL;
 using System.Net.Http.Headers;
@@ -10,17 +11,15 @@ namespace GameTracker.Plugins.Xbox
 {
     public class XboxGameProvider : IGameProvider
     {
-        private readonly RateLimitedHttpClient<XboxLiveTitleResponse> _rateLimitedHttpClient;
-        private const int BackOffHours = 1;
-        private const int MaxRequests = 150;
+        private readonly IRateLimitedXboxHttpClient _rateLimitedHttpClient;
 
         private readonly List<XboxGame> _games;
 
         private bool _initialized;
 
-        public XboxGameProvider()
+        public XboxGameProvider(IRateLimitedXboxHttpClient rateLimitedXboxHttpClient)
         {
-            _rateLimitedHttpClient = new RateLimitedHttpClient<XboxLiveTitleResponse>(TimeSpan.FromHours(BackOffHours), MaxRequests);
+            _rateLimitedHttpClient = rateLimitedXboxHttpClient;
             _games = new List<XboxGame>();
         }
 

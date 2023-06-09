@@ -15,11 +15,11 @@
 
 @inject IGameLibraryManager GameLibraryManager;
 
-@if (!isAuthenticated)
+@if (!_isAuthenticated)
 {
     <p><em>Unauthorized.</em></p>
 }
-else if (isInitializing)
+else if (_isInitializing)
 {
 }
 else if (GameLibraryManager.Games == null || !GameLibraryManager.Games.Any())
@@ -37,7 +37,7 @@ else
                             <Icon Name="IconName.Search" Class="me-1" />Title Search
                         </TitleTemplate>
                         <Content>
-                            <AutoComplete @bind-Value="filterProperties.Name"
+                            <AutoComplete @bind-Value="_filterProperties.Name"
                                           TItem="Game"
                                           DataProvider="GameFilterProvider"
                                           PropertyName="Title"
@@ -79,7 +79,7 @@ else
                             <Icon Name="IconName.CodeSlash" Class="me-1"/> Studio Search...
                         </TitleTemplate>
                         <Content>
-                            <AutoComplete @bind-Value="filterProperties.Studio"
+                            <AutoComplete @bind-Value="_filterProperties.Studio"
                                           TItem="Studio"
                                           DataProvider="StudioFilterProvider"
                                           PropertyName="Name"
@@ -92,7 +92,7 @@ else
                             <Icon Name="IconName.Building" Class="me-1" /> Publisher Search...
                         </TitleTemplate>
                         <Content>
-                            <AutoComplete @bind-Value="filterProperties.Publisher"
+                            <AutoComplete @bind-Value="_filterProperties.Publisher"
                                           TItem="Publisher"
                                           DataProvider="PublisherFilterProvider"
                                           PropertyName="Name"
@@ -113,7 +113,7 @@ else
                             <Icon Name="IconName.Controller" Class="me-1" /> Genre Search...
                         </TitleTemplate>
                         <Content>
-                            <AutoComplete @bind-Value="filterProperties.Genre"
+                            <AutoComplete @bind-Value="_filterProperties.Genre"
                                           TItem="FilterableGenre"
                                           DataProvider="GenreFilterProvider"
                                           PropertyName="Name"
@@ -126,17 +126,17 @@ else
         </tr>
     </table>
 
-    <Grid TItem="GameRow"
-          @ref="gameGrid"
+    <Grid AllowFiltering="false"
+          AllowPaging="true"
           Class="table table-hover table-bordered table-striped"
           Data="GameRows"
-          AllowFiltering="false"
-          AllowPaging="true"          
-          PageSize="4"
+          GridSettingsChanged="OnGridUpdated"
+          PageSize="@_pageSize"
           PageSizeSelectorVisible="true"
           PageSizeSelectorItems="@(new int[] { 4,8,16 })"
-          PaginationItemsTextFormat="{0} - {1} of {2} rows"
-          Responsive="true">
+          PaginationItemsTextFormat="@_paginationText"
+          Responsive="true"
+          TItem="GameRow">
         <GridColumn TItem="GameRow" PropertyName="Game1" Filterable="false" Sortable="false">
             <ChildContent>
                 <GameCell Game="@context.Game1" />
@@ -160,27 +160,31 @@ else
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
 
-    private FilterProperties filterProperties = new();
-    private Grid<GameRow> gameGrid;
-    private bool isAuthenticated;
-    private bool isInitializing;
+    private FilterProperties _filterProperties = new();
+    private bool _isAuthenticated;
+    private bool _isInitializing;
+    private int _pageSize;
+    private string _paginationText;
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await authenticationStateTask;
-        isAuthenticated = authState?.User?.Identity?.IsAuthenticated ?? false;
+        _isAuthenticated = authState?.User?.Identity?.IsAuthenticated ?? false;
         var userName = authState?.User?.Identity?.Name;
 
-        if (!isAuthenticated || string.IsNullOrEmpty(userName))
+        if (!_isAuthenticated || string.IsNullOrEmpty(userName))
         {
             return;
         }
 
-        isInitializing = true;
+        _isInitializing = true;
         PreloadService.Show();
         await GameLibraryManager.InitialiseProviders(userName);
         PreloadService.Hide();
-        isInitializing = false;
+        _isInitializing = false;
+
+        _pageSize = 4;
+        _paginationText = $"1 to 12 of {FilteredGames.Count} games";
     }
 
     private async Task<AutoCompleteDataProviderResult<Game>> GameFilterProvider(AutoCompleteDataProviderRequest<Game> request)
@@ -228,52 +232,52 @@ else
         {
             var filteredGames = new List<Game>(GameLibraryManager.Games);
 
-            if (!string.IsNullOrEmpty(filterProperties.Name))
+            if (!string.IsNullOrEmpty(_filterProperties.Name))
             {
-                filteredGames = filteredGames.Where(g => g.Title.Contains(filterProperties.Name)).ToList();
+                filteredGames = filteredGames.Where(g => g.Title.Contains(_filterProperties.Name)).ToList();
             }
 
-            if (!string.IsNullOrEmpty(filterProperties.Studio))
+            if (!string.IsNullOrEmpty(_filterProperties.Studio))
             {
-                filteredGames = filteredGames.Where(g => g.StudioName != null && g.StudioName.Contains(filterProperties.Studio)).ToList();
+                filteredGames = filteredGames.Where(g => g.StudioName != null && g.StudioName.Contains(_filterProperties.Studio)).ToList();
             }
 
-            if (!string.IsNullOrEmpty(filterProperties.Publisher))
+            if (!string.IsNullOrEmpty(_filterProperties.Publisher))
             {
-                filteredGames = filteredGames.Where(g => g.PublisherName != null && g.PublisherName.Contains(filterProperties.Publisher)).ToList();
+                filteredGames = filteredGames.Where(g => g.PublisherName != null && g.PublisherName.Contains(_filterProperties.Publisher)).ToList();
             }
 
-            if (!string.IsNullOrEmpty(filterProperties.Genre))
+            if (!string.IsNullOrEmpty(_filterProperties.Genre))
             {
-                filteredGames = filteredGames.Where(g => g.Genres != null && g.Genres.Any(g => g.ToString() == filterProperties.Genre)).ToList();
+                filteredGames = filteredGames.Where(g => g.Genres != null && g.Genres.Any(g => g.ToString() == _filterProperties.Genre)).ToList();
             }
 
-            if (filterProperties.ReleaseDate != null)
+            if (_filterProperties.ReleaseDate != null)
             {
-                var filterDateTime = new DateTime(filterProperties.ReleaseDate.Value.Year, filterProperties.ReleaseDate.Value.Month, filterProperties.ReleaseDate.Value.Day);
+                var filterDateTime = new DateTime(_filterProperties.ReleaseDate.Value.Year, _filterProperties.ReleaseDate.Value.Month, _filterProperties.ReleaseDate.Value.Day);
                 filteredGames = filteredGames.Where(g => g.ReleaseDate.HasValue && g.ReleaseDate.Value >= filterDateTime).ToList();
             }
 
-            if (filterProperties.LastPlayed != null)
+            if (_filterProperties.LastPlayed != null)
             {
-                filteredGames = filteredGames.Where(g => g.LastPlayed.HasValue && g.LastPlayed.Value <= filterProperties.LastPlayed).ToList();
+                filteredGames = filteredGames.Where(g => g.LastPlayed.HasValue && g.LastPlayed.Value <= _filterProperties.LastPlayed).ToList();
             }
 
-            if (filterProperties.LowerHours != null)
+            if (_filterProperties.LowerHours != null)
             {
-                var lower = TimeSpan.FromHours(filterProperties.LowerHours.Value);                
+                var lower = TimeSpan.FromHours(_filterProperties.LowerHours.Value);                
                 filteredGames = filteredGames.Where(g => g.Playtime != null && g.Playtime >= lower).ToList();
             }
 
-            if (filterProperties.UpperHours != null)
+            if (_filterProperties.UpperHours != null)
             {
-                var upper = TimeSpan.FromHours(filterProperties.UpperHours.Value);
+                var upper = TimeSpan.FromHours(_filterProperties.UpperHours.Value);
                 filteredGames = FilteredGames.Where(g => g.Playtime != null && g.Playtime <= upper).ToList();
             }
 
-            if (filterProperties.MinimumReviewScore != null)
+            if (_filterProperties.MinimumReviewScore != null)
             {
-                filteredGames = filteredGames.Where(g => g.AverageCriticalReview.HasValue && g.AverageCriticalReview > filterProperties.MinimumReviewScore).ToList();
+                filteredGames = filteredGames.Where(g => g.AverageCriticalReview.HasValue && g.AverageCriticalReview > _filterProperties.MinimumReviewScore).ToList();
             }
 
             return filteredGames;
@@ -295,50 +299,50 @@ else
 
     private DateOnly? ReleaseDateFilter
     {
-        get => filterProperties.ReleaseDate;
+        get => _filterProperties.ReleaseDate;
         set
         {
-            filterProperties.ReleaseDate = value;
+            _filterProperties.ReleaseDate = value;
             this.StateHasChanged();
         }
     }
 
     private DateTime? LastPlayedFilter
     {
-        get => filterProperties.LastPlayed;
+        get => _filterProperties.LastPlayed;
         set
         {
-            filterProperties.LastPlayed = value;
+            _filterProperties.LastPlayed = value;
             this.StateHasChanged();
         }
     }
 
     private int? LowerHoursFilter
     {
-        get => filterProperties.LowerHours;
+        get => _filterProperties.LowerHours;
         set
         {
-            filterProperties.LowerHours = value;
+            _filterProperties.LowerHours = value;
             this.StateHasChanged();
         }
     }
 
     private int? UpperHoursFilter
     {
-        get => filterProperties.UpperHours;
+        get => _filterProperties.UpperHours;
         set
         {
-            filterProperties.UpperHours = value;
+            _filterProperties.UpperHours = value;
             this.StateHasChanged();
         }
     }
 
     private int? MinimumReviewScoreFilter
     {
-        get => filterProperties.MinimumReviewScore;
+        get => _filterProperties.MinimumReviewScore;
         set
         {
-            filterProperties.MinimumReviewScore = value;
+            _filterProperties.MinimumReviewScore = value;
             this.StateHasChanged();
         }
     }
@@ -349,5 +353,20 @@ else
         {
             this.StateHasChanged();
         }        
+    }
+
+    private async Task OnGridUpdated(GridSettings gridSettings)
+    {       
+        int from = (gridSettings.PageNumber - 1) * (gridSettings.PageSize * 3) + 1;
+        int to = gridSettings.PageNumber * (gridSettings.PageSize * 3);
+        int total = FilteredGames.Count;
+
+        if (to > total)
+        {
+            to = total;
+        }
+
+        _pageSize = gridSettings.PageSize;
+        _paginationText = $"{from} to {to} of {total} games";
     }
 }

@@ -1,25 +1,25 @@
 ﻿using GameTracker.Models;
 using GameTracker.Models.Enums;
-using GameTracker.Plugins.Steam.Data;
 using GameTracker.Plugins.Steam.Helpers;
 using GameTracker.Plugins.Steam.Models.StoreApi;
 
 using GenreEnum = GameTracker.Models.Enums.Genre;
 using GameTracker.Plugins.Steam.Models.WebApi;
 using GameTracker.Plugins.Steam.Singletons;
+using GameTracker.Plugins.Steam.Interfaces;
 
 namespace GameTracker.Plugins.Steam.Models
 {
     public class SteamGame : Game
     {
-        private SteamGameDetails? _gameDetails;
-        private readonly SteamGameDetailsRepository _gameDetailsRepository;
+        private readonly ISteamGameDetailsRepository _gameDetailsRepository;
 
+        private SteamGameDetails? _gameDetails;
         private readonly DateTime _lastPlayed;
         private readonly TimeSpan _playTime;
         private readonly string _title;
 
-        internal SteamGame(SteamGameDetailsRepository steamGameDetailsRepository,
+        internal SteamGame(ISteamGameDetailsRepository steamGameDetailsRepository,
             SteamApp app,
             int playTime,
             long lastPlayed)

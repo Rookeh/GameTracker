@@ -1,10 +1,10 @@
-﻿using GameTracker.Data.Repositories;
-using GameTracker.Plugins.Steam.Helpers;
+﻿using GameTracker.Plugins.Steam.Helpers;
+using GameTracker.Plugins.Steam.Interfaces;
 using GameTracker.Plugins.Steam.Models.StoreApi;
 
 namespace GameTracker.Plugins.Steam.Data
 {
-    public class SteamGameDetailsRepository : DapperRepository<SteamGameDetails>
+    public class SteamGameDetailsRepository : DapperRepository<SteamGameDetails>, ISteamGameDetailsRepository
     {
         private const string TableName = "game_details";
         private const string BootstrapSql = @"CREATE TABLE game_details (

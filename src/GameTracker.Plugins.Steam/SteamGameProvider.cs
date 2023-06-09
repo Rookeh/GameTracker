@@ -1,6 +1,6 @@
 ﻿using GameTracker.Interfaces;
 using GameTracker.Models;
-using GameTracker.Plugins.Steam.Data;
+using GameTracker.Plugins.Steam.Interfaces;
 using GameTracker.Plugins.Steam.Models;
 using GameTracker.Plugins.Steam.Models.WebApi;
 using System.Text.Json;
@@ -10,13 +10,14 @@ namespace GameTracker.Plugins.Steam
 {
     public class SteamGameProvider : IGameProvider
     {
-        private readonly Platform _platform;        
-        private readonly SteamGameDetailsRepository _steamGameDetailsRepository;               
+        private readonly ISteamGameDetailsRepository _steamGameDetailsRepository;
+
+        private readonly Platform _platform;                
         private readonly List<Game> _games;
         
         private bool _initialized;
 
-        public SteamGameProvider()
+        public SteamGameProvider(ISteamGameDetailsRepository steamGameDetailsRepository)
         {
             _games = new List<Game>();
             _platform = new Platform
@@ -44,7 +45,7 @@ namespace GameTracker.Plugins.Steam
                 }
             };
 
-            _steamGameDetailsRepository = new SteamGameDetailsRepository();
+            _steamGameDetailsRepository = steamGameDetailsRepository;
         }
 
         public IEnumerable<Game> Games => _games;
