@@ -8,7 +8,6 @@
 
     <main>
         <div class="bb-top-row px-4 d-flex justify-content-end">
-            <LoginDisplay />
             <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
         </div>
 
@@ -52,8 +51,17 @@
         {
             navItems.AddRange(new List<NavItem>
             {
-                new NavItem { Id = "2", Href = "/gameproviders", IconName = IconName.Plugin, Text = "Game Providers"},
-                new NavItem { Id = "3", Href = "/games", IconName = IconName.Joystick, Text = "All Games"}
+                new NavItem { Id = "4", Href = "/Identity/Account/Manage/Index", IconName = IconName.PersonFillGear, Text = "Account", Match=NavLinkMatch.All },
+                new NavItem { Id = "5", Href = "/gameproviders", IconName = IconName.Plugin, Text = "Game Providers"},
+                new NavItem { Id = "6", Href = "/games", IconName = IconName.Joystick, Text = "All Games"}
+            });
+        }
+        else
+        {
+            navItems.AddRange(new List<NavItem>
+            {
+                new NavItem { Id = "2", Href = "/Identity/Account/Login", IconName = IconName.KeyFill, Text = "Login", Match = NavLinkMatch.All },
+                new NavItem { Id = "3", Href = "/Identity/Account/Register", IconName = IconName.PersonFillAdd, Text = "Register", Match = NavLinkMatch.All },
             });
         }
 
