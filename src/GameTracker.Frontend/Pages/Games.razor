@@ -126,7 +126,8 @@ else
         </tr>
     </table>
 
-    <Grid AllowFiltering="false"
+    <Grid @ref="_gameGrid"
+          AllowFiltering="false"
           AllowPaging="true"
           Class="table table-hover table-bordered table-striped"
           Data="GameRows"
@@ -161,6 +162,8 @@ else
     private Task<AuthenticationState> authenticationStateTask { get; set; }
 
     private FilterProperties _filterProperties = new();
+    private Grid<GameRow> _gameGrid;
+
     private bool _isAuthenticated;
     private bool _isInitializing;
     private int _pageSize;
@@ -303,7 +306,7 @@ else
         set
         {
             _filterProperties.ReleaseDate = value;
-            this.StateHasChanged();
+            _gameGrid.RefreshDataAsync();
         }
     }
 
@@ -313,7 +316,7 @@ else
         set
         {
             _filterProperties.LastPlayed = value;
-            this.StateHasChanged();
+            _gameGrid.RefreshDataAsync();
         }
     }
 
@@ -323,7 +326,7 @@ else
         set
         {
             _filterProperties.LowerHours = value;
-            this.StateHasChanged();
+            _gameGrid.RefreshDataAsync();
         }
     }
 
@@ -333,7 +336,7 @@ else
         set
         {
             _filterProperties.UpperHours = value;
-            this.StateHasChanged();
+            _gameGrid.RefreshDataAsync();
         }
     }
 
@@ -343,16 +346,13 @@ else
         set
         {
             _filterProperties.MinimumReviewScore = value;
-            this.StateHasChanged();
+            _gameGrid.RefreshDataAsync();
         }
     }
 
     private void OnAutoComplete(object state)
     {
-        if (state != null)
-        {
-            this.StateHasChanged();
-        }        
+        _gameGrid.RefreshDataAsync();
     }
 
     private async Task OnGridUpdated(GridSettings gridSettings)
