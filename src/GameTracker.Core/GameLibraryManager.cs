@@ -26,12 +26,27 @@ namespace GameTracker.Core
             if (provider != null)
             {
                 await provider.Refresh(userId, parameters);
-                await _parameterCacheRepository.SetParameters(new ParameterCache
+                _providerGameDictionary[provider.ProviderId] = provider.Games;
+
+                var existingParams = await _parameterCacheRepository.GetParameters(userId, providerId);
+                if (existingParams == null || !existingParams.Parameters.Any())
                 {
-                    Parameters = parameters,
-                    ProviderId = providerId,
-                    UserId = userId
-                });
+                    await _parameterCacheRepository.InsertParameters(new ParameterCache
+                    {
+                        Parameters = parameters,
+                        ProviderId = providerId,
+                        UserId = userId
+                    });
+                }
+                else
+                {
+                    await _parameterCacheRepository.UpdateParameters(new ParameterCache
+                    {
+                        Parameters = parameters,
+                        ProviderId = providerId,
+                        UserId = userId
+                    });
+                }                
             }
         }
 

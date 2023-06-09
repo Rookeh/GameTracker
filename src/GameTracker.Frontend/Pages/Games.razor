@@ -127,6 +127,7 @@ else
     </table>
 
     <Grid TItem="GameRow"
+          @ref="gameGrid"
           Class="table table-hover table-bordered table-striped"
           Data="GameRows"
           AllowFiltering="false"
@@ -134,7 +135,7 @@ else
           PageSize="4"
           PageSizeSelectorVisible="true"
           PageSizeSelectorItems="@(new int[] { 4,8,16 })"
-          PaginationItemsTextFormat="{0} - {1} of {2} rows"          
+          PaginationItemsTextFormat="{0} - {1} of {2} rows"
           Responsive="true">
         <GridColumn TItem="GameRow" PropertyName="Game1" Filterable="false" Sortable="false">
             <ChildContent>
@@ -160,6 +161,7 @@ else
     private Task<AuthenticationState> authenticationStateTask { get; set; }
 
     private FilterProperties filterProperties = new();
+    private Grid<GameRow> gameGrid;
     private bool isAuthenticated;
     private bool isInitializing;
 
@@ -174,9 +176,11 @@ else
             return;
         }
 
+        isInitializing = true;
         PreloadService.Show();
         await GameLibraryManager.InitialiseProviders(userName);
         PreloadService.Hide();
+        isInitializing = false;
     }
 
     private async Task<AutoCompleteDataProviderResult<Game>> GameFilterProvider(AutoCompleteDataProviderRequest<Game> request)

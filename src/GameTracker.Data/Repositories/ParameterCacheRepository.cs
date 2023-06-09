@@ -37,7 +37,27 @@ namespace GameTracker.Data.Repositories
             };
         }
 
-        public async Task SetParameters(ParameterCache value)
+        public async Task UpdateParameters(ParameterCache value)
+        {
+            var sql = @"UPDATE parameter_cache 
+                        SET value = @value
+                        WHERE paramOrder = @order
+                        AND providerId = @providerId
+                        AND userId = @userId";
+
+            for (int i = 0; i < value.Parameters.Length; i++)
+            {
+                await SetValue(sql, new
+                {
+                    userId = value.UserId,
+                    providerId = value.ProviderId.ToString(),
+                    order = i,
+                    value = value.Parameters[i].ToString()
+                });
+            }
+        }
+
+        public async Task InsertParameters(ParameterCache value)
         {
             var sql = @"INSERT INTO parameter_cache (userId, providerId, paramOrder, value)
                         VALUES (@userId, @providerId, @order, @value)";
