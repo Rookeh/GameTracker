@@ -87,7 +87,7 @@ else
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        if (firstRender && GameLibraryManager.Games.Any())
         {
             await _playedUnplayedChart.InitializeAsync(_playedUnplayedData, _doughnutChartOptions);
             await _hoursPlayedChart.InitializeAsync(_hoursPlayedData, _doughnutChartOptions);
