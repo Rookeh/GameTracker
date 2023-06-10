@@ -1,9 +1,7 @@
 ﻿using GameTracker.Models;
-using GameTracker.Models.Constants;
 using GameTracker.Models.Enums;
 using GameTracker.Plugins.Xbox.Helpers;
 using GameTracker.Plugins.Xbox.Models.OpenXBL;
-using System.Text.RegularExpressions;
 
 namespace GameTracker.Plugins.Xbox.Models
 {
@@ -22,9 +20,11 @@ namespace GameTracker.Plugins.Xbox.Models
             return Task.CompletedTask;
         }
 
-        public override string Title => _xboxTitle.Name;
+        public override ControlScheme[] ControlSchemes => XboxGameHelpers.GetControlSchemesFromDevices(_xboxTitle.Devices).Distinct().ToArray();
 
         public override string Description => string.Empty;
+
+        public override GameplayMode[] GameplayModes => Array.Empty<GameplayMode>();
 
         public override Genre[] Genres => Array.Empty<Genre>();
 
@@ -47,13 +47,11 @@ namespace GameTracker.Plugins.Xbox.Models
 
         public override MultiplayerAvailability[] MultiplayerAvailability => Array.Empty<MultiplayerAvailability>();
 
-        public override GameplayMode[] GameplayModes => Array.Empty<GameplayMode>();
-
-        public override Platform[] Platforms => GetPlatforms(_xboxTitle.Devices).ToArray();
+        public override Platform[] Platforms => XboxGameHelpers.GetPlatforms(_xboxTitle.Devices).ToArray();
 
         public override TimeSpan? Playtime => null;
 
-        public override Publisher? Publisher => GetPublisher(_xboxTitle.PFN);
+        public override Publisher? Publisher => XboxGameHelpers.GetPublisher(_xboxTitle.PFN);
 
         public override DateTime? ReleaseDate => null;
 
@@ -63,53 +61,6 @@ namespace GameTracker.Plugins.Xbox.Models
 
         public override string[] Tags => Array.Empty<string>();
 
-        #region Private methods
-
-        private IEnumerable<Platform> GetPlatforms(string[] devices)
-        {
-            foreach(var device in devices) 
-            { 
-                switch (device)
-                {
-                    case Constants.Devices.PC:
-                    case Constants.Devices.Win32:
-                        yield return WellKnownPlatforms.Windows;
-                        break;
-                    case Constants.Devices.Xbox360:
-                        yield return Constants.ConsolePlatforms.Xbox360;
-                        break;
-                    case Constants.Devices.XboxOne:
-                        yield return Constants.ConsolePlatforms.XboxOne;
-                        break;
-                    case Constants.Devices.XboxSeries:
-                        yield return Constants.ConsolePlatforms.XboxSeries;
-                        break;
-                    default: yield break;
-                }
-            }
-        }
-
-        private Publisher? GetPublisher(string pfn)
-        {
-            if (string.IsNullOrEmpty(pfn) || Regex.IsMatch(pfn, "^\\d"))
-            {
-                return null;
-            }
-
-            var publisherName = "Unknown";
-
-            var pfnArr = pfn.Split('.');
-            if (pfnArr.Any())
-            {
-                publisherName = Regex.Replace(pfnArr[0], "([a-z](?=[A-Z]|[0-9])|[A-Z](?=[A-Z][a-z]|[0-9])|[0-9](?=[^0-9]))", "$1 ");
-            }
-
-            return new Publisher
-            {
-                Name = publisherName
-            };
-        }
-
-        #endregion
+        public override string Title => _xboxTitle.Name;
     }
 }

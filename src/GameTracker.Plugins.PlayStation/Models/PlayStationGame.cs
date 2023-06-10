@@ -23,9 +23,7 @@ namespace GameTracker.Plugins.PlayStation.Models
             return Task.CompletedTask;
         }
 
-        public override TimeSpan? Playtime => null;
-
-        public override string Title => _psnGame.Name;
+        public override ControlScheme[] ControlSchemes => new[] { ControlScheme.Controller };
 
         public override string Description => string.Empty;
 
@@ -40,6 +38,8 @@ namespace GameTracker.Plugins.PlayStation.Models
             Height = 338
         };
 
+        public override DateTime? LastPlayed => _psnGame.LastPlayedDateTime;
+
         public override LaunchCommand LaunchCommand => new LaunchCommand
         {
             Icon = "Playstation",
@@ -48,11 +48,11 @@ namespace GameTracker.Plugins.PlayStation.Models
             Uri = GetLaunchUri()
         };
 
-        public override MultiplayerAvailability[] MultiplayerAvailability => Array.Empty<MultiplayerAvailability>();
-
-        public override DateTime? LastPlayed => _psnGame.LastPlayedDateTime;
+        public override MultiplayerAvailability[] MultiplayerAvailability => Array.Empty<MultiplayerAvailability>();        
 
         public override Platform[] Platforms => GetPlatforms().ToArray();
+
+        public override TimeSpan? Playtime => null;
 
         public override Publisher? Publisher => null;
 
@@ -63,6 +63,8 @@ namespace GameTracker.Plugins.PlayStation.Models
         public override Studio? Studio => null;
 
         public override string[] Tags => Array.Empty<string>();
+
+        public override string Title => _psnGame.Name;
 
         #region Private methods
 

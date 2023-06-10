@@ -51,9 +51,10 @@
         {
             navItems.AddRange(new List<NavItem>
             {
-                new NavItem { Id = "4", Href = "/Identity/Account/Manage/Index", IconName = IconName.PersonFillGear, Text = "Account", Match=NavLinkMatch.All },
+                new NavItem { Id = "4", Href = "/Identity/Account/Manage/Index", IconName = IconName.PersonGear, Text = "Account", Match=NavLinkMatch.All },
                 new NavItem { Id = "5", Href = "/gameproviders", IconName = IconName.Plugin, Text = "Game Providers"},
-                new NavItem { Id = "6", Href = "/games", IconName = IconName.Joystick, Text = "All Games"}
+                new NavItem { Id = "6", Href = "/games", IconName = IconName.Controller, Text = "Game Library"},
+                new NavItem { Id = "7", Href = "/stats", IconName = IconName.BarChartLine, Text = "Stats for Nerds"}
             });
         }
         else

@@ -159,7 +159,7 @@ else
 @code {
 
     [CascadingParameter]
-    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    private Task<AuthenticationState> _authenticationStateTask { get; set; }
 
     private FilterProperties _filterProperties = new();
     private Grid<GameRow> _gameGrid;
@@ -171,7 +171,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var authState = await authenticationStateTask;
+        var authState = await _authenticationStateTask;
         _isAuthenticated = authState?.User?.Identity?.IsAuthenticated ?? false;
         var userName = authState?.User?.Identity?.Name;
 

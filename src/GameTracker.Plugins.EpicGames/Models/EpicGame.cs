@@ -22,13 +22,11 @@ namespace GameTracker.Plugins.EpicGames.Models
             return Task.CompletedTask;
         }
 
-        public override TimeSpan? Playtime => null;
-
-        public override DateTime? LastPlayed => null;
-
-        public override string Title => _element.Title;
+        public override ControlScheme[] ControlSchemes => Array.Empty<ControlScheme>();
 
         public override string Description => _element.Description;
+
+        public override GameplayMode[] GameplayModes => Array.Empty<GameplayMode>();
 
         public override Genre[] Genres => Array.Empty<Genre>();
 
@@ -39,13 +37,15 @@ namespace GameTracker.Plugins.EpicGames.Models
             Height = 259
         };
 
+        public override DateTime? LastPlayed => null;
+
         public override LaunchCommand LaunchCommand => GetLaunchCommand();
 
         public override MultiplayerAvailability[] MultiplayerAvailability => Array.Empty<MultiplayerAvailability>();
 
-        public override GameplayMode[] GameplayModes => Array.Empty<GameplayMode>();
+        public override Platform[] Platforms => new[] { WellKnownPlatforms.Windows };
 
-        public override Platform[] Platforms => new[] { WellKnownPlatforms.Windows } ;
+        public override TimeSpan? Playtime => null;
 
         public override Publisher? Publisher => new Publisher { Name = _element.Seller.Name };
 
@@ -56,6 +56,8 @@ namespace GameTracker.Plugins.EpicGames.Models
         public override Studio? Studio => GetStudio();
 
         public override string[] Tags => Array.Empty<string>();
+
+        public override string Title => _element.Title;
 
         #region Private methods
 

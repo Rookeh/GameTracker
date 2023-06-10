@@ -1,5 +1,6 @@
 ﻿@using GameTracker.Frontend.Helpers;
 @using GameTracker.Models;
+@using GameTracker.Models.Enums;
 @using GameTracker.Models.BaseClasses;
 @using System.Text;
 @inject IJSRuntime JSRuntime;
@@ -92,6 +93,42 @@
                         </table>
                     </span>
                 </div>
+                @if (Game.ControlSchemes.Any())
+                {
+                    <div class="controls">
+                        <span class="label">Controls:</span>
+                        <span class="value">
+                            <table>
+                                <tr>
+                                    @foreach (var controlScheme in Game.ControlSchemes)
+                                    {
+                                        <td>
+                                            @switch (controlScheme)
+                                            {
+                                                case ControlScheme.KeyboardMouse:
+                                                    <Icon Name="IconName.Mouse2Fill" /> <span>Keyboard / Mouse</span>
+                                                    break;
+                                                case ControlScheme.PartialController:
+                                                    <Icon Name="IconName.Dpad" /> <span>Controller (Partial)</span>
+                                                    break;
+                                                case ControlScheme.Controller:
+                                                    <Icon Name="IconName.DpadFill" /> <span>Controller</span>
+                                                    break;
+                                                case ControlScheme.VRSupported:
+                                                    <Icon Name="IconName.BadgeVr" /> <span>VR Supported</span>
+                                                    break;
+                                                case ControlScheme.VROnly:
+                                                    <Icon Name="IconName.BadgeVrFill" /> <span>VR Only</span>
+                                                    break;
+                                            }
+                                        </td>
+                                        <td />
+                                    }
+                                </tr>
+                            </table>
+                        </span>
+                    </div>
+                }
                 @foreach (var review in Game.Reviews)
                 {
                     <div class="rating">

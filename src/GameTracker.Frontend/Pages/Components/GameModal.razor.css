@@ -38,7 +38,7 @@
     font-weight: bold;
 }
 
-.rating, .publisher, .studio, .synopsis .gameplay-mode .game-time .genre .last-played .multiplayer-avail .platforms .release-date .tags {
+.rating, .publisher, .studio, .synopsis .gameplay-mode .game-time .genre .last-played .multiplayer-avail .platforms .release-date .tags .controls {
     display: flex;
     align-items: center;
     gap: 5px;

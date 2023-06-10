@@ -20,6 +20,8 @@ namespace GameTracker.Plugins.GOG.Models
             return Task.CompletedTask;
         }
 
+        public override ControlScheme[] ControlSchemes => Array.Empty<ControlScheme>() ;
+
         public override string Description => _gameDetails.Description?.Full ?? string.Empty;
 
         public override GameplayMode[] GameplayModes => Array.Empty<GameplayMode>();
@@ -61,6 +63,7 @@ namespace GameTracker.Plugins.GOG.Models
 
         public override string[] Tags => Array.Empty<string>();
 
-        public override string Title => _gameDetails.Title;        
+        public override string Title => _gameDetails.Title;
+
     }
 }

@@ -1,0 +1,165 @@
+﻿@page "/stats";
+
+@using BlazorBootstrap.Extensions
+@using Color = System.Drawing.Color
+@using GameTracker.Frontend.Helpers;
+@using GameTracker.Interfaces;
+
+@inject IGameLibraryManager GameLibraryManager;
+@inject PreloadService PreloadService;
+
+@if (!_isAuthenticated)
+{
+    <p><em>Unauthorized.</em></p>
+}
+else if (_isInitializing)
+{
+}
+else if (GameLibraryManager.Games == null || !GameLibraryManager.Games.Any())
+{
+    <p><em>No games loaded. Please configure a game provider.</em></p>
+}
+else
+{
+    <Accordion>
+        <AccordionItem>
+            <TitleTemplate>
+                <Icon Name="IconName.ClockHistory" Class="me-1"/> Overall Playtime
+            </TitleTemplate>
+            <Content>
+                <table>
+                    <tr>
+                        <td>
+                            <DoughnutChart @ref="_playedUnplayedChart" Width="400" Class="mb-4" />
+                            <span>Played vs Unplayed</span>
+                        </td>
+                        <td>
+                            <DoughnutChart @ref="_hoursPlayedChart" Width="400" Class="mb-4" />
+                            <span>Hours Played</span>
+                        </td>
+                    </tr>
+                </table>                
+            </Content>
+        </AccordionItem>
+    </Accordion>    
+}
+
+@code {
+
+    [CascadingParameter]
+    private Task<AuthenticationState> _authenticationStateTask { get; set; }
+
+    private ChartData _playedUnplayedData = new ChartData();
+    private DoughnutChart _playedUnplayedChart = new DoughnutChart();
+
+    private ChartData _hoursPlayedData = new ChartData();
+    private DoughnutChart _hoursPlayedChart = new DoughnutChart();
+
+    private DoughnutChartOptions _doughnutChartOptions = new DoughnutChartOptions();
+    private bool _isAuthenticated;
+    private bool _isInitializing;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await _authenticationStateTask;
+        _isAuthenticated = authState?.User?.Identity?.IsAuthenticated ?? false;
+        var userName = authState?.User?.Identity?.Name;
+
+        if (!_isAuthenticated || string.IsNullOrEmpty(userName))
+        {
+            return;
+        }
+
+        _isInitializing = true;
+        PreloadService.Show();
+        await GameLibraryManager.InitialiseProviders(userName);
+        PreloadService.Hide();
+        _isInitializing = false;
+
+        _doughnutChartOptions = new DoughnutChartOptions
+        {
+            Responsive = true,
+        };
+
+        SetupHoursPlayedChart();
+        SetupPlayedUnplayedChart();        
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await _playedUnplayedChart.InitializeAsync(_playedUnplayedData, _doughnutChartOptions);
+            await _hoursPlayedChart.InitializeAsync(_hoursPlayedData, _doughnutChartOptions);
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private void SetupHoursPlayedChart()
+    {
+        var chartDataSet = new DoughnutChartDataset()
+        {
+            Data = new List<double>
+            {
+                GameLibraryManager.Games.Count(g => g.Playtime == null),
+                GameLibraryManager.Games.Count(g => g.Playtime != null && g.Playtime == TimeSpan.Zero),
+                GameLibraryManager.Games.Count(g => g.Playtime != null && g.Playtime > TimeSpan.Zero && g.Playtime <= TimeSpan.FromHours(10)),
+                GameLibraryManager.Games.Count(g => g.Playtime != null && g.Playtime > TimeSpan.FromHours(10) && g.Playtime <= TimeSpan.FromHours(50)),
+                GameLibraryManager.Games.Count(g => g.Playtime != null && g.Playtime > TimeSpan.FromHours(50) && g.Playtime <= TimeSpan.FromHours(100)),
+                GameLibraryManager.Games.Count(g => g.Playtime != null && g.Playtime > TimeSpan.FromHours(100) && g.Playtime <= TimeSpan.FromHours(250)),
+                GameLibraryManager.Games.Count(g => g.Playtime != null && g.Playtime > TimeSpan.FromHours(250)),
+            },
+                BackgroundColor = new List<string>
+            {
+                ColourHelper.ChartColours.Neutral.ToRgbString(),
+                ColourHelper.ChartColours.Primary.ToRgbString(),
+                ColourHelper.ChartColours.Secondary.ToRgbString(),
+                ColourHelper.ChartColours.Tertiary.ToRgbString(),
+                ColourHelper.ChartColours.Quaternary.ToRgbString(),
+                ColourHelper.ChartColours.Quinary.ToRgbString(),
+                ColourHelper.ChartColours.Senary.ToRgbString()
+            }
+        };
+
+        _hoursPlayedData = new ChartData()
+        {
+            Labels = new List<string> 
+            { 
+                "No data",
+                "Never played",
+                "> 0 to 10 hours",
+                "> 10 to 50 hours",
+                "> 50 to 100 hours",
+                "> 100 to 250 hours",
+                "250+ hours"
+            },
+            Datasets = new List<IChartDataset>() { chartDataSet }
+        };
+    }
+
+    private void SetupPlayedUnplayedChart()
+    {
+        var chartDataSet = new DoughnutChartDataset()
+        {
+            Data = new List<double>
+            {
+                GameLibraryManager.Games.Count(g => g.Playtime == null && g.LastPlayed == null),
+                GameLibraryManager.Games.Count(g => g.Playtime != null && g.Playtime == TimeSpan.Zero),
+                GameLibraryManager.Games.Count(g => (g.Playtime != null && g.Playtime > TimeSpan.Zero) || (g.Playtime == null && g.LastPlayed != null))
+            },
+            BackgroundColor = new List<string>
+            {
+                ColourHelper.ChartColours.Neutral.ToRgbString(),
+                ColourHelper.ChartColours.Primary.ToRgbString(),
+                ColourHelper.ChartColours.Secondary.ToRgbString()                
+            }
+        };
+
+        _playedUnplayedData = new ChartData()
+        {
+            Labels = new List<string> { "No data", "Unplayed", "Played" },
+            Datasets = new List<IChartDataset>() { chartDataSet }
+        };
+    }
+}

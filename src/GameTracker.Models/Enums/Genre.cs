@@ -4,6 +4,7 @@
     {
         Action,
         Adventure,
+        Arcade,
         BeatEmUp,
         BoardGame,
         CardGame,
@@ -18,6 +19,7 @@
         Indie,
         MMO,
         MOBA,
+        Music,
         OpenWorld,
         Other,
         Party,
@@ -37,7 +39,6 @@
         TowerDefense,
         Trivia,
         VisualNovel,
-        VR,
         Wargame
     }
 }

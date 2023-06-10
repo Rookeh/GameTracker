@@ -37,9 +37,14 @@ namespace GameTracker.Plugins.Steam.Models
             _gameDetails = await LazyLoadGameDetails();
         }
 
+        public override ControlScheme[] ControlSchemes => SteamGameHelpers.ParseControlScheme(_gameDetails?.Categories);
+
         public override string Description => _gameDetails?.ShortDescription ?? string.Empty;
-        public override GameplayMode[] GameplayModes => SteamGameHelpers.ParseMultiplayerModes(_gameDetails?.Categories).ToArray();
-        public override GenreEnum[] Genres => SteamGameHelpers.ParseGenres(_gameDetails?.Genres).ToArray();
+
+        public override GameplayMode[] GameplayModes => SteamGameHelpers.ParseMultiplayerModes(_gameDetails?.Categories);
+
+        public override GenreEnum[] Genres => SteamGameHelpers.ParseGenres(_gameDetails?.Genres).Distinct().ToArray();
+
         public override Image Image => new Image()
         {
             Url = _gameDetails?.HeaderImage ?? "img\\placeholder.png",
@@ -48,6 +53,7 @@ namespace GameTracker.Plugins.Steam.Models
         };
 
         public override DateTime? LastPlayed => _lastPlayed;
+
         public override LaunchCommand LaunchCommand => new LaunchCommand
         {
             Icon = "Steam",
@@ -55,10 +61,15 @@ namespace GameTracker.Plugins.Steam.Models
             Text = "Launch via Steam",
             Uri = $"steam://run/{PlatformId}"
         };
-        public override MultiplayerAvailability[] MultiplayerAvailability => SteamGameHelpers.ParseMultiplayerAvailability(_gameDetails?.Categories).ToArray();
+
+        public override MultiplayerAvailability[] MultiplayerAvailability => SteamGameHelpers.ParseMultiplayerAvailability(_gameDetails?.Categories);
+
         public override Platform[] Platforms => SteamGameHelpers.ParsePlatforms(_gameDetails?.Platforms).ToArray();
+
         public override TimeSpan? Playtime => _playTime;
+
         public override Publisher? Publisher => SteamGameHelpers.ParsePublisher(_gameDetails);
+
         public override DateTime? ReleaseDate
         {
             get
@@ -74,9 +85,13 @@ namespace GameTracker.Plugins.Steam.Models
                 return null;
             }
         }
+
         public override Review[] Reviews => SteamGameHelpers.ParseMetacriticReview(this, _gameDetails?.Metacritic) ?? Array.Empty<Review>();
+
         public override Studio? Studio => _gameDetails?.Developers?.Any() ?? false ? new Studio { Name = _gameDetails.Developers.First() } : null;
-        public override string[] Tags => _gameDetails?.Categories.Select(c => c.Description).ToArray() ?? Array.Empty<string>();        
+
+        public override string[] Tags => _gameDetails?.Categories.Select(c => c.Description).ToArray() ?? Array.Empty<string>();    
+        
         public override string Title => _title;
 
         #region Private methods

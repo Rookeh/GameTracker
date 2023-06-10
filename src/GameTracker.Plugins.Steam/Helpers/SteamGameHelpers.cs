@@ -10,13 +10,42 @@ namespace GameTracker.Plugins.Steam.Helpers
 {
     internal static class SteamGameHelpers
     {
-        internal static IEnumerable<GameplayMode> ParseMultiplayerModes(Category[]? categories)
+        internal static ControlScheme[] ParseControlScheme(Category[]? categories)
+        {
+            var controlSchemes = new List<ControlScheme>()
+            {
+                ControlScheme.KeyboardMouse
+            };
+
+            if (categories == null || !categories.Any())
+            {
+                return controlSchemes.ToArray();
+            }
+
+            foreach (var category in categories)
+            {
+                if (Constants.SteamCategoryMappings.SteamControlSchemeMappings.ContainsKey(category.Description))
+                {
+                    controlSchemes.Add(Constants.SteamCategoryMappings.SteamControlSchemeMappings[category.Description]);
+                }
+            }
+
+            if (controlSchemes.Contains(ControlScheme.VROnly))
+            {                
+                controlSchemes.Remove(ControlScheme.KeyboardMouse);
+                controlSchemes.Remove(ControlScheme.VRSupported);
+            }
+
+            return controlSchemes.Distinct().ToArray();
+        }
+
+        internal static GameplayMode[] ParseMultiplayerModes(Category[]? categories)
         {
             var multiplayerModes = new List<GameplayMode>();
 
             if (categories == null || !categories.Any())
             {
-                return multiplayerModes;
+                return multiplayerModes.ToArray();
             }
 
             foreach (var category in categories)
@@ -27,16 +56,16 @@ namespace GameTracker.Plugins.Steam.Helpers
                 }
             }
 
-            return multiplayerModes.Distinct();
+            return multiplayerModes.Distinct().ToArray();
         }
 
-        internal static IEnumerable<MultiplayerAvailability> ParseMultiplayerAvailability(Category[]? categories)
+        internal static MultiplayerAvailability[] ParseMultiplayerAvailability(Category[]? categories)
         {
             var multiplayerAvailability = new List<MultiplayerAvailability>();
 
             if (categories == null || !categories.Any())
             {
-                return multiplayerAvailability;
+                return multiplayerAvailability.ToArray();
             }
 
             foreach (var category in categories)
@@ -47,7 +76,7 @@ namespace GameTracker.Plugins.Steam.Helpers
                 }
             }
 
-            return multiplayerAvailability.Distinct();
+            return multiplayerAvailability.Distinct().ToArray();
         }
 
         internal static IEnumerable<GenreEnum> ParseGenres(Genre[]? genres)

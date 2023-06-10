@@ -1,6 +1,5 @@
 ﻿using GameTracker.Models;
 using GameTracker.Models.Enums;
-using System.Xml.Linq;
 
 namespace GameTracker.Plugins.Dummy
 {
@@ -19,7 +18,11 @@ namespace GameTracker.Plugins.Dummy
             return Task.CompletedTask;
         }
 
+        public override ControlScheme[] ControlSchemes => new[] { ControlScheme.KeyboardMouse };
+
         public override string Description => "Dummy Description";
+
+        public override GameplayMode[] GameplayModes => new[] { GameplayMode.Singleplayer };
 
         public override Genre[] Genres => new[] { Genre.Other };
 
@@ -30,6 +33,8 @@ namespace GameTracker.Plugins.Dummy
             Height = 215
         };
 
+        public override DateTime? LastPlayed => DateTime.UnixEpoch;
+
         public override LaunchCommand LaunchCommand => new LaunchCommand
         {
             NewTab = true,
@@ -38,11 +43,7 @@ namespace GameTracker.Plugins.Dummy
             Uri = "https://en.wikipedia.org/wiki/%22Hello,_World!%22_program"
         };     
 
-        public override MultiplayerAvailability[] MultiplayerAvailability => new[] { Models.Enums.MultiplayerAvailability.None };
-
-        public override GameplayMode[] GameplayModes => new[] { GameplayMode.Singleplayer } ;
-
-        public override DateTime? LastPlayed => DateTime.UnixEpoch;
+        public override MultiplayerAvailability[] MultiplayerAvailability => new[] { Models.Enums.MultiplayerAvailability.None };        
 
         public override Platform[] Platforms => new[] { new Platform { Name = "Dummy Platform", Icon = "EggFried" } } ;
 

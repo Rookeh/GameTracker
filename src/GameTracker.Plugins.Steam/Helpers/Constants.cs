@@ -14,20 +14,31 @@ namespace GameTracker.Plugins.Steam.Helpers
 
         internal static class SteamCategoryMappings
         {
+            internal static Dictionary<string, ControlScheme> SteamControlSchemeMappings => new Dictionary<string, ControlScheme>
+            {
+                ["Full controller support"] = ControlScheme.Controller,
+                ["Partial Controller Support"] = ControlScheme.PartialController,
+                ["VR Only"] = ControlScheme.VROnly,
+                ["VR Support"] = ControlScheme.VRSupported,
+                ["VR Supported"] = ControlScheme.VRSupported
+            };
+
             internal static Dictionary<string, GenreEnum> SteamGenreMappings => new Dictionary<string, GenreEnum>
             {
                 ["Action"] = GenreEnum.Action,
                 ["Adventure"] = GenreEnum.Adventure,
                 ["Casual"] = GenreEnum.Casual,
                 ["Early Access"] = GenreEnum.EarlyAccess,
-                ["FreeToPlay"] = GenreEnum.FreeToPlay,
+                ["Free to Play"] = GenreEnum.FreeToPlay,
+                ["Gore"] = GenreEnum.Horror,
                 ["Indie"] = GenreEnum.Indie,
                 ["Strategy"] = GenreEnum.Strategy,
                 ["RPG"] = GenreEnum.RPG,
+                ["Rol"] = GenreEnum.RPG,
                 ["Racing"] = GenreEnum.Racing,
                 ["Simulation"] = GenreEnum.Simulation,
-                ["Massively Multiplayer"] = GenreEnum.MMO,
-                ["VR"] = GenreEnum.VR
+                ["Sports"] = GenreEnum.Sports,
+                ["Massively Multiplayer"] = GenreEnum.MMO
             };
 
             internal static Dictionary<string, MultiplayerAvailability> SteamMultiplayerAvailMappings => new Dictionary<string, MultiplayerAvailability>

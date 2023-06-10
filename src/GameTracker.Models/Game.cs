@@ -24,23 +24,23 @@ namespace GameTracker.Models
 
         public string StudioName => Studio?.Name ?? string.Empty;
         public string PublisherName => Publisher?.Name ?? string.Empty;
-        public string GenreString => Genres.Any() ? string.Join(',', Genres) : string.Empty;
 
-        public abstract Task Preload();
-        public abstract TimeSpan? Playtime { get; }
-        public abstract DateTime? LastPlayed { get; }
-        public abstract string Title { get; }
-        public abstract string Description { get; }
+        public abstract Task Preload();        
+        public abstract ControlScheme[] ControlSchemes { get; }
+        public abstract string Description { get; }        
+        public abstract GameplayMode[] GameplayModes { get; }
         public abstract Genre[] Genres { get; }
         public abstract Image Image { get; }
+        public abstract DateTime? LastPlayed { get; }
         public abstract LaunchCommand LaunchCommand { get; }
-        public abstract MultiplayerAvailability[] MultiplayerAvailability { get; }
-        public abstract GameplayMode[] GameplayModes { get; }        
+        public abstract MultiplayerAvailability[] MultiplayerAvailability { get; }            
         public abstract Platform[] Platforms { get; }
+        public abstract TimeSpan? Playtime { get; }
         public abstract Publisher? Publisher { get; }
         public abstract DateTime? ReleaseDate { get; }
         public abstract Review[] Reviews { get; }
         public abstract Studio? Studio { get; }
         public abstract string[] Tags { get; }
+        public abstract string Title { get; }
     }
 }
