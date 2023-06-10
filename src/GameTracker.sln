@@ -29,7 +29,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameTracker.Plugins.EpicGam
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameTracker.Data", "GameTracker.Data\GameTracker.Data.csproj", "{99958866-B97B-4888-B88C-E81C179E2A9C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameTracker.Plugins.Nintendo", "GameTracker.Plugins.Nintendo\GameTracker.Plugins.Nintendo.csproj", "{BCD028E1-91CE-4E06-B11B-8CB5D13F8448}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameTracker.Plugins.Nintendo", "GameTracker.Plugins.Nintendo\GameTracker.Plugins.Nintendo.csproj", "{BCD028E1-91CE-4E06-B11B-8CB5D13F8448}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

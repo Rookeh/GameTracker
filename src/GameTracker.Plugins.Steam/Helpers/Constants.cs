@@ -7,6 +7,12 @@ namespace GameTracker.Plugins.Steam.Helpers
 {
     internal static class Constants
     {
+        internal static class Authentication
+        {
+            internal const string ApiKeyUrl = "https://steamcommunity.com/dev/apikey";
+            internal const string SteamIdUrl = "https://steamid.io";
+        }
+
         internal static class SQLite
         {
             internal const string ConnectionString = "Data Source=SteamGames.sqlite";

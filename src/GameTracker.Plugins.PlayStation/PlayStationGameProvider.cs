@@ -12,7 +12,6 @@ namespace GameTracker.Plugins.PlayStation
 {
     public class PlayStationGameProvider : IGameProvider
     {
-        private readonly Platform _platform;
         private readonly List<PlayStationGame> _games;
         
         private bool _initialized;
@@ -20,17 +19,20 @@ namespace GameTracker.Plugins.PlayStation
         public PlayStationGameProvider()
         {
             _games = new List<PlayStationGame>();
-            _platform = new Platform()
-            {
-                Name = "PlayStation Network",
-                Description = "PlayStation Network",
-                Icon = "Playstation"
-            };
         }
 
         public Guid ProviderId => new Guid("A33F4D1B-2B4E-4669-AA98-9207A4F38037");
 
-        public Platform Platform => _platform;
+        public Platform Platform => new Platform
+        {
+            Name = "PlayStation Network",
+            Description = "PlayStation Network",            
+            ExtendedInformation = "This integration requires your PSN 'NPSSO' token to fetch owned games from your profile. To obtain this, first " +
+                                @$"<a href=""{Constants.Authentication.UserLoginLink}"">log into the PlayStation network</a>. Once you are logged " +
+                                @$"in, you can retrieve your token from <a href=""{Constants.Authentication.NPSSOTokenLink}"">this</a> link.<br><br> " +
+                                  "Optionally, you can include any non-game titles (e.g. streaming services) in the results.",
+            Icon = "Playstation"
+        };
 
         public IEnumerable<Game> Games => _games;
 

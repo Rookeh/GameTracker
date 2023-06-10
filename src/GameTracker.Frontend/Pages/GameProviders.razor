@@ -8,6 +8,7 @@
 @using GameTracker.Interfaces;
 @using GameTracker.Core;
 @using GameTracker.Interfaces.Data;
+@using GameTracker.Models;
 
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject ToastService ToastService;
@@ -46,7 +47,7 @@ else
                     }
                     else
                     {
-                        <Icon Size="IconSize.x2" Name="@IconHelper.GetIconEnum(@context.Platform.Icon)" />
+                        <Icon Size="IconSize.x2" Name="@IconHelper.GetIconEnum(@context.Platform.Icon, IconName.Controller)" />
                     }                                       
                 </div>
             </ChildContent>
@@ -65,7 +66,9 @@ else
         </GridColumn>
         <GridColumn TItem="IGameProvider" PropertyName="Refresh">
             <div class="btn-container">
+                <Modal @ref="_providerModal" IsVerticallyCentered=true Size="ModalSize.Large" />
                 <button class="btn btn-primary" onclick="@(async () => await LoadGames(context))">Load Games</button>
+                <button class="btn btn-secondary" onclick="@(async () => await OnShowProviderModalClick(context))">More Info</button>
             </div>            
         </GridColumn>
     </Grid>
@@ -79,7 +82,8 @@ else
     private Dictionary<string, int> intParameters;
 
     private bool isAuthenticated;
-    private string userName;
+    private Modal _providerModal;
+    private string userName;    
 
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
@@ -189,5 +193,12 @@ else
                 Message = $"Failed to load games for provider {provider.Platform.Name}: {e.Message}",
             });
         }
+    }
+
+    private async Task OnShowProviderModalClick(IGameProvider provider)
+    {
+        var modalParams = new Dictionary<string, object>();
+        modalParams.Add("Provider", provider.Platform);
+        await _providerModal.ShowAsync<ProviderModal>(title: provider.Platform.Name, parameters: modalParams);
     }
 }

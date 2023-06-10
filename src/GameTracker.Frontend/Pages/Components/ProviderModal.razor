@@ -1,0 +1,60 @@
+﻿@using GameTracker.Frontend.Helpers;
+@using GameTracker.Models;
+@using GameTracker.Models.Enums;
+@using GameTracker.Models.BaseClasses;
+@using System.Text;
+@inject IJSRuntime JSRuntime;
+@inject NavigationManager NavigationManager;
+
+<div class="modal-content">
+    <div class="provider-details">
+        <div class="modal-body">
+            <div class="info">
+                <h2 class="title">@Provider.Name <Icon Name="IconHelper.GetIconEnum(Provider?.Icon, IconName.Controller)"/></h2>
+                @if (!string.IsNullOrEmpty(Provider.Description))
+                {
+                    <div class="description">
+                        <span class="label">Info:</span>
+                        <span class="value">@Provider.Description</span>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Provider.ExtendedInformation))
+                {
+                    <div class="extended-info">
+                        <span class="label">Configuration Instructions:</span>
+                        <span class="value">@((MarkupString)Provider.ExtendedInformation)</span>
+                    </div>
+                }
+                @if (Provider.Links != null)
+                {
+                    <div class="links">
+                        <span class="label">Links:</span>
+                        <span class="value">
+                            <table>
+                                <tr>
+                                    @foreach (var link in Provider.Links)
+                                    {
+                                        <td>
+                                            <Icon Name="IconHelper.GetIconFromLinkType(link.LinkPlatform)" /><a href="@LinkHelper.GetLinkUri(link)">@link.LinkPlatform.ToString()</a>
+                                        </td>
+                                        <td />
+                                    }
+                                </tr>
+                            </table>
+                        </span>
+                    </div>
+                }                
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    [Parameter] public Platform Provider { get; set; }
+
+    private static string GetName(CorporateEntity entity)
+    {
+        return entity != null ? entity.Name : "Unknown";
+    }
+}

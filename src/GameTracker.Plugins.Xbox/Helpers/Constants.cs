@@ -41,6 +41,7 @@ namespace GameTracker.Plugins.Xbox.Helpers
 
         internal static class OpenXBL
         {
+            internal const string URL = "https://xbl.io/";
             internal const string AuthHeader = "x-authorization";
             internal const string TitleHistoryUrl = "https://xbl.io/api/v2/player/titleHistory";
         }
@@ -56,10 +57,12 @@ namespace GameTracker.Plugins.Xbox.Helpers
             Name = "Xbox",
             Icon = "Xbox",
             Description = "The Xbox network, formerly and still sometimes branded as Xbox Live, is an online multiplayer gaming and digital media delivery service created and operated by Microsoft.",
+            ExtendedInformation = @$"This integration uses <a href=""{OpenXBL.URL}"">OpenXBL</a> to fetch data from your Xbox profile. " +
+                                  $@"You will need to sign up, and then copy the personal API key from your OpenXBL profile page.<br><br> " +
+                                    "You can opt to include or exclude both Game Pass titles and legacy (Xbox 360 / Games for Windows Live) titles from the results.",
             Links = new[]
             {                                
-                new SocialLink { LinkPlatform = LinkType.Mastodon, LinkTarget = "@Xbox@mastodon.social" },
-                new SocialLink { LinkPlatform = LinkType.Reddit, LinkTarget = "/r/xbox/" },
+                new SocialLink { LinkPlatform = LinkType.Reddit, LinkTarget = "xbox" },
                 new SocialLink { LinkPlatform = LinkType.Twitter, LinkTarget = "@Xbox" },
                 new SocialLink { LinkPlatform = LinkType.Web, LinkTarget = "https://www.xbox.com" },
                 new SocialLink { LinkPlatform = LinkType.YouTube, LinkTarget = "@xbox" }

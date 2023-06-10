@@ -11,6 +11,8 @@ namespace GameTracker.Plugins.PlayStation.Helpers
             public const string TokenExchangeCredential = "MDk1MTUxNTktNzIzNy00MzcwLTliNDAtMzgwNmU2N2MwODkxOnVjUGprYTV0bnRCMktxc1A=";
             public const string RedirectUri = "com.scee.psxandroid.scecompcall://redirect";
             public const string Scope = "psn:mobile.v2.core psn:clientapp";
+            public const string UserLoginLink = "https://www.playstation.com/";
+            public const string NPSSOTokenLink = "https://ca.account.sony.com/api/v1/ssocookie";
         }
 
         public static class Consoles

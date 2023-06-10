@@ -1,0 +1,39 @@
+﻿.provider-details {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 20px;
+    border-radius: 5px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.modal-body {
+    flex: 1;
+}
+
+.modal-content {
+    background-color: transparent;
+    border: none;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.description .extended-info .links {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.label {
+    font-weight: bold;
+}

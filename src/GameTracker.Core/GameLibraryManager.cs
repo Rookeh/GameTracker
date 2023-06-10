@@ -25,27 +25,23 @@ namespace GameTracker.Core
             var provider = _providerFactory.GetProviders().FirstOrDefault(p => p.ProviderId == providerId);
             if (provider != null)
             {
-                await provider.Refresh(userId, parameters);
-                _providerGameDictionary[provider.ProviderId] = provider.Games;
+                try
+                {
+                    var refreshedParams = await provider.Refresh(userId, parameters);
+                    _providerGameDictionary[provider.ProviderId] = provider.Games;
+                    var existingParams = await _parameterCacheRepository.GetParameters(userId, providerId);
 
-                var existingParams = await _parameterCacheRepository.GetParameters(userId, providerId);
-                if (existingParams == null || !existingParams.Parameters.Any())
-                {
-                    await _parameterCacheRepository.InsertParameters(new ParameterCache
+                    if (existingParams == null || !existingParams.Parameters.Any())
                     {
-                        Parameters = parameters,
-                        ProviderId = providerId,
-                        UserId = userId
-                    });
+                        await _parameterCacheRepository.InsertParameters(refreshedParams);
+                    }
+                    else
+                    {
+                        await _parameterCacheRepository.UpdateParameters(refreshedParams);
+                    }
                 }
-                else
+                catch (Exception)
                 {
-                    await _parameterCacheRepository.UpdateParameters(new ParameterCache
-                    {
-                        Parameters = parameters,
-                        ProviderId = providerId,
-                        UserId = userId
-                    });
                 }                
             }
         }
@@ -56,17 +52,23 @@ namespace GameTracker.Core
             {
                 if (!provider.Initialized)
                 {
-                    var parameterCache = await _parameterCacheRepository.GetParameters(userId, provider.ProviderId);
-                    if (parameterCache != null && parameterCache.Parameters.Length == provider.RequiredParameters.Count())
+                    try
                     {
-                        parameterCache.Parameters = MapParameterTypes(provider.RequiredParameters.Values.ToArray(), parameterCache.Parameters).ToArray();
-                        await provider.Load(parameterCache);
-                        foreach (var game in provider.Games)
+                        var parameterCache = await _parameterCacheRepository.GetParameters(userId, provider.ProviderId);
+                        if (parameterCache != null && parameterCache.Parameters.Length == provider.RequiredParameters.Count())
                         {
-                            await game.Preload();
-                        }
+                            parameterCache.Parameters = MapParameterTypes(provider.RequiredParameters.Values.ToArray(), parameterCache.Parameters).ToArray();
+                            await provider.Load(parameterCache);
+                            foreach (var game in provider.Games)
+                            {
+                                await game.Preload();
+                            }
 
-                        _providerGameDictionary[provider.ProviderId] = provider.Games;
+                            _providerGameDictionary[provider.ProviderId] = provider.Games;
+                        }
+                    }
+                    catch (Exception)
+                    {
                     }
                 }
             }

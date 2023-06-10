@@ -21,6 +21,10 @@ namespace GameTracker.Plugins.EpicGames
         {
             Name = "Epic Games",
             Description = "The Epic Games Store is a digital video game storefront for Microsoft Windows and macOS, operated by Epic Games.",
+            ExtendedInformation = "This integration cannot access your Epic account; therefore, you must specify which titles you own. " + 
+                                  "Details for owned titles will be retrieved from the Epic Games store.<br><br> " +
+                                  "Note that due to API limitations, not all titles support deep linking to the Epic Games Launcher. " + 
+                                  "If this is not possible for a given title, you will be directed to the title's store page instead.",
             Links = new[]
             {
                 new SocialLink { LinkPlatform = LinkType.Web, LinkTarget = "https://store.epicgames.com" },

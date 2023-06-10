@@ -85,7 +85,7 @@
                                 @foreach (var platform in Game.Platforms)
                                 {
                                     <td>
-                                        <Icon Name="@IconHelper.GetIconEnum(platform.Icon)" /> @platform.Name
+                                        <Icon Name="@IconHelper.GetIconEnum(platform.Icon, IconName.QuestionCircle)"/> @platform.Name
                                     </td>
                                     <td/>
                                 }
@@ -151,7 +151,7 @@
                     </div>
                 }
                 <Button Color="ButtonColor.Primary" @onclick="OnLaunchGameClick">
-                    <Icon Name="@IconHelper.GetIconEnum(@Game.LaunchCommand.Icon)" />
+                    <Icon Name="@IconHelper.GetIconEnum(@Game.LaunchCommand.Icon, IconName.Controller)" />
                     @Game.LaunchCommand.Text
                 </Button>
             </div>

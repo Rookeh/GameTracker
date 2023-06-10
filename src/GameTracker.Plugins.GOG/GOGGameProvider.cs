@@ -23,6 +23,11 @@ namespace GameTracker.Plugins.GOG
             {
                 Name = "GOG",
                 Description = "GOG.com is a digital distribution platform for video games and films. It is operated by GOG sp. z o.o., a wholly owned subsidiary of CD Projekt based in Warsaw, Poland. GOG.com delivers DRM-free video games through its digital platform for Microsoft Windows, macOS and Linux.",
+                ExtendedInformation = $"This integration requires an authentication code which you can retrieve by visiting " +
+                                     @$"<a href=""{Constants.Authentication.AuthenticationCodeUrl}"">this GOG URL</a>, pressing F12 to open your browser dev console, " +
+                                       "logging in to the page with your GOG details, and then capturing the <em>code</em> parameter returned in the response header from the " +
+                                     @$"'Network' tab of the dev console.<br><br> For more details, see <a href=""{Constants.Authentication.ApiDocumentation}"">here.</a><br><br>" +
+                                       "Note: Because the authentication code is short-lived, it is not persisted between sessions. Hence, you will need to manually refresh this integration for each session.",
                 Links = new[]
                 {
                     new SocialLink
@@ -116,9 +121,10 @@ namespace GameTracker.Plugins.GOG
 
             _initialized = true;
 
+            // The GOG token is not long-lived, so there is no point in caching it.
             return new ParameterCache
             {
-                Parameters = providerSpecificParameters,
+                Parameters = Array.Empty<object>(),
                 ProviderId = ProviderId,
                 UserId = userId
             };

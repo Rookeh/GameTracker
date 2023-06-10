@@ -61,6 +61,9 @@ namespace GameTracker.Plugins.Nintendo.Helpers
                 Name = "Nintendo EShop",
                 Description = "Nintendo EShop",
                 Icon = "NintendoSwitch",
+                ExtendedInformation = "This integration cannot access your Nintendo account; therefore, you must specify " +
+                                      "which titles you own. Details for owned titles will be retrieved from the Nintendo EShop.<br><br> " +
+                                      "You must also specify your region code. Currently, only Europe (EU) and Japan (JP) region codes are supported.",
                 Links = new SocialLink[] 
                 {
                     new SocialLink { LinkPlatform = LinkType.Web, LinkTarget = "https://www.nintendo.com/store/" }

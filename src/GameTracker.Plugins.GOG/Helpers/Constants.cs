@@ -1,5 +1,4 @@
-﻿using GameTracker.Plugins.GOG.Models;
-using GameTracker.Plugins.GOG.Models.GOGApi;
+﻿using GameTracker.Plugins.GOG.Models.GOGApi;
 
 namespace GameTracker.Plugins.GOG.Helpers
 {
@@ -7,7 +6,9 @@ namespace GameTracker.Plugins.GOG.Helpers
     {
         internal class Authentication
         {
+            internal static string ApiDocumentation => "https://gogapidocs.readthedocs.io/en/latest/auth.html";
             internal static string AuthenticationBaseUrl => "https://auth.gog.com";
+            internal static string AuthenticationCodeUrl => "https://auth.gog.com/auth?client_id=46899977096215655&redirect_uri=https%3A%2F%2Fembed.gog.com%2Fon_login_success%3Forigin%3Dclient&response_type=code&layout=client2";
         }
 
         internal static GameDetails DefaultGameDetails => new GameDetails

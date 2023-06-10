@@ -1,9 +1,12 @@
-﻿using GameTracker.Interfaces;
+﻿using GameTracker.Data;
+using GameTracker.Interfaces;
 using GameTracker.Models;
 using GameTracker.Plugins.Steam.Interfaces;
 using GameTracker.Plugins.Steam.Models;
 using GameTracker.Plugins.Steam.Models.WebApi;
 using System.Text.Json;
+
+using Constants = GameTracker.Plugins.Steam.Helpers.Constants;
 using LinkType = GameTracker.Models.Enums.LinkType;
 
 namespace GameTracker.Plugins.Steam
@@ -25,6 +28,9 @@ namespace GameTracker.Plugins.Steam
                 Name = "Steam",
                 Description = "Steam is a video game digital distribution service and storefront from Valve. It was launched as a software client in September 2003 as a way for Valve to provide automatic updates for their games, and expanded to distributing third-party game publishers' titles in late 2005.",
                 Icon = "Steam",
+                ExtendedInformation = @"This integration requires your Steam Web API key for authentication, and your profile's SteamID64 value to fetch game data.<br><br> " +
+                                     @$"To obtain a Steam Web API key, visit <a href=""{Constants.Authentication.ApiKeyUrl}"">this</a> page. " +
+                                     @$"To find your SteamID64 value, use a tool like <a href=""{Constants.Authentication.SteamIdUrl}"">steamid.io</a>.",                                
                 Links = new[]
                 {
                     new SocialLink
@@ -79,7 +85,7 @@ namespace GameTracker.Plugins.Steam
 
             if (providerSpecificParameters.Length != 2)
             {
-                throw new ArgumentException("Steam WebAPI key and SteamID must be provided.");
+                throw new ArgumentException("Steam Web API key and SteamID64 must be provided.");
             }
 
             var apiKey = providerSpecificParameters[0].ToString();
@@ -134,8 +140,8 @@ namespace GameTracker.Plugins.Steam
 
         public Dictionary<string, Type> RequiredParameters => new()
         {
-            { "Steam WebAPI Key", typeof(string) },
-            { "SteamID", typeof(string) }
+            { "Steam Web API Key", typeof(string) },
+            { "SteamID64", typeof(string) }
         };
     }
 }
