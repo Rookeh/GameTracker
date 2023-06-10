@@ -22,7 +22,10 @@ namespace GameTracker.Plugins.GOG
             _platform = new Platform
             {
                 Name = "GOG",
-                Description = "GOG.com is a digital distribution platform for video games and films. It is operated by GOG sp. z o.o., a wholly owned subsidiary of CD Projekt based in Warsaw, Poland. GOG.com delivers DRM-free video games through its digital platform for Microsoft Windows, macOS and Linux.",
+                Description = "GOG.com, previously known as Good Old Games, is a digital video game storefront and distribution platform for the PC with a strong emphasis on DRM-free content. " +
+                              "A subsidiary of Polish development studio and publisher CD Projekt, it was launched in 2008 - initially offering older, legacy titles with some updates "+
+                              "to make them compatible with newer hardware and operating systems. Since then, its library has expanded to include more modern offerings and an extensive " +
+                              "selection of indie titles.",
                 ExtendedInformation = $"This integration requires an authentication code which you can retrieve by visiting " +
                                      @$"<a href=""{Constants.Authentication.AuthenticationCodeUrl}"">this GOG URL</a>, pressing F12 to open your browser dev console, " +
                                        "logging in to the page with your GOG details, and then capturing the <em>code</em> parameter returned in the response header from the " +

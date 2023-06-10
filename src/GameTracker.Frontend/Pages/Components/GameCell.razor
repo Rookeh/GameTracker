@@ -2,7 +2,6 @@
 
 @if (Game != null)
 {
-    <Modal @ref="modal" IsVerticallyCentered=true Size="ModalSize.Large" />
     @if (canShowGameDetails)
     {        
         <img height="@Game.Image.Height" width="@Game.Image.Width" src="@Game.Image.Url" alt="@Game.Title" @onclick="@(e => OnShowGameModalClick(Game))" />
@@ -22,8 +21,10 @@
     [Parameter]
     public Game Game { get; set; }
 
+    [Parameter]
+    public Modal Modal { get; set; }
+
     private bool canShowGameDetails = false;
-    private Modal modal;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -39,6 +40,6 @@
     {
         var modalParams = new Dictionary<string, object>();
         modalParams.Add("Game", game);
-        await modal.ShowAsync<GameModal>(title: game.Title, parameters: modalParams);
+        await Modal.ShowAsync<GameModal>(title: game.Title, parameters: modalParams);
     }
 }

@@ -26,11 +26,16 @@ namespace GameTracker.Plugins.PlayStation
         public Platform Platform => new Platform
         {
             Name = "PlayStation Network",
-            Description = "PlayStation Network",            
+            Description = "The PlayStation Network (PSN) is an online gaming and digital storefront owned and operated by Sony Interactive Entertainment. " +
+                          "It was launched in 2006 as the online platform for the PlayStation 3 console, and it has been integrated into every PlayStation " +
+                           "console since (with the exception of the PlayStation Classic). It offers the ability to purchase digital titles, and until 2021 it " +
+                           "also offered digital media purchases of TV and movies, however this has since been discontinued with the rise of other streaming " +
+                           "services. PSN also offers a subscription service, PlayStation Plus, which is a competitor to Microsoft's Xbox Game Pass.",
             ExtendedInformation = "This integration requires your PSN 'NPSSO' token to fetch owned games from your profile. To obtain this, first " +
                                 @$"<a href=""{Constants.Authentication.UserLoginLink}"">log into the PlayStation network</a>. Once you are logged " +
                                 @$"in, you can retrieve your token from <a href=""{Constants.Authentication.NPSSOTokenLink}"">this</a> link.<br><br> " +
-                                  "Optionally, you can include any non-game titles (e.g. streaming services) in the results.",
+                                  "Note that only your 10 most recently played titles are exposed by the PSN API. These include non-game titles " +
+                                  "(e.g. streaming services). These titles can be included or excluded from the results.",
             Icon = "Playstation"
         };
 

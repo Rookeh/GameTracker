@@ -4,6 +4,7 @@
 @using Color = System.Drawing.Color
 @using GameTracker.Frontend.Helpers;
 @using GameTracker.Interfaces;
+@using GameTracker.Models.Enums;
 
 @inject IGameLibraryManager GameLibraryManager;
 @inject PreloadService PreloadService;
@@ -24,7 +25,7 @@ else
     <Accordion>
         <AccordionItem>
             <TitleTemplate>
-                <Icon Name="IconName.ClockHistory" Class="me-1"/> Overall Playtime
+                <Icon Name="IconName.ClockHistory" Class="me-1"/> Time Played
             </TitleTemplate>
             <Content>
                 <table>
@@ -41,6 +42,25 @@ else
                 </table>                
             </Content>
         </AccordionItem>
+        <AccordionItem>
+            <TitleTemplate>
+                <Icon Name="IconName.Controller" Class="me-1"/> Library Breakdown
+            </TitleTemplate>
+            <Content>
+                <table>
+                    <tr>
+                        <td>
+                            <DoughnutChart @ref="_genreChart" Width="400" Class="mb-4" />
+                            <span>By Genre</span>
+                        </td>
+                        <td>
+                            <DoughnutChart @ref="_platformChart" Width="400" Class="mb-4" />
+                            <span>By Platform</span>
+                        </td>
+                    </tr>
+                </table>
+            </Content>
+        </AccordionItem>
     </Accordion>    
 }
 
@@ -54,6 +74,12 @@ else
 
     private ChartData _hoursPlayedData = new ChartData();
     private DoughnutChart _hoursPlayedChart = new DoughnutChart();
+
+    private ChartData _platformData = new ChartData();
+    private DoughnutChart _platformChart = new DoughnutChart();    
+
+    private ChartData _genreData = new ChartData();
+    private DoughnutChart _genreChart = new DoughnutChart();    
 
     private DoughnutChartOptions _doughnutChartOptions = new DoughnutChartOptions();
     private bool _isAuthenticated;
@@ -81,19 +107,42 @@ else
             Responsive = true,
         };
 
+        SetupGenreChart();
         SetupHoursPlayedChart();
-        SetupPlayedUnplayedChart();        
+        SetupPlatformChart();
+        SetupPlayedUnplayedChart();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender && GameLibraryManager.Games.Any())
         {
-            await _playedUnplayedChart.InitializeAsync(_playedUnplayedData, _doughnutChartOptions);
+            await _genreChart.InitializeAsync(_genreData, _doughnutChartOptions);
             await _hoursPlayedChart.InitializeAsync(_hoursPlayedData, _doughnutChartOptions);
+            await _platformChart.InitializeAsync(_platformData, _doughnutChartOptions);
+            await _playedUnplayedChart.InitializeAsync(_playedUnplayedData, _doughnutChartOptions);
         }
 
         await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private void SetupGenreChart()
+    {
+        var grouped = GameLibraryManager.Games.SelectMany(game => game.Genres.Select(genre => new { game, genre }))
+                                              .GroupBy(x => x.genre)
+                                              .Select(group => new { Genre = group.Key, Games = group.Select(g => g.game).ToList() });
+
+        var chartDataSet = new DoughnutChartDataset()
+        {
+            Data = grouped.Select(g => Convert.ToDouble(g.Games.Count())).ToList(),
+            BackgroundColor = grouped.Select(g => ColourHelper.GetRandomColour().ToRgbString()).ToList()
+        };
+
+        _genreData = new ChartData()
+        {
+            Labels = grouped.Select(g => g.Genre.ToString()).ToList(),
+            Datasets = new List<IChartDataset>() { chartDataSet }
+        };
     }
 
     private void SetupHoursPlayedChart()
@@ -110,7 +159,7 @@ else
                 GameLibraryManager.Games.Count(g => g.Playtime != null && g.Playtime > TimeSpan.FromHours(100) && g.Playtime <= TimeSpan.FromHours(250)),
                 GameLibraryManager.Games.Count(g => g.Playtime != null && g.Playtime > TimeSpan.FromHours(250)),
             },
-                BackgroundColor = new List<string>
+            BackgroundColor = new List<string>
             {
                 ColourHelper.ChartColours.Neutral.ToRgbString(),
                 ColourHelper.ChartColours.Primary.ToRgbString(),
@@ -134,6 +183,25 @@ else
                 "> 100 to 250 hours",
                 "250+ hours"
             },
+            Datasets = new List<IChartDataset>() { chartDataSet }
+        };
+    }
+
+    private void SetupPlatformChart()
+    {
+        var grouped = GameLibraryManager.Games.SelectMany(game => game.Platforms.Select(platform => new { game, platformName = platform.Name }))
+                                              .GroupBy(x => x.platformName)
+                                              .Select(group => new { Platform = group.Key, Games = group.Select(g => g.game).ToList() });
+
+        var chartDataSet = new DoughnutChartDataset()
+        {
+            Data = grouped.Select(g => Convert.ToDouble(g.Games.Count())).ToList(),
+            BackgroundColor = grouped.Select(g => ColourHelper.GetRandomColour().ToRgbString()).ToList()
+        };
+
+        _platformData = new ChartData()
+        {
+            Labels = grouped.Select(g => g.Platform).ToList(),
             Datasets = new List<IChartDataset>() { chartDataSet }
         };
     }

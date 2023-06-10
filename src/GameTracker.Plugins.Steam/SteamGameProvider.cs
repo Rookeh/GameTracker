@@ -26,10 +26,15 @@ namespace GameTracker.Plugins.Steam
             _platform = new Platform
             {
                 Name = "Steam",
-                Description = "Steam is a video game digital distribution service and storefront from Valve. It was launched as a software client in September 2003 as a way for Valve to provide automatic updates for their games, and expanded to distributing third-party game publishers' titles in late 2005.",
+                Description = "Steam is a digital storefront and game delivery service for the PC developed and operated by Valve. It was launched in 2003 as an update mechanism " +
+                              "for early Valve titles such as Counter-Strike 1.6, and soon afterwards it was used as the launch platform for Valve's critically-acclaimed Half-Life 2. " +
+                              "Since then, its storefront expanded to include non-Valve titles, and within a decade it became a highly dominant presence on the Windows PC platform, with over " +
+                              "50,000 titles available for purchase as of December 2022. In 2010 support for Mac OS X was added, and in 2013 a Linux client was introduced. Since then, " +
+                              "Valve has placed a strong emphasis on cross-OS compatibility - going so far as to build their own Linux compatibility layer, Proton. This culminated in " +
+                              "2022 with the release of the Steam Deck, a handheld gaming computer running SteamOS - a custom Linux distribution based on Arch.",
                 Icon = "Steam",
-                ExtendedInformation = @"This integration requires your Steam Web API key for authentication, and your profile's SteamID64 value to fetch game data.<br><br> " +
-                                     @$"To obtain a Steam Web API key, visit <a href=""{Constants.Authentication.ApiKeyUrl}"">this</a> page. " +
+                ExtendedInformation = @"This integration requires your Steam Web API key for authentication, and your profile's SteamID64 value to fetchgame data.<br><br> " +
+                                     @$"To obtain a Steam Web API key, visit <a href=""{Constants.Authentication.ApiKeyUrl}"">this</a> page.<br><br> " +
                                      @$"To find your SteamID64 value, use a tool like <a href=""{Constants.Authentication.SteamIdUrl}"">steamid.io</a>.",                                
                 Links = new[]
                 {

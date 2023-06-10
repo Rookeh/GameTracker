@@ -58,11 +58,12 @@ namespace GameTracker.Plugins.Nintendo.Helpers
         {
             internal static Platform NintendoEShop => new Platform
             {
-                Name = "Nintendo EShop",
-                Description = "Nintendo EShop",
+                Name = "Nintendo eShop",
+                Description = "The Nintendo eShop is a digital distribution service for Nintendo's Switch console. It was formerly available on Nintendo's " + 
+                              "Wii U console and 3DS handheld, but access from these systems was discontinued in March 2023.",
                 Icon = "NintendoSwitch",
                 ExtendedInformation = "This integration cannot access your Nintendo account; therefore, you must specify " +
-                                      "which titles you own. Details for owned titles will be retrieved from the Nintendo EShop.<br><br> " +
+                                      "which titles you own. Details for owned titles will be retrieved from the Nintendo eShop.<br><br> " +
                                       "You must also specify your region code. Currently, only Europe (EU) and Japan (JP) region codes are supported.",
                 Links = new SocialLink[] 
                 {

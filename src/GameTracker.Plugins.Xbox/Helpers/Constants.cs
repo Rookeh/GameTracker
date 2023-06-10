@@ -12,21 +12,25 @@ namespace GameTracker.Plugins.Xbox.Helpers
             {
                 Name = "Xbox 360",
                 Icon = "Xbox",
-                Description = "The Xbox 360 is a home video game console developed by Microsoft."
+                Description = "The Xbox 360 is a seventh-generation game console, developed and released by Microsoft in 2005."
             };
 
             internal static Platform XboxOne => new Platform()
             {
                 Name = "Xbox One",
                 Icon = "Xbox",
-                Description = "The Xbox One S/X are home video game consoles developed by Microsoft."
+                Description = "The Xbox One is an eighth-generation game console, developed by Microsoft as a successor to the Xbox 360 and released in 2013. " +
+                              "Later in its lifecycle, two new variants were introduced; the Xbox One S and Xbox One X. The former replaced the original variant as an entry-level " + 
+                              "model and the One X was introduced as a higher-powered version, offering native 4K output and improved visual fidelity, to compete with the PlayStation 4 Pro."
             };
 
             internal static Platform XboxSeries => new Platform()
             {
                 Name = "Xbox Series",
                 Icon = "Xbox",
-                Description = "The Xbox Series S/X are home video game consoles developed by Microsoft."
+                Description = "The Xbox Series S and Series X are ninth-generation home video game consoles developed by Microsoft as successors to the Xbox One S and One X, respectively. " +
+                              "They were released in 2020. Both systems offer improvements in compute and graphical fidelity over their predecessors, although the Series X is the more " +
+                              "powerful of the two variants."
             };
         }
 
@@ -56,7 +60,11 @@ namespace GameTracker.Plugins.Xbox.Helpers
         {
             Name = "Xbox",
             Icon = "Xbox",
-            Description = "The Xbox network, formerly and still sometimes branded as Xbox Live, is an online multiplayer gaming and digital media delivery service created and operated by Microsoft.",
+            Description = "The Xbox network is an online gaming and digital storefront operated by Microsoft. It was previously branded as Xbox Live, " +
+                          "which was introduced in 2002 as an online platform for the original Xbox console. Starting with the Xbox 360, the service was " +
+                          "updated to include the ability to purchase digital titles, and over the years it has evolved further to offer apps, streaming content, " +
+                          "and a subscription service called Game Pass which offers subscribers access to a rotating library of titles at no additional cost. In " +
+                          "2020, Xbox Cloud Gaming was launched, offering the ability to stream Xbox titles to Xbox consoles and web browsers.",
             ExtendedInformation = @$"This integration uses <a href=""{OpenXBL.URL}"">OpenXBL</a> to fetch data from your Xbox profile. " +
                                   $@"You will need to sign up, and then copy the personal API key from your OpenXBL profile page.<br><br> " +
                                     "You can opt to include or exclude both Game Pass titles and legacy (Xbox 360 / Games for Windows Live) titles from the results.",

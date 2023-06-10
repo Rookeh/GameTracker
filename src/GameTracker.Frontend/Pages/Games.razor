@@ -28,6 +28,7 @@ else if (GameLibraryManager.Games == null || !GameLibraryManager.Games.Any())
 }
 else
 {
+    <Modal @ref="_modal" IsVerticallyCentered=true Size="ModalSize.Large" />
     <table class="table">
         <tr>
             <td>
@@ -125,7 +126,6 @@ else
             </td>
         </tr>
     </table>
-
     <Grid @ref="_gameGrid"
           AllowFiltering="false"
           AllowPaging="true"
@@ -138,19 +138,19 @@ else
           PaginationItemsTextFormat="@_paginationText"
           Responsive="true"
           TItem="GameRow">
-        <GridColumn TItem="GameRow" PropertyName="Game1" Filterable="false" Sortable="false">
+        <GridColumn TItem="GameRow" PropertyName="Game1" Filterable="false" Sortable="false" TextAlignment="Alignment.Center">
             <ChildContent>
-                <GameCell Game="@context.Game1" />
+                <GameCell Game="@context.Game1" Modal="@_modal" />
             </ChildContent>
         </GridColumn>
-        <GridColumn TItem="GameRow" PropertyName="Game2" Filterable="false" Sortable="false">
+        <GridColumn TItem="GameRow" PropertyName="Game2" Filterable="false" Sortable="false" TextAlignment="Alignment.Center">
             <ChildContent>
-                <GameCell Game="@context.Game2" />
+                <GameCell Game="@context.Game2" Modal="@_modal" />
             </ChildContent>
         </GridColumn>
-        <GridColumn TItem="GameRow" PropertyName="Game3" Filterable="false" Sortable="false">
+        <GridColumn TItem="GameRow" PropertyName="Game3" Filterable="false" Sortable="false" TextAlignment="Alignment.Center">
             <ChildContent>
-                <GameCell Game="@context.Game3" />
+                <GameCell Game="@context.Game3" Modal="@_modal" />
             </ChildContent>
         </GridColumn>
     </Grid>
@@ -163,6 +163,7 @@ else
 
     private FilterProperties _filterProperties = new();
     private Grid<GameRow> _gameGrid;
+    private Modal _modal;
 
     private bool _isAuthenticated;
     private bool _isInitializing;
