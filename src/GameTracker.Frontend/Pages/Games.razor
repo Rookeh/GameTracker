@@ -77,7 +77,7 @@ else
                 <Accordion>
                     <AccordionItem>
                         <TitleTemplate>
-                            <Icon Name="IconName.CodeSlash" Class="me-1"/> Studio Search...
+                            <Icon Name="IconName.CodeSlash" Class="me-1" /> Studio Search...
                         </TitleTemplate>
                         <Content>
                             <AutoComplete @bind-Value="_filterProperties.Studio"
@@ -188,7 +188,7 @@ else
         _isInitializing = false;
 
         _pageSize = 4;
-        _paginationText = $"1 to 12 of {FilteredGames.Count} games";
+        RefreshPaginationText(1, _pageSize, GameLibraryManager.Games.Count());
     }
 
     private async Task<AutoCompleteDataProviderResult<Game>> GameFilterProvider(AutoCompleteDataProviderRequest<Game> request)
@@ -200,6 +200,7 @@ else
     {
         var genres = GameLibraryManager.Games.SelectMany(g => g.Genres)
             .Distinct()
+            .OrderBy(g => g.ToString())
             .Select(g => new FilterableGenre { Name = g.ToString() })
             .ToList();
 
@@ -212,7 +213,11 @@ else
 
     private async Task<AutoCompleteDataProviderResult<Publisher>> PublisherFilterProvider(AutoCompleteDataProviderRequest<Publisher> request)
     {
-        var publishers = GameLibraryManager.Games.Where(g => g.Publisher != null).Select(g => g.Publisher).DistinctBy(p => p.Name);
+        var publishers = GameLibraryManager.Games.Where(g => g.Publisher != null)
+            .Select(g => g.Publisher)
+            .DistinctBy(p => p.Name)
+            .OrderBy(p => p.Name);
+
         return await Task.FromResult(new AutoCompleteDataProviderResult<Publisher>
         {
             Data = publishers,
@@ -222,7 +227,11 @@ else
 
     private async Task<AutoCompleteDataProviderResult<Studio>> StudioFilterProvider(AutoCompleteDataProviderRequest<Studio> request)
     {
-        var studios = GameLibraryManager.Games.Where(g => g.Studio != null).Select(g => g.Studio).DistinctBy(p => p.Name);
+        var studios = GameLibraryManager.Games.Where(g => g.Studio != null)
+            .Select(g => g.Studio)
+            .DistinctBy(s => s.Name)
+            .OrderBy(s => s.Name);
+
         return await Task.FromResult(new AutoCompleteDataProviderResult<Studio>
         {
             Data = studios,
@@ -269,7 +278,7 @@ else
 
             if (_filterProperties.LowerHours != null)
             {
-                var lower = TimeSpan.FromHours(_filterProperties.LowerHours.Value);                
+                var lower = TimeSpan.FromHours(_filterProperties.LowerHours.Value);
                 filteredGames = filteredGames.Where(g => g.Playtime != null && g.Playtime >= lower).ToList();
             }
 
@@ -293,11 +302,11 @@ else
         get
         {
             return FilteredGames.Chunk(3).Select(c => new GameRow
-                {
-                    Game1 = c[0],
-                    Game2 = c.Length >= 2 ? c[1] : null,
-                    Game3 = c.Length >= 3 ? c[2] : null
-                }).ToList();
+            {
+                Game1 = c[0],
+                Game2 = c.Length >= 2 ? c[1] : null,
+                Game3 = c.Length >= 3 ? c[2] : null
+            }).ToList();
         }
     }
 
@@ -357,9 +366,14 @@ else
     }
 
     private async Task OnGridUpdated(GridSettings gridSettings)
-    {       
-        int from = (gridSettings.PageNumber - 1) * (gridSettings.PageSize * 3) + 1;
-        int to = gridSettings.PageNumber * (gridSettings.PageSize * 3);
+    {
+        RefreshPaginationText(gridSettings.PageNumber, gridSettings.PageSize, FilteredGames.Count);
+    }
+
+    private void RefreshPaginationText(int pageNumber, int pageSize, int gameCount)
+    {
+        int from = (pageNumber - 1) * (pageSize * 3) + 1;
+        int to = pageNumber * (pageSize * 3);
         int total = FilteredGames.Count;
 
         if (to > total)
@@ -367,7 +381,7 @@ else
             to = total;
         }
 
-        _pageSize = gridSettings.PageSize;
+        _pageSize = pageSize;
         _paginationText = $"{from} to {to} of {total} games";
     }
 }

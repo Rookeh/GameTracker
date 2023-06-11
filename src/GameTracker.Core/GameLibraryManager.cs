@@ -1,7 +1,6 @@
 ﻿using GameTracker.Interfaces;
 using GameTracker.Interfaces.Data;
 using GameTracker.Models;
-using System.Runtime.ExceptionServices;
 
 namespace GameTracker.Core
 {
@@ -18,7 +17,9 @@ namespace GameTracker.Core
             _providerGameDictionary = new Dictionary<Guid, IEnumerable<Game>>();
         }
 
-        public IEnumerable<Game> Games => _providerGameDictionary.Values.SelectMany(g => g);
+        public IEnumerable<Game> Games => _providerGameDictionary.Values.SelectMany(g => g)
+                                            .OrderBy(g => g.Title)
+                                            .ToList();
 
         public async Task RefreshProvider(string userId, Guid providerId, params object[] parameters)
         {

@@ -54,8 +54,18 @@ else
                             <span>By Genre</span>
                         </td>
                         <td>
+                            <DoughnutChart @ref="_multiPlayerChart" Width="400" Class="mb-4" />
+                            <span>By Multiplayer Type</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
                             <DoughnutChart @ref="_platformChart" Width="400" Class="mb-4" />
                             <span>By Platform</span>
+                        </td>
+                        <td>
+                            <DoughnutChart @ref="_storeFrontChart" Width="400" Class="mb-4" />
+                            <span>By Storefront</span>
                         </td>
                     </tr>
                 </table>
@@ -79,7 +89,13 @@ else
     private DoughnutChart _platformChart = new DoughnutChart();    
 
     private ChartData _genreData = new ChartData();
-    private DoughnutChart _genreChart = new DoughnutChart();    
+    private DoughnutChart _genreChart = new DoughnutChart();
+
+    private ChartData _multiPlayerData = new ChartData();
+    private DoughnutChart _multiPlayerChart = new DoughnutChart();
+
+    private ChartData _storeFrontData = new ChartData();
+    private DoughnutChart _storeFrontChart = new DoughnutChart();
 
     private DoughnutChartOptions _doughnutChartOptions = new DoughnutChartOptions();
     private bool _isAuthenticated;
@@ -109,18 +125,22 @@ else
 
         SetupGenreChart();
         SetupHoursPlayedChart();
+        SetupMultiplayerChart();
         SetupPlatformChart();
         SetupPlayedUnplayedChart();
+        SetupStoreFrontChart();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender && GameLibraryManager.Games.Any())
-        {
+        {            
             await _genreChart.InitializeAsync(_genreData, _doughnutChartOptions);
             await _hoursPlayedChart.InitializeAsync(_hoursPlayedData, _doughnutChartOptions);
+            await _multiPlayerChart.InitializeAsync(_multiPlayerData, _doughnutChartOptions);
             await _platformChart.InitializeAsync(_platformData, _doughnutChartOptions);
             await _playedUnplayedChart.InitializeAsync(_playedUnplayedData, _doughnutChartOptions);
+            await _storeFrontChart.InitializeAsync(_storeFrontData, _doughnutChartOptions);
         }
 
         await base.OnAfterRenderAsync(firstRender);
@@ -187,6 +207,25 @@ else
         };
     }
 
+    private void SetupMultiplayerChart()
+    {
+        var grouped = GameLibraryManager.Games.SelectMany(game => game.MultiplayerAvailability.Select(multiplayer => new { game, multiplayer }))
+                                              .GroupBy(x => x.multiplayer)
+                                              .Select(group => new { Multiplayer = group.Key, Games = group.Select(g => g.game).ToList() });
+
+        var chartDataSet = new DoughnutChartDataset()
+        {
+            Data = grouped.Select(g => Convert.ToDouble(g.Games.Count())).ToList(),
+            BackgroundColor = grouped.Select(g => ColourHelper.GetRandomColour().ToRgbString()).ToList()
+        };
+
+        _multiPlayerData = new ChartData()
+        {
+            Labels = grouped.Select(g => g.Multiplayer.ToString()).ToList(),
+            Datasets = new List<IChartDataset>() { chartDataSet }
+        };
+    }
+
     private void SetupPlatformChart()
     {
         var grouped = GameLibraryManager.Games.SelectMany(game => game.Platforms.Select(platform => new { game, platformName = platform.Name }))
@@ -227,6 +266,23 @@ else
         _playedUnplayedData = new ChartData()
         {
             Labels = new List<string> { "No data", "Unplayed", "Played" },
+            Datasets = new List<IChartDataset>() { chartDataSet }
+        };
+    }
+
+    private void SetupStoreFrontChart()
+    {
+        var grouped = GameLibraryManager.Games.GroupBy(g => g.GetType().Name);
+
+        var chartDataSet = new DoughnutChartDataset()
+        {
+            Data = grouped.Select(g => Convert.ToDouble(g.Count())).ToList(),
+            BackgroundColor = grouped.Select(g => ColourHelper.GetRandomColour().ToRgbString()).ToList()
+        };
+
+        _storeFrontData = new ChartData()
+        {
+            Labels = grouped.Select(g => g.Key).ToList(),
             Datasets = new List<IChartDataset>() { chartDataSet }
         };
     }

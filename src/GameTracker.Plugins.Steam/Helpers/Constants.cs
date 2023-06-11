@@ -58,8 +58,8 @@ namespace GameTracker.Plugins.Steam.Helpers
                 ["Shared/Split Screen PvP"] = MultiplayerAvailability.Local,
                 ["Shared/Split Screen Co-op"] = MultiplayerAvailability.Local,
                 ["Shared/Split Screen"] = MultiplayerAvailability.Local,
-                ["LAN PvP"] = MultiplayerAvailability.LocalNetwork,
-                ["LAN Co-op"] = MultiplayerAvailability.LocalNetwork
+                ["LAN PvP"] = MultiplayerAvailability.LAN,
+                ["LAN Co-op"] = MultiplayerAvailability.LAN
             };
 
             internal static Dictionary<string, GameplayMode> SteamMultiplayerModeMappings => new Dictionary<string, GameplayMode>

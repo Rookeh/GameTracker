@@ -4,7 +4,7 @@
     {
         Always,
         Online,
-        LocalNetwork,
+        LAN,
         Local,
         None
     }

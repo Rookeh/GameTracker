@@ -33,7 +33,7 @@ namespace GameTracker.Plugins.Steam
                               "Valve has placed a strong emphasis on cross-OS compatibility - going so far as to build their own Linux compatibility layer, Proton. This culminated in " +
                               "2022 with the release of the Steam Deck, a handheld gaming computer running SteamOS - a custom Linux distribution based on Arch.",
                 Icon = "Steam",
-                ExtendedInformation = @"This integration requires your Steam Web API key for authentication, and your profile's SteamID64 value to fetchgame data.<br><br> " +
+                ExtendedInformation = @"This integration requires your Steam Web API key for authentication, and your profile's SteamID64 value to fetch game data.<br><br> " +
                                      @$"To obtain a Steam Web API key, visit <a href=""{Constants.Authentication.ApiKeyUrl}"">this</a> page.<br><br> " +
                                      @$"To find your SteamID64 value, use a tool like <a href=""{Constants.Authentication.SteamIdUrl}"">steamid.io</a>.",                                
                 Links = new[]
