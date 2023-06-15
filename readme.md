@@ -40,7 +40,7 @@ Currently, this project supports importing game libraries from the following pro
  - [Steam](src/Plugins/GameTracker.Plugins.Steam/readme.md)
  - [Xbox](src/Plugins/GameTracker.Plugins.Xbox/readme.md)
 
-Not all game providers expose the same level of detail, and there are some caveats that apply to certain providers. For more details, see the readme files within each provider's plugin directory.
+Not all game providers expose the same level of detail, and there are some caveats that apply to certain providers. For more details, see the links above.
 
 ## What works (mostly!):
 
