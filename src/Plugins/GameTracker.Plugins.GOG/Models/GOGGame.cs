@@ -7,12 +7,22 @@ namespace GameTracker.Plugins.GOG.Models
 {
     public class GOGGame : Game
     {
-        private readonly GameDetails _gameDetails;
+        private readonly string _description;
+        private readonly string _imageUrl;
+        private readonly Platform[] _platforms;
+        private readonly DateTime? _releaseDate;
+        private readonly string _title;
 
         internal GOGGame(GameDetails gameDetails)
         {
             PlatformId = gameDetails.Id;
-            _gameDetails = gameDetails;
+            _description = gameDetails.Description?.Full ?? string.Empty;
+            _imageUrl = gameDetails.Images?.Logo2x ?? "img\\placeholder.png";
+            _platforms = gameDetails.ContentSystemCompatibility.FromContentSystemCompatibility();
+            _releaseDate = string.IsNullOrEmpty(gameDetails.ReleaseDate)
+                ? null
+                : DateTime.Parse(gameDetails.ReleaseDate);
+            _title = gameDetails.Title;
         }
 
         public override Task Preload()
@@ -22,7 +32,7 @@ namespace GameTracker.Plugins.GOG.Models
 
         public override ControlScheme[] ControlSchemes => Array.Empty<ControlScheme>() ;
 
-        public override string Description => _gameDetails.Description?.Full ?? string.Empty;
+        public override string Description => _description;
 
         public override GameplayMode[] GameplayModes => Array.Empty<GameplayMode>();
 
@@ -30,7 +40,7 @@ namespace GameTracker.Plugins.GOG.Models
 
         public override Image Image => new Image
         {
-            Url = _gameDetails.Images?.Logo2x ?? "img\\placeholder.png",
+            Url = _imageUrl,
             Width = 200,
             Height = 120
         };
@@ -47,15 +57,13 @@ namespace GameTracker.Plugins.GOG.Models
 
         public override DateTime? LastPlayed => null;
 
-        public override Platform[] Platforms => _gameDetails.ContentSystemCompatibility.FromContentSystemCompatibility();
+        public override Platform[] Platforms => _platforms;
 
         public override TimeSpan? Playtime => null;
 
         public override Publisher? Publisher => null;
 
-        public override DateTime? ReleaseDate => string.IsNullOrEmpty(_gameDetails.ReleaseDate) 
-            ? null 
-            : DateTime.Parse(_gameDetails.ReleaseDate);
+        public override DateTime? ReleaseDate => _releaseDate;
 
         public override Review[] Reviews => Array.Empty<Review>();
 
@@ -65,7 +73,7 @@ namespace GameTracker.Plugins.GOG.Models
 
         public override string[] Tags => Array.Empty<string>();
 
-        public override string Title => _gameDetails.Title;
+        public override string Title => _title;
 
     }
 }

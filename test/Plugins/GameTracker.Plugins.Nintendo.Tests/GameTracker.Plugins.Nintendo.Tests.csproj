@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\GameTracker.Plugins.Nintendo\GameTracker.Plugins.Nintendo.csproj" />
+    <ProjectReference Include="..\..\..\src\Plugins\GameTracker.Plugins.Nintendo\GameTracker.Plugins.Nintendo.csproj" />
   </ItemGroup>
 
 </Project>

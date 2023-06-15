@@ -24,13 +24,13 @@
     <ProjectReference Include="..\GameTracker.Core\GameTracker.Core.csproj" />
     <ProjectReference Include="..\GameTracker.Data\GameTracker.Data.csproj" />
     <ProjectReference Include="..\GameTracker.Interfaces\GameTracker.Interfaces.csproj" />
-    <ProjectReference Include="..\GameTracker.Plugins.Dummy\GameTracker.Plugins.Dummy.csproj" />
-    <ProjectReference Include="..\GameTracker.Plugins.EpicGames\GameTracker.Plugins.EpicGames.csproj" />
-    <ProjectReference Include="..\GameTracker.Plugins.GOG\GameTracker.Plugins.GOG.csproj" />
-    <ProjectReference Include="..\GameTracker.Plugins.Nintendo\GameTracker.Plugins.Nintendo.csproj" />
-    <ProjectReference Include="..\GameTracker.Plugins.PlayStation\GameTracker.Plugins.PlayStation.csproj" />
-    <ProjectReference Include="..\GameTracker.Plugins.Steam\GameTracker.Plugins.Steam.csproj" />
-    <ProjectReference Include="..\GameTracker.Plugins.Xbox\GameTracker.Plugins.Xbox.csproj" />
+    <ProjectReference Include="..\Plugins\GameTracker.Plugins.Dummy\GameTracker.Plugins.Dummy.csproj" />
+    <ProjectReference Include="..\Plugins\GameTracker.Plugins.EpicGames\GameTracker.Plugins.EpicGames.csproj" />
+    <ProjectReference Include="..\Plugins\GameTracker.Plugins.GOG\GameTracker.Plugins.GOG.csproj" />
+    <ProjectReference Include="..\Plugins\GameTracker.Plugins.Nintendo\GameTracker.Plugins.Nintendo.csproj" />
+    <ProjectReference Include="..\Plugins\GameTracker.Plugins.PlayStation\GameTracker.Plugins.PlayStation.csproj" />
+    <ProjectReference Include="..\Plugins\GameTracker.Plugins.Steam\GameTracker.Plugins.Steam.csproj" />
+    <ProjectReference Include="..\Plugins\GameTracker.Plugins.Xbox\GameTracker.Plugins.Xbox.csproj" />
   </ItemGroup>
 
   <ItemGroup>

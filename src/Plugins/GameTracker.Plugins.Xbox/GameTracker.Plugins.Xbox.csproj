@@ -7,7 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GameTracker.Interfaces\GameTracker.Interfaces.csproj" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\GameTracker.Interfaces\GameTracker.Interfaces.csproj" />
     <ProjectReference Include="..\GameTracker.Plugins.Common\GameTracker.Plugins.Common.csproj" />
   </ItemGroup>
 

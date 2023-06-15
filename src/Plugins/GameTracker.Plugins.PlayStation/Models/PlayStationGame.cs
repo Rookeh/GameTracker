@@ -8,14 +8,22 @@ namespace GameTracker.Plugins.PlayStation.Models
 {
     public class PlayStationGame : Game
     {
-        private readonly PSNGame _psnGame;
-        private readonly string _locale;
+        private readonly string _imageUrl;
+        private readonly DateTime? _lastPlayed;
+        private readonly Platform[] _platforms;
+        private readonly string _launchUrl;
+        private readonly string _title;
 
         internal PlayStationGame(PSNGame psnGame)
-        {
-            _locale = CultureInfo.CurrentCulture.Name.ToLower();
-            _psnGame = psnGame;
+        {            
             PlatformId = Convert.ToInt32(psnGame.ConceptId);
+            _imageUrl = psnGame.Image.URL;
+            _lastPlayed = psnGame.LastPlayedDateTime;
+            _launchUrl = string.IsNullOrEmpty(psnGame.ProductId)
+                ? string.Format(Constants.LaunchCommands.Media, CultureInfo.CurrentCulture.Name.ToLower(), psnGame.Platform.ToLower())
+                : string.Format(Constants.LaunchCommands.Game, CultureInfo.CurrentCulture.Name.ToLower(), psnGame.ProductId);
+            _platforms = GetPlatforms(psnGame.Platform).ToArray();
+            _title = psnGame.Name;
         }
 
         public override Task Preload()
@@ -33,24 +41,24 @@ namespace GameTracker.Plugins.PlayStation.Models
 
         public override Image Image => new Image
         {
-            Url = _psnGame.Image.URL,
+            Url = _imageUrl,
             Width = 338,
             Height = 338
         };
 
-        public override DateTime? LastPlayed => _psnGame.LastPlayedDateTime;
+        public override DateTime? LastPlayed => _lastPlayed;
 
         public override LaunchCommand LaunchCommand => new LaunchCommand
         {
             Icon = "Playstation",
             NewTab = true,
             Text = "View in PlayStation Store",
-            Url = GetLaunchUri()
+            Url = _launchUrl
         };
 
         public override MultiplayerAvailability[] MultiplayerAvailability => Array.Empty<MultiplayerAvailability>();        
 
-        public override Platform[] Platforms => GetPlatforms().ToArray();
+        public override Platform[] Platforms => _platforms;
 
         public override TimeSpan? Playtime => null;
 
@@ -66,20 +74,13 @@ namespace GameTracker.Plugins.PlayStation.Models
 
         public override string[] Tags => Array.Empty<string>();
 
-        public override string Title => _psnGame.Name;
+        public override string Title => _title;
 
         #region Private methods
 
-        private string GetLaunchUri()
+        private static IEnumerable<Platform> GetPlatforms(string platform)
         {
-            return string.IsNullOrEmpty(_psnGame.ProductId)
-                ? string.Format(Constants.LaunchCommands.Media, _locale, _psnGame.Platform.ToLower())
-                : string.Format(Constants.LaunchCommands.Game, _locale, _psnGame.ProductId);
-        }
-
-        private IEnumerable<Platform> GetPlatforms()
-        {
-            switch (_psnGame.Platform)
+            switch (platform)
             {
                 case Constants.Consoles.PS3:
                     yield return Constants.ConsolePlatforms.PlayStation3;

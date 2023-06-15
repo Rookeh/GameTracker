@@ -24,8 +24,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\GameTracker.Plugins.Common\GameTracker.Plugins.Common.csproj" />
-    <ProjectReference Include="..\..\..\src\GameTracker.Plugins.Xbox\GameTracker.Plugins.Xbox.csproj" />
+    <ProjectReference Include="..\..\..\src\Plugins\GameTracker.Plugins.Common\GameTracker.Plugins.Common.csproj" />
+    <ProjectReference Include="..\..\..\src\Plugins\GameTracker.Plugins.Xbox\GameTracker.Plugins.Xbox.csproj" />
   </ItemGroup>
 
 </Project>

@@ -32,14 +32,14 @@ else
                     <tr>
                         <td>
                             <div>
-                                <DoughnutChart @ref="_playedUnplayedChart" Width="400" Class="mb-4" />
-                                <span class="chart-label">Played vs Unplayed</span>
+                                <span class="chart-label"><h3>Played vs Unplayed</h3></span>
+                                <DoughnutChart @ref="_playedUnplayedChart" Width="400" Class="mb-4" />                                
                             </div>
                         </td>
                         <td>
                             <div>
-                                <DoughnutChart @ref="_hoursPlayedChart" Width="400" Class="mb-4" />
-                                <span class="chart-label">Hours Played</span>
+                                <span class="chart-label"><h3>Hours Played</h3></span>
+                                <DoughnutChart @ref="_hoursPlayedChart" Width="400" Class="mb-4" />                                
                             </div>
                         </td>
                     </tr>
@@ -54,30 +54,30 @@ else
                 <table>
                     <tr>
                         <td>
+                            <span class="chart-label"><h3>By Genre</h3></span>
                             <div>
                                 <DoughnutChart @ref="_genreChart" Width="400" Class="mb-4" />
-                            </div>
-                            <span class="chart-label">By Genre</span>
+                            </div>                            
                         </td>
                         <td>
+                            <span class="chart-label"><h3>By Multiplayer Type</h3></span>
                             <div>
                                 <DoughnutChart @ref="_multiPlayerChart" Width="400" Class="mb-4" />
-                            </div>
-                            <span class="chart-label">By Multiplayer Type</span>
+                            </div>                            
                         </td>
                     </tr>
                     <tr>
                         <td>
+                            <span class="chart-label"><h3>By Platform</h3></span>
                             <div>
                                 <DoughnutChart @ref="_platformChart" Width="400" Class="mb-4" />
-                            </div>
-                            <span class="chart-label">By Platform</span>
+                            </div>                            
                         </td>
                         <td>
+                            <span class="chart-label"><h3>By Storefront</h3></span>
                             <div>
                                 <DoughnutChart @ref="_storeFrontChart" Width="400" Class="mb-4" />
-                            </div>
-                            <span class="chart-label">By Storefront</span>
+                            </div>                            
                         </td>
                     </tr>
                 </table>

@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\GameTracker.Plugins.EpicGames\GameTracker.Plugins.EpicGames.csproj" />
+    <ProjectReference Include="..\..\..\src\Plugins\GameTracker.Plugins.EpicGames\GameTracker.Plugins.EpicGames.csproj" />
   </ItemGroup>
 
 </Project>

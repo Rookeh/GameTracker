@@ -7,12 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="EpicGamesStoreNET" Version="1.0.2" />
+    <PackageReference Include="System.Text.Json" Version="6.0.7" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GameTracker.Interfaces\GameTracker.Interfaces.csproj" />
-    <ProjectReference Include="..\GameTracker.Models\GameTracker.Models.csproj" />
+    <ProjectReference Include="..\..\GameTracker.Interfaces\GameTracker.Interfaces.csproj" />
+    <ProjectReference Include="..\GameTracker.Plugins.Common\GameTracker.Plugins.Common.csproj" />
   </ItemGroup>
 
 </Project>

@@ -7,10 +7,12 @@
              DataProvider="SidebarDataProvider" />
 
     <main>
-        <div class="bb-top-row px-4 d-flex justify-content-end">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-        </div>
-
+        @if (_isAuthenticated)
+        {
+            <div class="bb-top-row px-4 d-flex justify-content-end">
+                <a href="/Identity/Account/Manage/Index" target="_blank">Manage Account</a>
+            </div>
+        }
         <article class="content px-4">
             <div class="py-2">
                 @Body
@@ -25,9 +27,16 @@
 @code {
     private Sidebar sidebar = default!;
     private List<NavItem> navItems = default!;
+    private bool _isAuthenticated = false;
 
     [CascadingParameter]
-    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    private Task<AuthenticationState> AuthenticationStateTask { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authResult = await AuthenticationStateTask;
+        _isAuthenticated = authResult?.User?.Identity?.IsAuthenticated ?? false;
+    }
 
     private async Task<SidebarDataProviderResult> SidebarDataProvider(SidebarDataProviderRequest request)
     {
@@ -39,22 +48,18 @@
 
     private List<NavItem> GetNavItems()
     {
-        authenticationStateTask.Wait();
-        var authState = authenticationStateTask.Result;
-
         navItems = new List<NavItem>
         {
             new NavItem { Id = "1", Href = "/", IconName = IconName.HouseDoorFill, Text = "Home", Match=NavLinkMatch.All},
         };
 
-        if (authState?.User?.Identity?.IsAuthenticated ?? false)
+        if (_isAuthenticated)
         {
             navItems.AddRange(new List<NavItem>
             {
-                new NavItem { Id = "4", Href = "/Identity/Account/Manage/Index", IconName = IconName.PersonGear, Text = "Account", Match=NavLinkMatch.All },
-                new NavItem { Id = "5", Href = "/gameproviders", IconName = IconName.Plugin, Text = "Game Providers"},
-                new NavItem { Id = "6", Href = "/games", IconName = IconName.Controller, Text = "Game Library"},
-                new NavItem { Id = "7", Href = "/stats", IconName = IconName.PieChart, Text = "Stats for Nerds"}
+                new NavItem { Id = "4", Href = "/gameproviders", IconName = IconName.Plugin, Text = "Game Providers"},
+                new NavItem { Id = "5", Href = "/games", IconName = IconName.Controller, Text = "Game Library"},
+                new NavItem { Id = "6", Href = "/stats", IconName = IconName.PieChart, Text = "Stats for Nerds"}
             });
         }
         else

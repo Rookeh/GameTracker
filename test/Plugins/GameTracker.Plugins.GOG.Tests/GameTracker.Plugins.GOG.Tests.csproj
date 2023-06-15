@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\GameTracker.Plugins.GOG\GameTracker.Plugins.GOG.csproj" />
+    <ProjectReference Include="..\..\..\src\Plugins\GameTracker.Plugins.GOG\GameTracker.Plugins.GOG.csproj" />
   </ItemGroup>
 
 </Project>

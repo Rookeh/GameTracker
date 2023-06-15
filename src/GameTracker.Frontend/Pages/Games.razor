@@ -285,7 +285,7 @@ else
             if (_filterProperties.UpperHours != null)
             {
                 var upper = TimeSpan.FromHours(_filterProperties.UpperHours.Value);
-                filteredGames = FilteredGames.Where(g => g.Playtime != null && g.Playtime <= upper).ToList();
+                filteredGames = filteredGames.Where(g => g.Playtime != null && g.Playtime <= upper).ToList();
             }
 
             if (_filterProperties.MinimumReviewScore != null)

@@ -7,7 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GameTracker.Interfaces\GameTracker.Interfaces.csproj" />
+    <ProjectReference Include="..\..\GameTracker.Interfaces\GameTracker.Interfaces.csproj" />
+    <ProjectReference Include="..\GameTracker.Plugins.Common\GameTracker.Plugins.Common.csproj" />
   </ItemGroup>
 
 </Project>

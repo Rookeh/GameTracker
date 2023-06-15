@@ -7,11 +7,19 @@ namespace GameTracker.Plugins.Nintendo.Models
 {
     public class JPNintendoGame : Game
     {
-        private readonly TitleInfoListTitleInfo _titleInfo;
+        private readonly string _imageUrl;
+        private readonly LaunchCommand _launchCommand;
+        private readonly DateTime? _releaseDate;
+        private readonly Studio? _studio;
+        private readonly string _title;
 
         public JPNintendoGame(TitleInfoListTitleInfo titleInfo)
         {
-            _titleInfo = titleInfo;
+            _imageUrl = titleInfo.ScreenshotImgURL;
+            _launchCommand = JPGameHelpers.LaunchCommandFromUrl(titleInfo.LinkURL);
+            _releaseDate = JPGameHelpers.ReleaseDateFromSalesDateString(titleInfo.SalesDate);
+            _studio = JPGameHelpers.StudioFromMakerName(titleInfo.MakerName);
+            _title = titleInfo.TitleName;
         }
 
         public override ControlScheme[] ControlSchemes => Array.Empty<ControlScheme>();
@@ -26,12 +34,12 @@ namespace GameTracker.Plugins.Nintendo.Models
         {
             Width = 480,
             Height = 270,
-            Url = _titleInfo.ScreenshotImgURL
+            Url = _imageUrl
         };
 
         public override DateTime? LastPlayed => null;
 
-        public override LaunchCommand LaunchCommand => JPGameHelpers.LaunchCommandFromUrl(_titleInfo.LinkURL);
+        public override LaunchCommand LaunchCommand => _launchCommand;
 
         public override MultiplayerAvailability[] MultiplayerAvailability => Array.Empty<MultiplayerAvailability>();
 
@@ -41,17 +49,17 @@ namespace GameTracker.Plugins.Nintendo.Models
 
         public override Publisher? Publisher => null;
 
-        public override DateTime? ReleaseDate => JPGameHelpers.ReleaseDateFromSalesDateString(_titleInfo.SalesDate);
+        public override DateTime? ReleaseDate => _releaseDate;
 
         public override Review[] Reviews => Array.Empty<Review>();
 
         public override string StorefrontName => "Nintendo eShop";
 
-        public override Studio? Studio => JPGameHelpers.StudioFromMakerName(_titleInfo.MakerName);
+        public override Studio? Studio => _studio;
 
         public override string[] Tags => Array.Empty<string>();
 
-        public override string Title => _titleInfo.TitleName;
+        public override string Title => _title;
 
         public override Task Preload()
         {

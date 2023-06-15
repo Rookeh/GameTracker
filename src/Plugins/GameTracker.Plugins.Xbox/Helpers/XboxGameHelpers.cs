@@ -26,6 +26,27 @@ namespace GameTracker.Plugins.Xbox.Helpers
             }
         }
 
+        internal static Image GetImageFromUrl(string url)
+        {
+            return new Image
+            {
+                Url = url,
+                Width = 310,
+                Height = 310
+            };
+        }
+
+        internal static LaunchCommand GetLaunchCommand(string pfn)
+        {
+            return new LaunchCommand
+            {
+                Icon = "Xbox",
+                NewTab = false,
+                Text = "Launch via Microsoft Store",
+                Url = $"ms-windows-store://pdp/?PFN={pfn}"
+            };
+        }
+
         internal static IEnumerable<Platform> GetPlatforms(string[] devices)
         {
             foreach (var device in devices)

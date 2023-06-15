@@ -8,13 +8,27 @@ namespace GameTracker.Plugins.EpicGames.Models
 {
     public class EpicGame : Game
     {
-        private readonly Element _element;
+        private readonly string _description;
+        private readonly string _imageUrl;
+        private readonly string _publisherName;
+        private readonly string? _studioName; 
+        private readonly DateTime _releaseDate;
+        private readonly string _title;
+        private readonly string _namespace;
+        private readonly string _urlSlug;
 
         internal EpicGame(Element element)
         {
             var hexBytes = Convert.FromHexString(element.Id);
             PlatformId = BitConverter.ToInt32(hexBytes);
-            _element = element;
+            _description = element.Description;
+            _imageUrl = element.KeyImages?.FirstOrDefault(i => i.Type == "OfferImageWide")?.Url ?? "img//placeholder.png";
+            _namespace = element.Namespace;
+            _publisherName = element.Seller.Name;
+            _releaseDate = element.EffectiveDate;                        
+            _studioName = element.CustomAttributes.FirstOrDefault(ca => ca.Key == "developerName")?.Value ?? null;
+            _title = element.Title;
+            _urlSlug = element.UrlSlug;
         }
 
         public override Task Preload()
@@ -24,7 +38,7 @@ namespace GameTracker.Plugins.EpicGames.Models
 
         public override ControlScheme[] ControlSchemes => Array.Empty<ControlScheme>();
 
-        public override string Description => _element.Description;
+        public override string Description => _description;
 
         public override GameplayMode[] GameplayModes => Array.Empty<GameplayMode>();
 
@@ -32,7 +46,7 @@ namespace GameTracker.Plugins.EpicGames.Models
 
         public override Image Image => new Image
         {
-            Url = _element.KeyImages?.FirstOrDefault(i => i.Type == "OfferImageWide")?.Url ?? "img//placeholder.png",
+            Url = _imageUrl,
             Width = 460,
             Height = 259
         };
@@ -47,9 +61,9 @@ namespace GameTracker.Plugins.EpicGames.Models
 
         public override TimeSpan? Playtime => null;
 
-        public override Publisher? Publisher => new Publisher { Name = _element.Seller.Name };
+        public override Publisher? Publisher => new Publisher { Name = _publisherName };
 
-        public override DateTime? ReleaseDate => _element.EffectiveDate;
+        public override DateTime? ReleaseDate => _releaseDate;
 
         public override Review[] Reviews => Array.Empty<Review>();
 
@@ -59,18 +73,18 @@ namespace GameTracker.Plugins.EpicGames.Models
 
         public override string[] Tags => Array.Empty<string>();
 
-        public override string Title => _element.Title;
+        public override string Title => _title;
 
         #region Private methods
 
         private LaunchCommand GetLaunchCommand()
         {
-            bool isLaunchable = !Guid.TryParse(_element.Namespace, out var _);            
+            bool isLaunchable = !Guid.TryParse(_namespace, out var _);            
 
             if (isLaunchable)
             {
                 var textInfo = CultureInfo.InvariantCulture.TextInfo;
-                var nameSpace = textInfo.ToTitleCase(_element.Namespace);
+                var nameSpace = textInfo.ToTitleCase(_namespace);
 
                 return new LaunchCommand
                 {
@@ -88,15 +102,14 @@ namespace GameTracker.Plugins.EpicGames.Models
                 Icon = "Bag",
                 NewTab = true,
                 Text = "Open in Epic Games Store",
-                Url = $"https://store.epicgames.com/{locale}/p/{_element.UrlSlug}"
+                Url = $"https://store.epicgames.com/{locale}/p/{_urlSlug}"
             };
         }
 
         private Studio? GetStudio()
         {
-            var developerAttribute = _element.CustomAttributes.FirstOrDefault(ca => ca.Key == "developerName");
-            return developerAttribute != null 
-                ? new Studio { Name = developerAttribute.Value } 
+            return !string.IsNullOrEmpty(_studioName)
+                ? new Studio { Name = _studioName } 
                 : null;
         }
 
