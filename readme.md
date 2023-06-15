@@ -33,12 +33,12 @@ You need to register an account first (use any email and password you like, it d
 
 Currently, this project supports importing game libraries from the following providers:
 
- - Epic Games
- - GOG
- - Nintendo eShop
- - PlayStation Network
- - Steam
- - Xbox
+ - [Epic Games](src/Plugins/GameTracker.Plugins.EpicGames/readme.md)
+ - [GOG](src/Plugins/GameTracker.Plugins.GOG/readme.md)
+ - [Nintendo eShop](src/Plugins/GameTracker.Plugins.Nintendo/readme.md)
+ - [PlayStation Network](src/Plugins/GameTracker.Plugins.PlayStation/readme.md)
+ - [Steam](src/Plugins/GameTracker.Plugins.Steam/readme.md)
+ - [Xbox](src/Plugins/GameTracker.Plugins.Xbox/readme.md)
 
 Not all game providers expose the same level of detail, and there are some caveats that apply to certain providers. For more details, see the readme files within each provider's plugin directory.
 
