@@ -22,7 +22,7 @@ namespace GameTracker.Plugins.Nintendo.Models
             _title = titleInfo.TitleName;
         }
 
-        public override ControlScheme[] ControlSchemes => Array.Empty<ControlScheme>();
+        public override ControlScheme[] ControlSchemes => new[] { ControlScheme.Controller };
 
         public override string Description => string.Empty;
 
