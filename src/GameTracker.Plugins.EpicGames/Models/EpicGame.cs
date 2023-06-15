@@ -53,6 +53,8 @@ namespace GameTracker.Plugins.EpicGames.Models
 
         public override Review[] Reviews => Array.Empty<Review>();
 
+        public override string StorefrontName => "Epic";
+
         public override Studio? Studio => GetStudio();
 
         public override string[] Tags => Array.Empty<string>();
@@ -75,7 +77,7 @@ namespace GameTracker.Plugins.EpicGames.Models
                     Icon = "Controller",
                     NewTab = false,
                     Text = "Launch via Epic Games Launcher",
-                    Uri = $"com.epicgames.launcher://apps/{nameSpace}?action=launch&silent=true"
+                    Url = $"com.epicgames.launcher://apps/{nameSpace}?action=launch&silent=true"
                 };
             }
 
@@ -86,7 +88,7 @@ namespace GameTracker.Plugins.EpicGames.Models
                 Icon = "Bag",
                 NewTab = true,
                 Text = "Open in Epic Games Store",
-                Uri = $"https://store.epicgames.com/{locale}/p/{_element.UrlSlug}"
+                Url = $"https://store.epicgames.com/{locale}/p/{_element.UrlSlug}"
             };
         }
 

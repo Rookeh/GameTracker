@@ -25,53 +25,65 @@ else
     <Accordion>
         <AccordionItem>
             <TitleTemplate>
-                <Icon Name="IconName.ClockHistory" Class="me-1"/> Time Played
+                <Icon Name="IconName.ClockHistory" Class="me-1" /> Time Played
             </TitleTemplate>
             <Content>
                 <table>
                     <tr>
                         <td>
-                            <DoughnutChart @ref="_playedUnplayedChart" Width="400" Class="mb-4" />
-                            <span>Played vs Unplayed</span>
+                            <div>
+                                <DoughnutChart @ref="_playedUnplayedChart" Width="400" Class="mb-4" />
+                                <span class="chart-label">Played vs Unplayed</span>
+                            </div>
                         </td>
                         <td>
-                            <DoughnutChart @ref="_hoursPlayedChart" Width="400" Class="mb-4" />
-                            <span>Hours Played</span>
-                        </td>
-                    </tr>
-                </table>                
-            </Content>
-        </AccordionItem>
-        <AccordionItem>
-            <TitleTemplate>
-                <Icon Name="IconName.Controller" Class="me-1"/> Library Breakdown
-            </TitleTemplate>
-            <Content>
-                <table>
-                    <tr>
-                        <td>
-                            <DoughnutChart @ref="_genreChart" Width="400" Class="mb-4" />
-                            <span>By Genre</span>
-                        </td>
-                        <td>
-                            <DoughnutChart @ref="_multiPlayerChart" Width="400" Class="mb-4" />
-                            <span>By Multiplayer Type</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <DoughnutChart @ref="_platformChart" Width="400" Class="mb-4" />
-                            <span>By Platform</span>
-                        </td>
-                        <td>
-                            <DoughnutChart @ref="_storeFrontChart" Width="400" Class="mb-4" />
-                            <span>By Storefront</span>
+                            <div>
+                                <DoughnutChart @ref="_hoursPlayedChart" Width="400" Class="mb-4" />
+                                <span class="chart-label">Hours Played</span>
+                            </div>
                         </td>
                     </tr>
                 </table>
             </Content>
         </AccordionItem>
-    </Accordion>    
+        <AccordionItem>
+            <TitleTemplate>
+                <Icon Name="IconName.Controller" Class="me-1" /> Library Breakdown
+            </TitleTemplate>
+            <Content>
+                <table>
+                    <tr>
+                        <td>
+                            <div>
+                                <DoughnutChart @ref="_genreChart" Width="400" Class="mb-4" />
+                            </div>
+                            <span class="chart-label">By Genre</span>
+                        </td>
+                        <td>
+                            <div>
+                                <DoughnutChart @ref="_multiPlayerChart" Width="400" Class="mb-4" />
+                            </div>
+                            <span class="chart-label">By Multiplayer Type</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div>
+                                <DoughnutChart @ref="_platformChart" Width="400" Class="mb-4" />
+                            </div>
+                            <span class="chart-label">By Platform</span>
+                        </td>
+                        <td>
+                            <div>
+                                <DoughnutChart @ref="_storeFrontChart" Width="400" Class="mb-4" />
+                            </div>
+                            <span class="chart-label">By Storefront</span>
+                        </td>
+                    </tr>
+                </table>
+            </Content>
+        </AccordionItem>
+    </Accordion>
 }
 
 @code {
@@ -86,7 +98,7 @@ else
     private DoughnutChart _hoursPlayedChart = new DoughnutChart();
 
     private ChartData _platformData = new ChartData();
-    private DoughnutChart _platformChart = new DoughnutChart();    
+    private DoughnutChart _platformChart = new DoughnutChart();
 
     private ChartData _genreData = new ChartData();
     private DoughnutChart _genreChart = new DoughnutChart();
@@ -119,9 +131,9 @@ else
         _isInitializing = false;
 
         _doughnutChartOptions = new DoughnutChartOptions
-        {
-            Responsive = true,
-        };
+            {
+                Responsive = true,
+            };
 
         SetupGenreChart();
         SetupHoursPlayedChart();
@@ -134,7 +146,7 @@ else
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender && GameLibraryManager.Games.Any())
-        {            
+        {
             await _genreChart.InitializeAsync(_genreData, _doughnutChartOptions);
             await _hoursPlayedChart.InitializeAsync(_hoursPlayedData, _doughnutChartOptions);
             await _multiPlayerChart.InitializeAsync(_multiPlayerData, _doughnutChartOptions);
@@ -153,23 +165,23 @@ else
                                               .Select(group => new { Genre = group.Key, Games = group.Select(g => g.game).ToList() });
 
         var chartDataSet = new DoughnutChartDataset()
-        {
-            Data = grouped.Select(g => Convert.ToDouble(g.Games.Count())).ToList(),
-            BackgroundColor = grouped.Select(g => ColourHelper.GetRandomColour().ToRgbString()).ToList()
-        };
+            {
+                Data = grouped.Select(g => Convert.ToDouble(g.Games.Count())).ToList(),
+                BackgroundColor = grouped.Select(g => ColourHelper.GetRandomColour().ToRgbString()).ToList()
+            };
 
         _genreData = new ChartData()
-        {
-            Labels = grouped.Select(g => g.Genre.ToString()).ToList(),
-            Datasets = new List<IChartDataset>() { chartDataSet }
-        };
+            {
+                Labels = grouped.Select(g => g.Genre.ToString()).ToList(),
+                Datasets = new List<IChartDataset>() { chartDataSet }
+            };
     }
 
     private void SetupHoursPlayedChart()
     {
         var chartDataSet = new DoughnutChartDataset()
-        {
-            Data = new List<double>
+            {
+                Data = new List<double>
             {
                 GameLibraryManager.Games.Count(g => g.Playtime == null),
                 GameLibraryManager.Games.Count(g => g.Playtime != null && g.Playtime == TimeSpan.Zero),
@@ -179,22 +191,22 @@ else
                 GameLibraryManager.Games.Count(g => g.Playtime != null && g.Playtime > TimeSpan.FromHours(100) && g.Playtime <= TimeSpan.FromHours(250)),
                 GameLibraryManager.Games.Count(g => g.Playtime != null && g.Playtime > TimeSpan.FromHours(250)),
             },
-            BackgroundColor = new List<string>
+                BackgroundColor = new List<string>
             {
                 ColourHelper.ChartColours.Neutral.ToRgbString(),
-                ColourHelper.ChartColours.Primary.ToRgbString(),
-                ColourHelper.ChartColours.Secondary.ToRgbString(),
-                ColourHelper.ChartColours.Tertiary.ToRgbString(),
-                ColourHelper.ChartColours.Quaternary.ToRgbString(),
-                ColourHelper.ChartColours.Quinary.ToRgbString(),
-                ColourHelper.ChartColours.Senary.ToRgbString()
+                ColourHelper.GetRandomColour().ToRgbString(),
+                ColourHelper.GetRandomColour().ToRgbString(),
+                ColourHelper.GetRandomColour().ToRgbString(),
+                ColourHelper.GetRandomColour().ToRgbString(),
+                ColourHelper.GetRandomColour().ToRgbString(),
+                ColourHelper.GetRandomColour().ToRgbString()
             }
-        };
+            };
 
         _hoursPlayedData = new ChartData()
-        {
-            Labels = new List<string> 
-            { 
+            {
+                Labels = new List<string>
+            {
                 "No data",
                 "Never played",
                 "> 0 to 10 hours",
@@ -203,8 +215,8 @@ else
                 "> 100 to 250 hours",
                 "250+ hours"
             },
-            Datasets = new List<IChartDataset>() { chartDataSet }
-        };
+                Datasets = new List<IChartDataset>() { chartDataSet }
+            };
     }
 
     private void SetupMultiplayerChart()
@@ -214,16 +226,16 @@ else
                                               .Select(group => new { Multiplayer = group.Key, Games = group.Select(g => g.game).ToList() });
 
         var chartDataSet = new DoughnutChartDataset()
-        {
-            Data = grouped.Select(g => Convert.ToDouble(g.Games.Count())).ToList(),
-            BackgroundColor = grouped.Select(g => ColourHelper.GetRandomColour().ToRgbString()).ToList()
-        };
+            {
+                Data = grouped.Select(g => Convert.ToDouble(g.Games.Count())).ToList(),
+                BackgroundColor = grouped.Select(g => ColourHelper.GetRandomColour().ToRgbString()).ToList()
+            };
 
         _multiPlayerData = new ChartData()
-        {
-            Labels = grouped.Select(g => g.Multiplayer.ToString()).ToList(),
-            Datasets = new List<IChartDataset>() { chartDataSet }
-        };
+            {
+                Labels = grouped.Select(g => g.Multiplayer.ToString()).ToList(),
+                Datasets = new List<IChartDataset>() { chartDataSet }
+            };
     }
 
     private void SetupPlatformChart()
@@ -233,57 +245,57 @@ else
                                               .Select(group => new { Platform = group.Key, Games = group.Select(g => g.game).ToList() });
 
         var chartDataSet = new DoughnutChartDataset()
-        {
-            Data = grouped.Select(g => Convert.ToDouble(g.Games.Count())).ToList(),
-            BackgroundColor = grouped.Select(g => ColourHelper.GetRandomColour().ToRgbString()).ToList()
-        };
+            {
+                Data = grouped.Select(g => Convert.ToDouble(g.Games.Count())).ToList(),
+                BackgroundColor = grouped.Select(g => ColourHelper.GetRandomColour().ToRgbString()).ToList()
+            };
 
         _platformData = new ChartData()
-        {
-            Labels = grouped.Select(g => g.Platform).ToList(),
-            Datasets = new List<IChartDataset>() { chartDataSet }
-        };
+            {
+                Labels = grouped.Select(g => g.Platform).ToList(),
+                Datasets = new List<IChartDataset>() { chartDataSet }
+            };
     }
 
     private void SetupPlayedUnplayedChart()
     {
         var chartDataSet = new DoughnutChartDataset()
-        {
-            Data = new List<double>
+            {
+                Data = new List<double>
             {
                 GameLibraryManager.Games.Count(g => g.Playtime == null && g.LastPlayed == null),
                 GameLibraryManager.Games.Count(g => g.Playtime != null && g.Playtime == TimeSpan.Zero),
                 GameLibraryManager.Games.Count(g => (g.Playtime != null && g.Playtime > TimeSpan.Zero) || (g.Playtime == null && g.LastPlayed != null))
             },
-            BackgroundColor = new List<string>
+                BackgroundColor = new List<string>
             {
                 ColourHelper.ChartColours.Neutral.ToRgbString(),
-                ColourHelper.ChartColours.Primary.ToRgbString(),
-                ColourHelper.ChartColours.Secondary.ToRgbString()                
+                ColourHelper.GetRandomColour().ToRgbString(),
+                ColourHelper.GetRandomColour().ToRgbString()
             }
-        };
+            };
 
         _playedUnplayedData = new ChartData()
-        {
-            Labels = new List<string> { "No data", "Unplayed", "Played" },
-            Datasets = new List<IChartDataset>() { chartDataSet }
-        };
+            {
+                Labels = new List<string> { "No data", "Unplayed", "Played" },
+                Datasets = new List<IChartDataset>() { chartDataSet }
+            };
     }
 
     private void SetupStoreFrontChart()
     {
-        var grouped = GameLibraryManager.Games.GroupBy(g => g.GetType().Name);
+        var grouped = GameLibraryManager.Games.GroupBy(g => g.StorefrontName);
 
         var chartDataSet = new DoughnutChartDataset()
-        {
-            Data = grouped.Select(g => Convert.ToDouble(g.Count())).ToList(),
-            BackgroundColor = grouped.Select(g => ColourHelper.GetRandomColour().ToRgbString()).ToList()
-        };
+            {
+                Data = grouped.Select(g => Convert.ToDouble(g.Count())).ToList(),
+                BackgroundColor = grouped.Select(g => ColourHelper.GetRandomColour().ToRgbString()).ToList()
+            };
 
         _storeFrontData = new ChartData()
-        {
-            Labels = grouped.Select(g => g.Key).ToList(),
-            Datasets = new List<IChartDataset>() { chartDataSet }
-        };
+            {
+                Labels = grouped.Select(g => g.Key).ToList(),
+                Datasets = new List<IChartDataset>() { chartDataSet }
+            };
     }
 }

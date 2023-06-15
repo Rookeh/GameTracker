@@ -59,7 +59,7 @@ namespace GameTracker.Plugins.Steam.Models
             Icon = "Steam",
             NewTab = false,
             Text = "Launch via Steam",
-            Uri = $"steam://run/{PlatformId}"
+            Url = $"steam://run/{PlatformId}"
         };
 
         public override MultiplayerAvailability[] MultiplayerAvailability => SteamGameHelpers.ParseMultiplayerAvailability(_gameDetails?.Categories);
@@ -87,6 +87,8 @@ namespace GameTracker.Plugins.Steam.Models
         }
 
         public override Review[] Reviews => SteamGameHelpers.ParseMetacriticReview(this, _gameDetails?.Metacritic) ?? Array.Empty<Review>();
+
+        public override string StorefrontName => "Steam";
 
         public override Studio? Studio => _gameDetails?.Developers?.Any() ?? false ? new Studio { Name = _gameDetails.Developers.First() } : null;
 

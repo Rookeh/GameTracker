@@ -24,7 +24,7 @@ namespace GameTracker.Models
 
         public string StudioName => Studio?.Name ?? string.Empty;
         public string PublisherName => Publisher?.Name ?? string.Empty;
-
+                
         public abstract Task Preload();        
         public abstract ControlScheme[] ControlSchemes { get; }
         public abstract string Description { get; }        
@@ -39,6 +39,7 @@ namespace GameTracker.Models
         public abstract Publisher? Publisher { get; }
         public abstract DateTime? ReleaseDate { get; }
         public abstract Review[] Reviews { get; }
+        public abstract string StorefrontName { get; }
         public abstract Studio? Studio { get; }
         public abstract string[] Tags { get; }
         public abstract string Title { get; }

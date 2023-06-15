@@ -42,7 +42,7 @@ namespace GameTracker.Plugins.Xbox.Models
             Icon = "Xbox",
             NewTab = false,
             Text = "Launch via Microsoft Store",
-            Uri = $"ms-windows-store://pdp/?PFN={_xboxTitle.PFN}"
+            Url = $"ms-windows-store://pdp/?PFN={_xboxTitle.PFN}"
         };
 
         public override MultiplayerAvailability[] MultiplayerAvailability => Array.Empty<MultiplayerAvailability>();
@@ -56,6 +56,8 @@ namespace GameTracker.Plugins.Xbox.Models
         public override DateTime? ReleaseDate => null;
 
         public override Review[] Reviews => Array.Empty<Review>();
+
+        public override string StorefrontName => "Xbox";
 
         public override Studio? Studio => null;
 

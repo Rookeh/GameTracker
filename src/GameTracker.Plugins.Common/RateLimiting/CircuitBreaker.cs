@@ -1,5 +1,8 @@
-﻿namespace GameTracker.Plugins.Common.RateLimiting
-{
+﻿using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("GameTracker.Plugins.Common.Tests")]
+namespace GameTracker.Plugins.Common.RateLimiting
+{    
     internal class CircuitBreaker<TResult>
     {
         private TimeSpan _backOff;
@@ -17,7 +20,7 @@
         {
             try
             {
-                if (_state != CircuitBreakerState.Open || (DateTime.Now - _updatedAt) >= _backOff)
+                if (_state == CircuitBreakerState.Closed || (DateTime.Now - _updatedAt) >= _backOff)
                 {
                     _state = circuitBrokenCheck() ? CircuitBreakerState.Open : CircuitBreakerState.Closed;
                     _updatedAt = DateTime.Now;

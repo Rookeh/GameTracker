@@ -1,12 +1,21 @@
 ﻿using GameTracker.Plugins.Common.Helpers;
+using GameTracker.Plugins.Common.Interfaces;
+using GameTracker.Plugins.GOG.Interfaces;
 using GameTracker.Plugins.GOG.Models.GOGApi;
 using System.Text.Json;
 
 namespace GameTracker.Plugins.GOG.Helpers
 {
-    internal static class AuthenticationHelper
+    internal class AuthenticationHelper : IAuthenticationHelper
     {
-        internal static async Task<AuthToken> ExchangeGogAuthCodeForToken(string code)
+        private readonly IHttpClientWrapperFactory _httpClientWrapperFactory;
+
+        public AuthenticationHelper(IHttpClientWrapperFactory httpClientWrapperFactory)
+        {
+            _httpClientWrapperFactory = httpClientWrapperFactory;
+        }
+
+        public async Task<AuthToken> ExchangeGogAuthCodeForToken(string code)
         {
             var authParams = new Dictionary<string, string>()
             {
@@ -19,7 +28,7 @@ namespace GameTracker.Plugins.GOG.Helpers
 
             var requestUri = UriHelper.BuildQueryString($"{Constants.Authentication.AuthenticationBaseUrl}/token?", authParams);
 
-            using HttpClient httpClient = new();
+            using var httpClient = _httpClientWrapperFactory.BuildHttpClient();
             var tokenResponse = await httpClient.GetAsync(requestUri);
 
             if (!tokenResponse.IsSuccessStatusCode)

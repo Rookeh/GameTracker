@@ -1,5 +1,8 @@
-﻿using GameTracker.Plugins.GOG.Models.GOGApi;
+﻿
+using GameTracker.Plugins.GOG.Models.GOGApi;
+using System.Runtime.CompilerServices;
 
+[assembly:InternalsVisibleTo("GameTracker.Plugins.GOG.Tests")]
 namespace GameTracker.Plugins.GOG.Helpers
 {
     internal class Constants
@@ -9,6 +12,12 @@ namespace GameTracker.Plugins.GOG.Helpers
             internal static string ApiDocumentation => "https://gogapidocs.readthedocs.io/en/latest/auth.html";
             internal static string AuthenticationBaseUrl => "https://auth.gog.com";
             internal static string AuthenticationCodeUrl => "https://auth.gog.com/auth?client_id=46899977096215655&redirect_uri=https%3A%2F%2Fembed.gog.com%2Fon_login_success%3Forigin%3Dclient&response_type=code&layout=client2";
+        }
+
+        internal class Requests
+        {
+            internal const string GameDetailsRequestUrlFormat = "https://api.gog.com/products?ids={0}?expand=downloads,description,changelog";
+            internal const string OwnedGamesRequestUrl = "https://embed.gog.com/user/data/games";
         }
 
         internal static GameDetails DefaultGameDetails => new GameDetails

@@ -40,7 +40,7 @@ namespace GameTracker.Plugins.Dummy
             NewTab = true,
             Icon = "Egg",
             Text = "Hello, world",
-            Uri = "https://en.wikipedia.org/wiki/%22Hello,_World!%22_program"
+            Url = "https://en.wikipedia.org/wiki/%22Hello,_World!%22_program"
         };     
 
         public override MultiplayerAvailability[] MultiplayerAvailability => new[] { Models.Enums.MultiplayerAvailability.None };        
@@ -54,6 +54,8 @@ namespace GameTracker.Plugins.Dummy
         public override DateTime? ReleaseDate => DateTime.Today;
 
         public override Review[] Reviews => new[] { new Review { Score = new Random().Next(11), Critic = new Critic { Name = "Dummy Critic", UpperBound = 10 } } } ;
+
+        public override string StorefrontName => "Dummy";
 
         public override Studio Studio => new Studio { Name = "Dummy Studio" };
 

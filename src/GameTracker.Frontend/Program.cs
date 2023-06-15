@@ -1,6 +1,5 @@
 using BlazorBootstrap;
 using GameTracker.Interfaces;
-using GameTracker.Core.Factories;
 using GameTracker.Data.Repositories;
 using GameTracker.Data.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -21,7 +20,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddBlazorBootstrap();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
-builder.Services.AddScoped<IProviderFactory, ProviderFactory>();
+builder.Services.AddScoped<IGameProviderFactory, GameProviderFactory>();
 builder.Services.AddScoped<IParameterCacheRepository, ParameterCacheRepository>();
 builder.Services.AddScoped<IGameLibraryManager, GameLibraryManager>();
 

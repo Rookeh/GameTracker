@@ -1,17 +1,20 @@
 ﻿using GameTracker.Interfaces;
 using GameTracker.Models;
 using GameTracker.Models.Enums;
+using GameTracker.Plugins.EpicGames.Interfaces;
 using GameTracker.Plugins.EpicGames.Models;
 
 namespace GameTracker.Plugins.EpicGames
 {
     public class EpicGamesGameProvider : IGameProvider
     {
-        private readonly List<Game> _games;
+        private readonly IEpicGamesStore _epicGamesStore;
+        private readonly List<Game> _games;        
         private bool _initialized;
 
-        public EpicGamesGameProvider()
-        {
+        public EpicGamesGameProvider(IEpicGamesStore epicGamesStore)
+        {            
+            _epicGamesStore = epicGamesStore;
             _games = new List<Game>();
         }
 
@@ -49,7 +52,7 @@ namespace GameTracker.Plugins.EpicGames
 
         public async Task<ParameterCache> Refresh(string userId, params object[] providerSpecificParameters)
         {
-            if (providerSpecificParameters[0] == null || !(providerSpecificParameters[0] is string))
+            if (!providerSpecificParameters.Any() || providerSpecificParameters[0] == null || !(providerSpecificParameters[0] is string))
             {
                 throw new ArgumentException("Semicolon-delimited list of titles must be provided.");
             }
@@ -58,7 +61,7 @@ namespace GameTracker.Plugins.EpicGames
 
             _games.Clear();
 
-            var gameResponses = await Task.WhenAll(gameTitles.Select(gt => EpicGamesStoreNET.Query.SearchAsync(gt)));
+            var gameResponses = await Task.WhenAll(gameTitles.Select(gt => _epicGamesStore.SearchAsync(gt)));
             var epicGames = gameResponses.Where(gr => gr.Data?.Catalog?.SearchStore?.Elements != null && gr.Data.Catalog.SearchStore.Elements.Any())
                 .Select(gr => new EpicGame(gr.Data.Catalog.SearchStore.Elements.First()))
                 .ToList();

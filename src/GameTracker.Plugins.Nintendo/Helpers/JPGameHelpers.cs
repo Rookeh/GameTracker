@@ -12,7 +12,7 @@ namespace GameTracker.Plugins.Nintendo.Helpers
                 Icon = "NintendoSwitch",
                 NewTab = true,
                 Text = "Open in Nintendo Store",
-                Uri = string.Format(Constants.JPRegion.StoreUrlFormat, url.Remove(0, 8))
+                Url = string.Format(Constants.JPRegion.StoreUrlFormat, url.Remove(0, 8))
             };
         }
 

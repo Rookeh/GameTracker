@@ -3,13 +3,13 @@ using GameTracker.Interfaces.Plugins;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
-namespace GameTracker.Core.Factories
+namespace GameTracker.Core
 {
-    public class ProviderFactory : IProviderFactory
-    {        
+    public class GameProviderFactory : IGameProviderFactory
+    {
         private List<IGameProvider> _cachedProviders;
 
-        public ProviderFactory()
+        public GameProviderFactory()
         {
             _cachedProviders = new List<IGameProvider>();
         }
@@ -41,12 +41,12 @@ namespace GameTracker.Core.Factories
             var pluginAssemblyPaths = Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "GameTracker.Plugins.*.dll", enumerationOptions);
 
             foreach (var pluginAssemblyPath in pluginAssemblyPaths)
-            {              
+            {
                 var pluginAssembly = Assembly.LoadFrom(pluginAssemblyPath);
                 var pluginServiceCollection = new ServiceCollection();
 
                 var pluginDependencyInjectors = pluginAssembly.GetExportedTypes().Where(t => t.GetInterfaces().Any(i => i == typeof(IDependencyInjector)));
-                foreach(var pluginDependencyInjector in pluginDependencyInjectors)
+                foreach (var pluginDependencyInjector in pluginDependencyInjectors)
                 {
                     var injectorInstance = Activator.CreateInstance(pluginDependencyInjector) as IDependencyInjector;
                     injectorInstance.InjectDependencies(pluginServiceCollection);

@@ -1,6 +1,6 @@
 ﻿namespace GameTracker.Interfaces
 {
-    public interface IProviderFactory
+    public interface IGameProviderFactory
     {
         IEnumerable<IGameProvider> GetProviders();
     }

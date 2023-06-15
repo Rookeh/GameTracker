@@ -45,7 +45,7 @@ namespace GameTracker.Plugins.PlayStation.Models
             Icon = "Playstation",
             NewTab = true,
             Text = "View in PlayStation Store",
-            Uri = GetLaunchUri()
+            Url = GetLaunchUri()
         };
 
         public override MultiplayerAvailability[] MultiplayerAvailability => Array.Empty<MultiplayerAvailability>();        
@@ -59,6 +59,8 @@ namespace GameTracker.Plugins.PlayStation.Models
         public override DateTime? ReleaseDate => null;
 
         public override Review[] Reviews => Array.Empty<Review>();
+
+        public override string StorefrontName => "PlayStation";
 
         public override Studio? Studio => null;
 

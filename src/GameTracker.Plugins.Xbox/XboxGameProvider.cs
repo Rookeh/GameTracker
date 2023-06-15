@@ -1,10 +1,8 @@
 ﻿using GameTracker.Interfaces;
 using GameTracker.Models;
-using GameTracker.Plugins.Common.RateLimiting;
 using GameTracker.Plugins.Xbox.Helpers;
 using GameTracker.Plugins.Xbox.Interfaces;
 using GameTracker.Plugins.Xbox.Models;
-using GameTracker.Plugins.Xbox.Models.OpenXBL;
 using System.Net.Http.Headers;
 
 namespace GameTracker.Plugins.Xbox
@@ -48,17 +46,17 @@ namespace GameTracker.Plugins.Xbox
             // https://xbl.io/console
             // n.b. Personal API keys are rate-limited to 150 requests per hour.
 
-            if (!(providerSpecificParameters[0] is string))
+            if (providerSpecificParameters.Length < 1 || !(providerSpecificParameters[0] is string))
             {
                 throw new ArgumentException("OpenXBL API key must be provided.");
             }
 
-            if (!(providerSpecificParameters[1] is bool))
+            if (providerSpecificParameters.Length < 2 || !(providerSpecificParameters[1] is bool))
             {
                 throw new ArgumentException("Include Game Pass Titles must be boolean.");
             }
 
-            if (!(providerSpecificParameters[2] is bool))
+            if (providerSpecificParameters.Length < 3 || !(providerSpecificParameters[2] is bool))
             {
                 throw new ArgumentException("Include Legacy Titles must be boolean.");
             }

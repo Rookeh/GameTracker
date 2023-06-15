@@ -52,7 +52,7 @@ namespace GameTracker.Plugins.Nintendo.Helpers
                 Icon = "NintendoSwitch",
                 NewTab = true,
                 Text = "Open in Nintendo EShop",
-                Uri = string.Format(Constants.EURegion.StoreUrlFormat, url)
+                Url = string.Format(Constants.EURegion.StoreUrlFormat, url)
             };
         }
     }

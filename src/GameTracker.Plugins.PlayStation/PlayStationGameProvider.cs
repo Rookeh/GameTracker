@@ -1,7 +1,9 @@
 ﻿using GameTracker.Interfaces;
 using GameTracker.Models;
 using GameTracker.Plugins.Common.Helpers;
+using GameTracker.Plugins.Common.Interfaces;
 using GameTracker.Plugins.PlayStation.Helpers;
+using GameTracker.Plugins.PlayStation.Interfaces;
 using GameTracker.Plugins.PlayStation.Models;
 using GameTracker.Plugins.PlayStation.Models.GraphQL;
 using System.Net.Http.Headers;
@@ -12,12 +14,16 @@ namespace GameTracker.Plugins.PlayStation
 {
     public class PlayStationGameProvider : IGameProvider
     {
+        private readonly IAuthenticationHelper _authenticationHelper;
+        private readonly IHttpClientWrapperFactory _httpClientWrapperFactory;
+
         private readonly List<PlayStationGame> _games;
-        
         private bool _initialized;
 
-        public PlayStationGameProvider()
-        {
+        public PlayStationGameProvider(IAuthenticationHelper authenticationHelper, IHttpClientWrapperFactory httpClientWrapperFactory)
+        {            
+            _authenticationHelper = authenticationHelper;
+            _httpClientWrapperFactory = httpClientWrapperFactory;
             _games = new List<PlayStationGame>();
         }
 
@@ -69,8 +75,8 @@ namespace GameTracker.Plugins.PlayStation
             var npsso = providerSpecificParameters[0] as string;
             var includeNonGameTitles = (bool)providerSpecificParameters[1];
 
-            var authCode = await AuthenticationHelper.ExchangeNpssoForCode(npsso);
-            var authToken = await AuthenticationHelper.ExchangeCodeForToken(authCode);
+            var authCode = await _authenticationHelper.ExchangeNpssoForCode(npsso);
+            var authToken = await _authenticationHelper.ExchangeCodeForToken(authCode);
             var authHeader = new AuthenticationHeaderValue("Bearer", authToken);
 
             var gameQuery = new PersistedQueryRoot
@@ -93,7 +99,7 @@ namespace GameTracker.Plugins.PlayStation
             var gameRequest = new HttpRequestMessage(HttpMethod.Get, gameRequestUri);
             gameRequest.Headers.Authorization = authHeader;
 
-            using HttpClient httpClient = new();
+            using var httpClient = _httpClientWrapperFactory.BuildHttpClient();
             var gameResponse = await httpClient.SendAsync(gameRequest);
 
             if (!gameResponse.IsSuccessStatusCode)

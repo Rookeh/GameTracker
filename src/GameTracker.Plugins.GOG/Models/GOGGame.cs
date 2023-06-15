@@ -40,7 +40,7 @@ namespace GameTracker.Plugins.GOG.Models
             NewTab = false,
             Icon = "PcDisplay",
             Text = "Launch via GOG Galaxy",
-            Uri = $"goggalaxy://openGameView/{PlatformId}"
+            Url = $"goggalaxy://openGameView/{PlatformId}"
         };
 
         public override MultiplayerAvailability[] MultiplayerAvailability => Array.Empty<MultiplayerAvailability>();        
@@ -58,6 +58,8 @@ namespace GameTracker.Plugins.GOG.Models
             : DateTime.Parse(_gameDetails.ReleaseDate);
 
         public override Review[] Reviews => Array.Empty<Review>();
+
+        public override string StorefrontName => "GOG";
 
         public override Studio? Studio => null;
 

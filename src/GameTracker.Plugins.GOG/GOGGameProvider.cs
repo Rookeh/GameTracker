@@ -1,7 +1,9 @@
 ﻿using GameTracker.Interfaces;
 using GameTracker.Models;
 using GameTracker.Models.Enums;
+using GameTracker.Plugins.Common.Interfaces;
 using GameTracker.Plugins.GOG.Helpers;
+using GameTracker.Plugins.GOG.Interfaces;
 using GameTracker.Plugins.GOG.Models;
 using GameTracker.Plugins.GOG.Models.GOGApi;
 using System.Net.Http.Headers;
@@ -10,15 +12,19 @@ using System.Text.Json;
 namespace GameTracker.Plugins.GOG
 {
     public class GOGGameProvider : IGameProvider
-    {
+    {        
+        private readonly IAuthenticationHelper _authenticationHelper;
+        private readonly IHttpClientWrapperFactory _httpClientFactory;
+        
         private readonly List<GOGGame> _games;
-        private readonly Platform _platform;
-
+        private readonly Platform _platform;        
         private bool _initialized;
 
-        public GOGGameProvider()
+        public GOGGameProvider(IAuthenticationHelper authenticationHelper, IHttpClientWrapperFactory httpClientFactory)
         {
             _games = new List<GOGGame>();
+            _authenticationHelper = authenticationHelper;
+            _httpClientFactory = httpClientFactory;
             _platform = new Platform
             {
                 Name = "GOG",
@@ -49,7 +55,7 @@ namespace GameTracker.Plugins.GOG
                         LinkTarget = "@GOG"
                     }
                 }
-            };
+            };            
         }
 
         public Guid ProviderId => new Guid("8301D3D9-C248-4252-82C4-331CCC7A25E9");
@@ -72,26 +78,20 @@ namespace GameTracker.Plugins.GOG
 
         public async Task<ParameterCache> Refresh(string userId, params object[] providerSpecificParameters)
         {
-            /*
-             * 
-             * https://gogapidocs.readthedocs.io/en/latest/auth.html
-             * https://gogapidocs.readthedocs.io/en/latest/galaxy.html#api-gog-com
-             * 
-             * Thank you, CDPR. Valve, take notes...
-             *
-             */
+            // https://gogapidocs.readthedocs.io/en/latest/auth.html
+            // https://gogapidocs.readthedocs.io/en/latest/galaxy.html#api-gog-com
 
-            if (providerSpecificParameters.Length != 1 || !(providerSpecificParameters[0] is string))
+            if (providerSpecificParameters == null || providerSpecificParameters.Length != 1 || !(providerSpecificParameters[0] is string))
             {
                 throw new ArgumentException("GOG Auth Code must be provided.");
-            }            
+            }
 
             var gogAuthCode = providerSpecificParameters[0] as string;
-            var gogAuthToken = await AuthenticationHelper.ExchangeGogAuthCodeForToken(gogAuthCode);
+            var gogAuthToken = await _authenticationHelper.ExchangeGogAuthCodeForToken(gogAuthCode);
             var authHeader = new AuthenticationHeaderValue("Bearer", gogAuthToken.AccessToken);
 
-            using HttpClient httpClient = new();
-            var ownedGamesRequest = new HttpRequestMessage(HttpMethod.Get, "https://embed.gog.com/user/data/games");
+            using var httpClient = _httpClientFactory.BuildHttpClient();
+            var ownedGamesRequest = new HttpRequestMessage(HttpMethod.Get, Constants.Requests.OwnedGamesRequestUrl);
             ownedGamesRequest.Headers.Authorization = authHeader;
 
             var ownedGamesResponse = await httpClient.SendAsync(ownedGamesRequest);            
@@ -107,7 +107,7 @@ namespace GameTracker.Plugins.GOG
 
             foreach (var chunk in ownedGameChunks)
             {
-                var gameDetailsRequestUrl = $"https://api.gog.com/products?ids={string.Join(',', chunk)}?expand=downloads,description,changelog";
+                var gameDetailsRequestUrl = string.Format(Constants.Requests.GameDetailsRequestUrlFormat, string.Join(',', chunk));
                 var gameDetailsRequest = new HttpRequestMessage(HttpMethod.Get, gameDetailsRequestUrl);
                 var gameDetailsResponse = await httpClient.SendAsync(gameDetailsRequest);
 

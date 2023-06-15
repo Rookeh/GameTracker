@@ -1,8 +1,10 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
 
+[assembly:InternalsVisibleTo("GameTracker.Plugins.Steam.Tests")]
 namespace GameTracker.Plugins.Steam.Models.WebApi
 {
-    public class SteamAppResponse
+    internal class SteamAppResponse
     {
         [JsonPropertyName("apps")]
         public SteamApp[] Apps { get; set; }

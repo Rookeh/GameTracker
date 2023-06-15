@@ -228,11 +228,11 @@
     {
         if (Game.LaunchCommand.NewTab)
         {
-            await JSRuntime.InvokeVoidAsync("open", Game.LaunchCommand.Uri, "_blank");
+            await JSRuntime.InvokeVoidAsync("open", Game.LaunchCommand.Url, "_blank");
         }
         else
         {
-            NavigationManager.NavigateTo(Game.LaunchCommand.Uri);
+            NavigationManager.NavigateTo(Game.LaunchCommand.Url);
         }
     }
 }

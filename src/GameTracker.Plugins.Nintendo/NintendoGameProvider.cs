@@ -1,26 +1,26 @@
 ﻿using GameTracker.Interfaces;
 using GameTracker.Models;
 using GameTracker.Plugins.Common.Helpers;
+using GameTracker.Plugins.Common.Interfaces;
 using GameTracker.Plugins.Nintendo.Helpers;
 using GameTracker.Plugins.Nintendo.Models;
 using GameTracker.Plugins.Nintendo.Models.EU;
 using GameTracker.Plugins.Nintendo.Models.JP;
-using System.ComponentModel.DataAnnotations;
-using System.Net.Http.Json;
-using System.Text.Encodings.Web;
-using System.Text.Json;
 using System.Xml.Serialization;
 
 namespace GameTracker.Plugins.Nintendo
 {
     public class NintendoGameProvider : IGameProvider
     {
-        private readonly List<Game> _games;
+        private readonly IHttpClientWrapperFactory _httpClientWrapperFactory;
+
+        private readonly List<Game> _games;        
         private bool _initialized;
 
-        public NintendoGameProvider()
+        public NintendoGameProvider(IHttpClientWrapperFactory httpClientWrapperFactory)
         {
             _games = new List<Game>();
+            _httpClientWrapperFactory = httpClientWrapperFactory;
         }
 
         public Guid ProviderId => new Guid("BD638153-9288-4467-84BE-4EF73CE102DD");
@@ -99,8 +99,8 @@ namespace GameTracker.Plugins.Nintendo
 
             var baseUrl = string.Format(Constants.EURegion.GetGamesUrlFormat, Constants.EURegion.DefaultLocale);
             var requestUri = UriHelper.BuildQueryString(baseUrl, gameQueryDict);
-            using HttpClient client = new();
-            var euGameResponseRoot = await client.GetFromJsonAsync<EUGameResponseRoot>(requestUri);
+            using var client = _httpClientWrapperFactory.BuildHttpClient();
+            var euGameResponseRoot = await client.GetFromJsonAndTypeAsync(requestUri, typeof(EUGameResponseRoot)) as EUGameResponseRoot;
 
             if (euGameResponseRoot != null)
             {
@@ -113,7 +113,7 @@ namespace GameTracker.Plugins.Nintendo
 
         private async Task<IEnumerable<JPNintendoGame>> PopulateJPGames(string[] searchTitles)
         {
-            using HttpClient client = new();
+            using var client = _httpClientWrapperFactory.BuildHttpClient();
             var gamesResponse = await client.GetStringAsync(Constants.JPRegion.GetGamesUrl);
 
             if (!string.IsNullOrEmpty(gamesResponse))

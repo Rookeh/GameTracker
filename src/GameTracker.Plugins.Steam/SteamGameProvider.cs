@@ -1,6 +1,7 @@
 ﻿using GameTracker.Data;
 using GameTracker.Interfaces;
 using GameTracker.Models;
+using GameTracker.Plugins.Common.Interfaces;
 using GameTracker.Plugins.Steam.Interfaces;
 using GameTracker.Plugins.Steam.Models;
 using GameTracker.Plugins.Steam.Models.WebApi;
@@ -13,6 +14,7 @@ namespace GameTracker.Plugins.Steam
 {
     public class SteamGameProvider : IGameProvider
     {
+        private readonly IHttpClientWrapperFactory _httpClientFactory;
         private readonly ISteamGameDetailsRepository _steamGameDetailsRepository;
 
         private readonly Platform _platform;                
@@ -20,9 +22,10 @@ namespace GameTracker.Plugins.Steam
         
         private bool _initialized;
 
-        public SteamGameProvider(ISteamGameDetailsRepository steamGameDetailsRepository)
+        public SteamGameProvider(IHttpClientWrapperFactory httpClientFactory, ISteamGameDetailsRepository steamGameDetailsRepository)
         {
             _games = new List<Game>();
+            _httpClientFactory = httpClientFactory;
             _platform = new Platform
             {
                 Name = "Steam",
@@ -96,7 +99,7 @@ namespace GameTracker.Plugins.Steam
             var apiKey = providerSpecificParameters[0].ToString();
             var steamId = providerSpecificParameters[1].ToString();
 
-            using HttpClient client = new();
+            using var client = _httpClientFactory.BuildHttpClient();
             var userGameResponse = await client.GetAsync($"https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key={apiKey}&steamid={steamId}");
 
             if (!userGameResponse.IsSuccessStatusCode)
@@ -117,7 +120,13 @@ namespace GameTracker.Plugins.Steam
 
             while (moreTitlesToQuery && _games.Count < userGames.GameCount)
             {
-                var steamAppsJson = await client.GetStringAsync($"https://api.steampowered.com/IStoreService/GetAppList/v1/?key={apiKey}&last_appid={lastAppId}");
+                var steamAppsResponse = await client.GetAsync($"https://api.steampowered.com/IStoreService/GetAppList/v1/?key={apiKey}&last_appid={lastAppId}");                
+                if (!steamAppsResponse.IsSuccessStatusCode)
+                {
+                    throw new ApplicationException($"Failed to query Steam store for game details. Response code: {steamAppsResponse.StatusCode}");
+                }
+
+                var steamAppsJson = await steamAppsResponse.Content.ReadAsStringAsync();
                 var steamAppResponse = JsonSerializer.Deserialize<SteamAppResponseRoot>(steamAppsJson);
                 var steamApps = steamAppResponse.Response.Apps;
 
