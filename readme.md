@@ -17,7 +17,7 @@ GameTracker is a project I started with the intent of aggregating all of my game
 
 The endgame for this project is for it to run as a container hosted on a local network, so that it can be accessed by multiple devices on the same LAN e.g. PC, laptop, Steam Deck, etc. 
 
-Whilst it is of course technically possible to expose this service externally over the internet, **I definitely would not recommend it**.
+Whilst it is of course technically possible to expose this service externally over the internet, **I definitely would not recommend it**, at least in its current state.
 
 Until the image is set up, the easiest way to run it is directly from Visual Studio. Before you launch it for the first time, however, the SQLite database needs to be initialized. From a PowerShell prompt (within the src folder, or from Visual Studio), run:
 
