@@ -51,43 +51,18 @@ namespace GameTracker.Plugins.Steam.Tests
                         {
                             AppId = appId,
                             LastPlayedTimestamp = lastPlayed,
-                            Playtime = (int)playTime.TotalMinutes
+                            Playtime = (int)playTime.TotalMinutes,
+                            Name = title
                         }
                     }
                 }
             };
 
-            var appListResponse = new SteamAppResponseRoot
-            {
-                Response = new SteamAppResponse
-                {
-                    Apps = new[]
-                    {
-                        new SteamApp
-                        {
-                            AppId = appId,
-                            Name = title
-                        }
-                    },
-                    HasMoreResults = false,
-                    LastAppId = 1
-                    
-                }
-            };
-
-            _mockHttpClient.Setup(x => x.GetAsync(It.Is<string>(s => s.Contains(apiKey) && s.Contains(steamId))))
+            _mockHttpClient.Setup(x => x.GetAsync(It.Is<Uri>(u => u.AbsoluteUri.Contains(apiKey) && u.AbsoluteUri.Contains(steamId))))
                 .ReturnsAsync(new HttpResponseMessage
                 {
                     StatusCode = HttpStatusCode.OK,
                     Content = new StringContent(JsonSerializer.Serialize(ownedGamesResponse))
-                })
-                .Verifiable();
-
-            _mockHttpClient.Setup(x => x.GetAsync(It.Is<string>(s => s.Contains("IStoreService") && s.Contains(apiKey))))
-                .ReturnsAsync(new HttpResponseMessage
-                {
-                    StatusCode = HttpStatusCode.OK,
-                    Content = new StringContent(JsonSerializer.Serialize(appListResponse))
                 })
                 .Verifiable();
 
@@ -111,60 +86,10 @@ namespace GameTracker.Plugins.Steam.Tests
             var apiKey = "abcd";
             var steamId = "1234";
 
-            _mockHttpClient.Setup(x => x.GetAsync(It.Is<string>(s => s.Contains(apiKey) && s.Contains(steamId))))
+            _mockHttpClient.Setup(x => x.GetAsync(It.Is<Uri>(u => u.AbsoluteUri.Contains(apiKey) && u.AbsoluteUri.Contains(steamId))))
                 .ReturnsAsync(new HttpResponseMessage
                 {
                     StatusCode = HttpStatusCode.Unauthorized
-                })
-                .Verifiable();
-
-            // Act / Assert
-            await Assert.ThrowsAsync<ApplicationException>(() => _provider.Refresh(userId, apiKey, steamId));
-            _mockHttpClient.Verify();
-        }
-
-        [Fact]
-        public async Task Refresh_IfStoreAPIFails_ThrowsApplicationException()
-        {
-            // Arrange
-            var userId = "test";
-            var apiKey = "abcd";
-            var steamId = "1234";
-
-            var appId = 1;
-            var lastPlayed = (long)(DateTime.Today - DateTime.UnixEpoch).TotalSeconds;
-            var playTime = TimeSpan.FromHours(1);
-            var title = "Test Title";
-
-            var ownedGamesResponse = new SteamGameResponseRoot
-            {
-                Response = new SteamGameResponse
-                {
-                    GameCount = 1,
-                    Games = new[]
-                    {
-                        new SteamGameDto
-                        {
-                            AppId = appId,
-                            LastPlayedTimestamp = lastPlayed,
-                            Playtime = (int)playTime.TotalMinutes
-                        }
-                    }
-                }
-            };
-
-            _mockHttpClient.Setup(x => x.GetAsync(It.Is<string>(s => s.Contains(apiKey) && s.Contains(steamId))))
-                .ReturnsAsync(new HttpResponseMessage
-                {
-                    StatusCode = HttpStatusCode.OK,
-                    Content = new StringContent(JsonSerializer.Serialize(ownedGamesResponse))
-                })
-                .Verifiable();
-
-            _mockHttpClient.Setup(x => x.GetAsync(It.Is<string>(s => s.Contains("IStoreService") && s.Contains(apiKey))))
-                .ReturnsAsync(new HttpResponseMessage
-                {
-                    StatusCode = HttpStatusCode.InternalServerError
                 })
                 .Verifiable();
 

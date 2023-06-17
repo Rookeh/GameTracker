@@ -7,6 +7,12 @@ namespace GameTracker.Plugins.Steam.Helpers
 {
     internal static class Constants
     {
+        internal static class ApiEndpoints
+        {
+            internal const string OwnedGamesEndpoint = "https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/";
+        }
+
+
         internal static class Authentication
         {
             internal const string ApiKeyUrl = "https://steamcommunity.com/dev/apikey";

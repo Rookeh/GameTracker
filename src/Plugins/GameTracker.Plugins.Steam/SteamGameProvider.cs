@@ -1,6 +1,7 @@
 ﻿using GameTracker.Data;
 using GameTracker.Interfaces;
 using GameTracker.Models;
+using GameTracker.Plugins.Common.Helpers;
 using GameTracker.Plugins.Common.Interfaces;
 using GameTracker.Plugins.Steam.Interfaces;
 using GameTracker.Plugins.Steam.Models;
@@ -98,9 +99,20 @@ namespace GameTracker.Plugins.Steam
 
             var apiKey = providerSpecificParameters[0].ToString();
             var steamId = providerSpecificParameters[1].ToString();
+            var ownedGameParams = new Dictionary<string, string>()
+            {
+                ["key"] = apiKey,
+                ["steamid"] = steamId,
+                ["include_appinfo"] = "true",
+                ["include_played_free_games"] = "true",
+                ["include_free_sub"] = "true",
+                ["include_extended_appinfo"] = "true",
+                ["format"] = "json"
+            };
 
+            var ownedGamesRequestUri = UriHelper.BuildQueryString(Constants.ApiEndpoints.OwnedGamesEndpoint, ownedGameParams);
             using var client = _httpClientFactory.BuildHttpClient();
-            var userGameResponse = await client.GetAsync($"https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key={apiKey}&steamid={steamId}");
+            var userGameResponse = await client.GetAsync(ownedGamesRequestUri);
 
             if (!userGameResponse.IsSuccessStatusCode)
             {
@@ -114,33 +126,9 @@ namespace GameTracker.Plugins.Steam
             var userGameResponseJson = await userGameResponse.Content.ReadAsStringAsync();
             var userGames = JsonSerializer.Deserialize<SteamGameResponseRoot>(userGameResponseJson).Response;
 
-            bool moreTitlesToQuery = true;
-            int lastAppId = 0;
             _games.Clear();
 
-            while (moreTitlesToQuery && _games.Count < userGames.GameCount)
-            {
-                var steamAppsResponse = await client.GetAsync($"https://api.steampowered.com/IStoreService/GetAppList/v1/?key={apiKey}&last_appid={lastAppId}");                
-                if (!steamAppsResponse.IsSuccessStatusCode)
-                {
-                    throw new ApplicationException($"Failed to query Steam store for game details. Response code: {steamAppsResponse.StatusCode}");
-                }
-
-                var steamAppsJson = await steamAppsResponse.Content.ReadAsStringAsync();
-                var steamAppResponse = JsonSerializer.Deserialize<SteamAppResponseRoot>(steamAppsJson);
-                var steamApps = steamAppResponse.Response.Apps;
-
-                var userSteamApps = steamApps.Where(sa => userGames.Games.Select(ug => ug.AppId).Contains(sa.AppId));
-
-                _games.AddRange(userSteamApps.Select(usa => new SteamGame(
-                    _steamGameDetailsRepository,
-                    usa,
-                    userGames.Games.Single(g => g.AppId == usa.AppId).Playtime,
-                    userGames.Games.Single(g => g.AppId == usa.AppId).LastPlayedTimestamp)));
-
-                lastAppId = steamAppResponse.Response.LastAppId;
-                moreTitlesToQuery = steamAppResponse.Response.HasMoreResults;
-            }
+            _games.AddRange(userGames.Games.Select(ug => new SteamGame(_steamGameDetailsRepository, ug)));
 
             _initialized = true;
 

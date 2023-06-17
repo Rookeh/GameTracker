@@ -21,6 +21,12 @@ namespace GameTracker.Plugins.Steam.Models.WebApi
             }
         }
 
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        [JsonPropertyName("img_icon_url")]
+        public string IconId { get; set; }
+
         [JsonPropertyName("playtime_forever")]
         public int Playtime { get; set; }
 

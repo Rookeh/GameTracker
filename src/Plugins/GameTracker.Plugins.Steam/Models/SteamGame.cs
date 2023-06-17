@@ -19,17 +19,13 @@ namespace GameTracker.Plugins.Steam.Models
         private readonly TimeSpan _playTime;
         private readonly string _title;
 
-        internal SteamGame(ISteamGameDetailsRepository steamGameDetailsRepository,
-            SteamApp app,
-            int playTime,
-            long lastPlayed)
+        internal SteamGame(ISteamGameDetailsRepository steamGameDetailsRepository, SteamGameDto steamGameDto)
         {
-            PlatformId = app.AppId;
+            PlatformId = steamGameDto.AppId;
             _gameDetailsRepository = steamGameDetailsRepository;
-            _title = app.Name;
-
-            _lastPlayed = DateTime.UnixEpoch.AddSeconds(lastPlayed);
-            _playTime = TimeSpan.FromMinutes(playTime);
+            _title = steamGameDto.Name;
+            _lastPlayed = DateTime.UnixEpoch.AddSeconds(steamGameDto.LastPlayedTimestamp);
+            _playTime = TimeSpan.FromMinutes(steamGameDto.Playtime);
         }
 
         public override async Task Preload()
