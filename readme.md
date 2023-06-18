@@ -58,6 +58,7 @@ Not all game providers expose the same level of detail, and there are some cavea
 
 ## What needs to be added / improved:
 
+ - Dockerfile.
  - Multiple review sources (currently we only have Metacritic data from Steam titles).
  - Additional filter options.
  - Additional data sources to supplement providers that do not expose basic game details e.g. description, genres, etc.
