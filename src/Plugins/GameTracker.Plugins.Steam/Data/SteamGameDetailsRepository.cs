@@ -25,6 +25,7 @@ namespace GameTracker.Plugins.Steam.Data
         private readonly IGenreRepository _genreRepository;
         private readonly IMetacriticScoreRepository _metacriticRepository;
         private readonly IPlatformsRepository _platformsRepository;
+        private readonly IPublisherRepository _publisherRepository;
         private readonly IReleaseDateRepository _releaseDateRepository;
 
         public SteamGameDetailsRepository(ICategoryRepository categoryRepository,
@@ -32,6 +33,7 @@ namespace GameTracker.Plugins.Steam.Data
                                           IGenreRepository genreRepository,
                                           IMetacriticScoreRepository metacriticRepository,
                                           IPlatformsRepository platformsRepository,
+                                          IPublisherRepository publisherRepository,
                                           IReleaseDateRepository releaseDateRepository)
             : base(Constants.SQLite.ConnectionString, TableName, BootstrapSql)
         {
@@ -40,13 +42,12 @@ namespace GameTracker.Plugins.Steam.Data
             _genreRepository = genreRepository;
             _metacriticRepository = metacriticRepository;
             _platformsRepository = platformsRepository;
+            _publisherRepository = publisherRepository;
             _releaseDateRepository = releaseDateRepository;
         }
 
         public async Task<SteamGameDetails?> GetGameDetails(int appId)
         {
-            // TODO: Bootstrap database if it does not exist on first run.
-
             var sql = "SELECT * FROM game_details WHERE appId = @appId";
             var result = (await GetValue(sql, new { appId })).FirstOrDefault();
 
@@ -57,6 +58,7 @@ namespace GameTracker.Plugins.Steam.Data
                 result.Genres = await _genreRepository.GetGenres(appId);
                 result.Metacritic = await _metacriticRepository.GetMetacriticScore(appId);
                 result.Platforms = await _platformsRepository.GetPlatforms(appId);
+                result.Publishers = await _publisherRepository.GetPublishers(appId);
                 result.ReleaseDate = await _releaseDateRepository.GetReleaseDate(appId);
             }
 
@@ -82,17 +84,17 @@ namespace GameTracker.Plugins.Steam.Data
                 website = steamGameDetails.Website
             });
 
-            if (steamGameDetails.Categories != null)
+            if (steamGameDetails.Categories != null && steamGameDetails.Categories.Any())
             {
                 await _categoryRepository.SetCategories(steamGameDetails.AppId, steamGameDetails.Categories);
             }
 
-            if (steamGameDetails.Developers != null)
+            if (steamGameDetails.Developers != null && steamGameDetails.Developers.Any())
             {
                 await _developerRepository.SetDevelopers(steamGameDetails.AppId, steamGameDetails.Developers);
             }
 
-            if (steamGameDetails.Genres != null)
+            if (steamGameDetails.Genres != null && steamGameDetails.Genres.Any())
             {
                 await _genreRepository.SetGenres(steamGameDetails.AppId, steamGameDetails.Genres);
             }
@@ -105,6 +107,11 @@ namespace GameTracker.Plugins.Steam.Data
             if (steamGameDetails.Platforms != null)
             {
                 await _platformsRepository.SetPlatforms(steamGameDetails.AppId, steamGameDetails.Platforms);
+            }
+
+            if (steamGameDetails.Publishers != null && steamGameDetails.Publishers.Any())
+            {
+                await _publisherRepository.SetPublishers(steamGameDetails.AppId, steamGameDetails.Publishers);
             }
 
             if (steamGameDetails.ReleaseDate != null)

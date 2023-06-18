@@ -33,7 +33,7 @@ The below grid indicates which fields are returned or supported by titles return
 | Multiplayer Availability | 🟢 Yes |
 | Platforms | 🟢 Yes |
 | Playtime | 🟢 Yes |
-| Publisher | 🔴 No |
+| Publisher | 🟢 Yes |
 | Release Date | 🟢 Yes |
 | Reviews | 🟢 Yes |
 | Tags | 🟢 Yes |

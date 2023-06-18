@@ -18,9 +18,11 @@ namespace GameTracker.Plugins.Steam.DependencyInjection
             services.AddSingleton<ICategoryMappingRepository, CategoryMappingRepository>();
             services.AddSingleton<IDeveloperMappingRepository, DeveloperMappingRepository>();
             services.AddSingleton<IGenreMappingRepository, GenreMappingRepository>();
+            services.AddScoped<IPublisherMappingRepository, PublisherMappingRepository>();
             services.AddSingleton<ICategoryRepository, CategoryRepository>();
             services.AddSingleton<IDeveloperRepository, DeveloperRepository>();
             services.AddSingleton<IGenreRepository, GenreRepository>();
+            services.AddSingleton<IPublisherRepository, PublisherRepository>();
             services.AddSingleton<IMetacriticScoreRepository, MetacriticScoreRepository>();
             services.AddSingleton<IPlatformsRepository, PlatformsRepository>();
             services.AddSingleton<IReleaseDateRepository, ReleaseDateRepository>();
