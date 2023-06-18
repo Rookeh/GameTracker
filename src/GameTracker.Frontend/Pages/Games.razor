@@ -2,6 +2,7 @@
 
 <PageTitle>Games</PageTitle>
 
+@using GameTracker.Frontend.Helpers;
 @using GameTracker.Frontend.Models;
 @using GameTracker.Frontend.Pages.Components;
 @using GameTracker.Interfaces;
@@ -43,7 +44,7 @@ else
                                           DataProvider="GameFilterProvider"
                                           PropertyName="Title"
                                           Placeholder="Search for a game title..."
-                                          OnChanged="(Game game) => OnAutoComplete(game)" />
+                                          OnChanged="(Game game) => TitleFilter(game)" />
                         </Content>
                     </AccordionItem>
                     <AccordionItem>
@@ -85,7 +86,7 @@ else
                                           DataProvider="StudioFilterProvider"
                                           PropertyName="Name"
                                           Placeholder="Search for a development studio..."
-                                          OnChanged="(Studio studio) => OnAutoComplete(studio)" />
+                                          OnChanged="(Studio studio) => StudioFilter(studio)" />
                         </Content>
                     </AccordionItem>
                     <AccordionItem>
@@ -98,7 +99,7 @@ else
                                           DataProvider="PublisherFilterProvider"
                                           PropertyName="Name"
                                           Placeholder="Search for a publisher..."
-                                          OnChanged="(Publisher publisher) => OnAutoComplete(publisher)" />
+                                          OnChanged="(Publisher publisher) => PublisherFilter(publisher)" />
                         </Content>
                     </AccordionItem>
                     <AccordionItem>
@@ -119,18 +120,57 @@ else
                                           DataProvider="GenreFilterProvider"
                                           PropertyName="Name"
                                           Placeholder="Search for a genre..."
-                                          OnChanged="(FilterableGenre genre) => OnAutoComplete(genre)" />
+                                          OnChanged="(FilterableGenre genre) => GenreFilter(genre)" />
                         </Content>
                     </AccordionItem>
                 </Accordion>
             </td>
         </tr>
     </table>
+    <Accordion>
+        <AccordionItem>
+            <TitleTemplate>
+                <Icon Name="IconName.SortUp" Class="me-1" /> Sort by...
+            </TitleTemplate>
+            <Content>
+                <div>
+                    <Button Color="ButtonColor.Primary" @onclick="(async () => await OrderBy(SortField.AverageReview))" Outline="true">
+                        <Icon Name="@IconHelper.GetSortIcon(_fieldOrderDictionary[SortField.AverageReview], SortField.AverageReview)"/>
+                        Average Review
+                    </Button>
+                    <Button Color="ButtonColor.Primary" @onclick="(async () => await OrderBy(SortField.LastPlayed))" Outline="true">
+                        <Icon Name="@IconHelper.GetSortIcon(_fieldOrderDictionary[SortField.LastPlayed], SortField.LastPlayed)" />
+                        Last Played
+                    </Button>
+                    <Button Color="ButtonColor.Primary" @onclick="(async () => await OrderBy(SortField.PlayTime))" Outline="true">
+                        <Icon Name="@IconHelper.GetSortIcon(_fieldOrderDictionary[SortField.PlayTime], SortField.PlayTime)" />
+                        Playtime
+                    </Button>
+                    <Button Color="ButtonColor.Primary" @onclick="(async () => await OrderBy(SortField.Publisher))" Outline="true">
+                        <Icon Name="@IconHelper.GetSortIcon(_fieldOrderDictionary[SortField.Publisher], SortField.Publisher)" />
+                        Publisher
+                    </Button>
+                    <Button Color="ButtonColor.Primary" @onclick="(async () => await OrderBy(SortField.ReleaseDate))" Outline="true">
+                        <Icon Name="@IconHelper.GetSortIcon(_fieldOrderDictionary[SortField.ReleaseDate], SortField.ReleaseDate)" />
+                        Release Date
+                    </Button>
+                    <Button Color="ButtonColor.Primary" @onclick="(async () => await OrderBy(SortField.StudioName))" Outline="true">
+                        <Icon Name="@IconHelper.GetSortIcon(_fieldOrderDictionary[SortField.StudioName], SortField.StudioName)" />
+                        Studio
+                    </Button>
+                    <Button Color="ButtonColor.Primary" @onclick="(async () => await OrderBy(SortField.Title))" Outline="true">
+                        <Icon Name="@IconHelper.GetSortIcon(_fieldOrderDictionary[SortField.Title], SortField.Title)" />
+                        Title
+                    </Button>
+                </div>
+            </Content>
+        </AccordionItem>
+    </Accordion>
     <Grid @ref="_gameGrid"
           AllowFiltering="false"
           AllowPaging="true"
           Class="table table-hover table-bordered table-striped"
-          Data="GameRows"
+          Data="FilteredOrderedGames.ToGameRows()"
           GridSettingsChanged="OnGridUpdated"
           PageSize="@_pageSize"
           PageSizeSelectorVisible="false"
@@ -165,8 +205,12 @@ else
     private Grid<GameRow> _gameGrid;
     private Modal _modal;
 
+    private bool _ascendingOrder;
+    private Dictionary<SortField, bool> _fieldOrderDictionary;
+    private Dictionary<string, Func<Game, bool>> _filterPredicates { get; set; }
     private bool _isAuthenticated;
     private bool _isInitializing;
+    private Func<Game, object?> _orderSelector { get; set; }
     private int _pageSize;
     private string _paginationText;
 
@@ -180,6 +224,11 @@ else
         {
             return;
         }
+        
+        _fieldOrderDictionary = InitializeGridOrder();
+        _ascendingOrder = true;
+        _filterPredicates = new Dictionary<string, Func<Game, bool>>();
+        _orderSelector = LinqHelper.TitleSelector;
 
         _isInitializing = true;
         PreloadService.Show();
@@ -190,6 +239,25 @@ else
         _pageSize = 4;
         RefreshPaginationText(1, _pageSize, GameLibraryManager.Games.Count());
     }
+
+    private IEnumerable<Game> FilteredOrderedGames
+    {
+        get
+        {
+            var filtered = GameLibraryManager.Games.Where(g => _filterPredicates.Any() ? _filterPredicates.All(p => p.Value(g)) : true);
+
+            if (_ascendingOrder)
+            {
+                return filtered.OrderBy(_orderSelector);
+            }
+            else
+            {
+                return filtered.OrderByDescending(_orderSelector);
+            }
+        }
+    }
+
+    #region AutoComplete Data Providers
 
     private async Task<AutoCompleteDataProviderResult<Game>> GameFilterProvider(AutoCompleteDataProviderRequest<Game> request)
     {
@@ -205,10 +273,10 @@ else
             .ToList();
 
         return await Task.FromResult(new AutoCompleteDataProviderResult<FilterableGenre>
-        {
-            Data = genres,
-            TotalCount = genres.Count()
-        });
+            {
+                Data = genres,
+                TotalCount = genres.Count()
+            });
     }
 
     private async Task<AutoCompleteDataProviderResult<Publisher>> PublisherFilterProvider(AutoCompleteDataProviderRequest<Publisher> request)
@@ -219,10 +287,10 @@ else
             .OrderBy(p => p.Name);
 
         return await Task.FromResult(new AutoCompleteDataProviderResult<Publisher>
-        {
-            Data = publishers,
-            TotalCount = publishers.Count()
-        });
+            {
+                Data = publishers,
+                TotalCount = publishers.Count()
+            });
     }
 
     private async Task<AutoCompleteDataProviderResult<Studio>> StudioFilterProvider(AutoCompleteDataProviderRequest<Studio> request)
@@ -233,82 +301,75 @@ else
             .OrderBy(s => s.Name);
 
         return await Task.FromResult(new AutoCompleteDataProviderResult<Studio>
-        {
-            Data = studios,
-            TotalCount = studios.Count()
-        });
+            {
+                Data = studios,
+                TotalCount = studios.Count()
+            });
     }
 
-    private List<Game> FilteredGames
+    #endregion
+
+    # region Grid Ordering    
+
+    private static Dictionary<SortField, bool> InitializeGridOrder()
     {
-        get
+        return new Dictionary<SortField, bool>()
         {
-            var filteredGames = new List<Game>(GameLibraryManager.Games);
-
-            if (!string.IsNullOrEmpty(_filterProperties.Name))
-            {
-                filteredGames = filteredGames.Where(g => g.Title.Contains(_filterProperties.Name)).ToList();
-            }
-
-            if (!string.IsNullOrEmpty(_filterProperties.Studio))
-            {
-                filteredGames = filteredGames.Where(g => g.StudioName != null && g.StudioName.Contains(_filterProperties.Studio)).ToList();
-            }
-
-            if (!string.IsNullOrEmpty(_filterProperties.Publisher))
-            {
-                filteredGames = filteredGames.Where(g => g.PublisherName != null && g.PublisherName.Contains(_filterProperties.Publisher)).ToList();
-            }
-
-            if (!string.IsNullOrEmpty(_filterProperties.Genre))
-            {
-                filteredGames = filteredGames.Where(g => g.Genres != null && g.Genres.Any(g => g.ToString() == _filterProperties.Genre)).ToList();
-            }
-
-            if (_filterProperties.ReleaseDate != null)
-            {
-                var filterDateTime = new DateTime(_filterProperties.ReleaseDate.Value.Year, _filterProperties.ReleaseDate.Value.Month, _filterProperties.ReleaseDate.Value.Day);
-                filteredGames = filteredGames.Where(g => g.ReleaseDate.HasValue && g.ReleaseDate.Value >= filterDateTime).ToList();
-            }
-
-            if (_filterProperties.LastPlayed != null)
-            {
-                filteredGames = filteredGames.Where(g => g.LastPlayed.HasValue && g.LastPlayed.Value <= _filterProperties.LastPlayed).ToList();
-            }
-
-            if (_filterProperties.LowerHours != null)
-            {
-                var lower = TimeSpan.FromHours(_filterProperties.LowerHours.Value);
-                filteredGames = filteredGames.Where(g => g.Playtime != null && g.Playtime >= lower).ToList();
-            }
-
-            if (_filterProperties.UpperHours != null)
-            {
-                var upper = TimeSpan.FromHours(_filterProperties.UpperHours.Value);
-                filteredGames = filteredGames.Where(g => g.Playtime != null && g.Playtime <= upper).ToList();
-            }
-
-            if (_filterProperties.MinimumReviewScore != null)
-            {
-                filteredGames = filteredGames.Where(g => g.AverageCriticalReview.HasValue && g.AverageCriticalReview > _filterProperties.MinimumReviewScore).ToList();
-            }
-
-            return filteredGames;
-        }
+            [SortField.AverageReview] = true,
+            [SortField.LastPlayed] = true,
+            [SortField.PlayTime] = true,
+            [SortField.Publisher] = true,
+            [SortField.ReleaseDate] = true,
+            [SortField.StudioName] = true,
+            [SortField.Title] = true
+        };
     }
 
-    private List<GameRow> GameRows
+    private async Task OrderBy(SortField sortField)
     {
-        get
+        _fieldOrderDictionary[sortField] = _fieldOrderDictionary.ContainsKey(sortField) ? !_fieldOrderDictionary[sortField] : false;
+        _ascendingOrder = _fieldOrderDictionary[sortField];
+
+        switch (sortField)
         {
-            return FilteredGames.Chunk(3).Select(c => new GameRow
-            {
-                Game1 = c[0],
-                Game2 = c.Length >= 2 ? c[1] : null,
-                Game3 = c.Length >= 3 ? c[2] : null
-            }).ToList();
+            case SortField.AverageReview:
+                _orderSelector = LinqHelper.AverageReviewSelector;
+                break;
+            case SortField.LastPlayed:
+                _orderSelector = LinqHelper.LastPlayedSelector;
+                break;
+            case SortField.PlayTime:
+                _orderSelector = LinqHelper.PlaytimeSelector;
+                break;
+            case SortField.Publisher:
+                _orderSelector = LinqHelper.PublisherSelector;
+                break;
+            case SortField.ReleaseDate:
+                _orderSelector = LinqHelper.ReleaseDateSelector;
+                break;
+            case SortField.StudioName:
+                _orderSelector = LinqHelper.StudioSelector;
+                break;
+            case SortField.Title:
+                _orderSelector = LinqHelper.TitleSelector;
+                break;
         }
+                
+        // This should not be necessary, but somehow the grid data source is not being refreshed until after
+        // the render event, meaning that otherwise the grid state will be at least one step behind where it should be.
+        // So, we have to forcibly reset the data source to pick up changes to the collection order.
+        // Not sure why this is only affecting changes to sort order and not filtering.
+
+        #pragma warning disable BL0005
+        _gameGrid.Data = FilteredOrderedGames.ToGameRows();
+        #pragma warning restore BL0005
+
+        await _gameGrid.RefreshDataAsync();
     }
+
+    #endregion
+
+    #region Grid Filtering 
 
     private DateOnly? ReleaseDateFilter
     {
@@ -316,6 +377,7 @@ else
         set
         {
             _filterProperties.ReleaseDate = value;
+            _filterPredicates[nameof(ReleaseDateFilter)] = LinqHelper.ReleaseDateFilter(value);
             _gameGrid.RefreshDataAsync();
         }
     }
@@ -326,6 +388,7 @@ else
         set
         {
             _filterProperties.LastPlayed = value;
+            _filterPredicates[nameof(LastPlayedFilter)] = LinqHelper.LastPlayedFilter(value);
             _gameGrid.RefreshDataAsync();
         }
     }
@@ -336,6 +399,7 @@ else
         set
         {
             _filterProperties.LowerHours = value;
+            _filterPredicates[nameof(LowerHoursFilter)] = LinqHelper.MinPlaytimeFilter(value.HasValue ? TimeSpan.FromHours(Convert.ToDouble(value)) : null);
             _gameGrid.RefreshDataAsync();
         }
     }
@@ -346,6 +410,7 @@ else
         set
         {
             _filterProperties.UpperHours = value;
+            _filterPredicates[nameof(UpperHoursFilter)] = LinqHelper.MaxPlaytimeFilter(value.HasValue ? TimeSpan.FromHours(Convert.ToDouble(value)) : null);
             _gameGrid.RefreshDataAsync();
         }
     }
@@ -356,25 +421,49 @@ else
         set
         {
             _filterProperties.MinimumReviewScore = value;
+            _filterPredicates[nameof(MinimumReviewScoreFilter)] = LinqHelper.ReviewScoreFilter(value);
             _gameGrid.RefreshDataAsync();
         }
     }
 
-    private void OnAutoComplete(object state)
+    private async Task GenreFilter(FilterableGenre genre)
     {
-        _gameGrid.RefreshDataAsync();
+        _filterPredicates[nameof(GenreFilter)] = LinqHelper.GenreFilter(genre?.Name);
+        await _gameGrid.RefreshDataAsync();
     }
+
+    private async Task PublisherFilter(Publisher publisher)
+    {
+        _filterPredicates[nameof(StudioFilter)] = LinqHelper.PublisherFilter(publisher?.Name);
+        await _gameGrid.RefreshDataAsync();
+    }
+
+    private async Task TitleFilter(Game game)
+    {
+        _filterPredicates[nameof(TitleFilter)] = LinqHelper.TitleFilter(game?.Title);
+        await _gameGrid.RefreshDataAsync();
+    }
+
+    private async Task StudioFilter(Studio studio)
+    {
+        _filterPredicates[nameof(StudioFilter)] = LinqHelper.StudioFilter(studio?.Name);
+        await _gameGrid.RefreshDataAsync();
+    }
+
+    #endregion    
+
+    #region Grid State
 
     private async Task OnGridUpdated(GridSettings gridSettings)
     {
-        RefreshPaginationText(gridSettings.PageNumber, gridSettings.PageSize, FilteredGames.Count);
+        RefreshPaginationText(gridSettings.PageNumber, gridSettings.PageSize, FilteredOrderedGames.Count());
     }
 
     private void RefreshPaginationText(int pageNumber, int pageSize, int gameCount)
     {
         int from = (pageNumber - 1) * (pageSize * 3) + 1;
         int to = pageNumber * (pageSize * 3);
-        int total = FilteredGames.Count;
+        int total = gameCount;
 
         if (to > total)
         {
@@ -384,4 +473,6 @@ else
         _pageSize = pageSize;
         _paginationText = $"{from} to {to} of {total} games";
     }
+
+    #endregion
 }

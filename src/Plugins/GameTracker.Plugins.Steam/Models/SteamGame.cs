@@ -5,13 +5,15 @@ using GameTracker.Plugins.Steam.Models.StoreApi;
 
 using GenreEnum = GameTracker.Models.Enums.Genre;
 using GameTracker.Plugins.Steam.Models.WebApi;
-using GameTracker.Plugins.Steam.Singletons;
-using GameTracker.Plugins.Steam.Interfaces;
+using GameTracker.Plugins.Steam.Interfaces.Data;
+using GameTracker.Plugins.Steam.ApiClients;
+using GameTracker.Plugins.Steam.Interfaces.ApiClients;
 
 namespace GameTracker.Plugins.Steam.Models
 {
     public class SteamGame : Game
     {
+        private readonly IRateLimitedSteamApiClient _rateLimitedApiClient;
         private readonly ISteamGameDetailsRepository _gameDetailsRepository;
 
         private SteamGameDetails? _gameDetails;
@@ -19,10 +21,12 @@ namespace GameTracker.Plugins.Steam.Models
         private readonly TimeSpan _playTime;
         private readonly string _title;
 
-        internal SteamGame(ISteamGameDetailsRepository steamGameDetailsRepository, SteamGameDto steamGameDto)
-        {
-            PlatformId = steamGameDto.AppId;
+        internal SteamGame(ref IRateLimitedSteamApiClient rateLimitedApiClient, ref ISteamGameDetailsRepository steamGameDetailsRepository, SteamGameDto steamGameDto)
+        {            
+            _rateLimitedApiClient = rateLimitedApiClient;
             _gameDetailsRepository = steamGameDetailsRepository;
+            
+            PlatformId = steamGameDto.AppId;
             _title = steamGameDto.Name;
             _lastPlayed = DateTime.UnixEpoch.AddSeconds(steamGameDto.LastPlayedTimestamp);
             _playTime = TimeSpan.FromMinutes(steamGameDto.Playtime);
@@ -119,7 +123,7 @@ namespace GameTracker.Plugins.Steam.Models
             }
 
             // Otherwise, we have to fetch the game details from Steam (this is expensive, and we may be rate limited).
-            var steamGameDetails = await RateLimitedSteamApiClient.GetSteamGameDetails(PlatformId);
+            var steamGameDetails = await _rateLimitedApiClient.GetSteamGameDetails(PlatformId);
 
             if (steamGameDetails != null)
             {

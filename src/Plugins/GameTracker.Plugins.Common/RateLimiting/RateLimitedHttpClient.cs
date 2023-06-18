@@ -40,18 +40,26 @@ namespace GameTracker.Plugins.Common.RateLimiting
 
         private async Task<T> GetFromJsonImpl(string url, T defaultValue, NameValueHeaderValue[] headers)
         {
-            using HttpClient client = new();
-
-            foreach (NameValueHeaderValue header in headers)
+            try
             {
-                client.DefaultRequestHeaders.Add(header.Name, header.Value);
+                using HttpClient client = new();
+
+                foreach (NameValueHeaderValue header in headers)
+                {
+                    client.DefaultRequestHeaders.Add(header.Name, header.Value);
+                }
+
+                var response = await client.GetAsync(url).ConfigureAwait(false);
+                var contentJson = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var contentObject = JsonSerializer.Deserialize<T>(contentJson);
+                _operations.Add(DateTime.Now);
+                return contentObject ?? defaultValue;
             }
-            
-            var response = await client.GetAsync(url).ConfigureAwait(false);
-            var contentJson = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-            var contentObject = JsonSerializer.Deserialize<T>(contentJson);
-            _operations.Add(DateTime.Now);
-            return contentObject ?? defaultValue;
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
         }
 
         #endregion

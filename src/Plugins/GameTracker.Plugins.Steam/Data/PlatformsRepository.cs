@@ -1,9 +1,9 @@
-﻿using GameTracker.Data.Repositories;
-using GameTracker.Plugins.Steam.Helpers;
+﻿using GameTracker.Plugins.Steam.Helpers;
+using GameTracker.Plugins.Steam.Interfaces.Data;
 
 namespace GameTracker.Plugins.Steam.Data
 {
-    public class PlatformsRepository : DapperRepository<Platforms>
+    public class PlatformsRepository : DapperRepository<Platforms>, IPlatformsRepository
     {
         private const string TableName = "platforms";
         private const string BootstrapSql = @"CREATE TABLE platforms (
@@ -13,7 +13,7 @@ namespace GameTracker.Plugins.Steam.Data
                                                 linux INTEGER NOT NULL
                                               );";
 
-        public PlatformsRepository() 
+        public PlatformsRepository()
             : base(Constants.SQLite.ConnectionString, TableName, BootstrapSql)
         {
         }
@@ -23,9 +23,9 @@ namespace GameTracker.Plugins.Steam.Data
             var sql = @"SELECT windows, mac, linux
                         FROM platforms
                         WHERE appId = @appId";
-            
+
             var result = await GetValue(sql, new { appId });
-            
+
             return result.FirstOrDefault();
         }
 
@@ -34,11 +34,12 @@ namespace GameTracker.Plugins.Steam.Data
             var sql = @"INSERT INTO platforms (appId, windows, mac, linux)
                         VALUES (@appId, @windows, @mac, @linux)";
 
-            await SetValue(sql, new { 
-                appId, 
+            await SetValue(sql, new
+            {
+                appId,
                 windows = platforms.Windows,
                 mac = platforms.Mac,
-                linux = platforms.Linux 
+                linux = platforms.Linux
             });
         }
     }

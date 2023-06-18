@@ -27,8 +27,9 @@ namespace GameTracker.Core
                     return _cachedProviders = ActivateProviderTypesFromPlugins().ToList();
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Console.WriteLine(e);
                 return Enumerable.Empty<IGameProvider>();
             }
         }

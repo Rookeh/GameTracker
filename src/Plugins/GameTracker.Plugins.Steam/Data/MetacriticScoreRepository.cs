@@ -1,19 +1,20 @@
-﻿using GameTracker.Data.Repositories;
-using GameTracker.Plugins.Steam.Helpers;
+﻿using GameTracker.Plugins.Steam.Helpers;
+using GameTracker.Plugins.Steam.Interfaces.Data;
 using GameTracker.Plugins.Steam.Models.StoreApi;
 
 namespace GameTracker.Plugins.Steam.Data
 {
-    public class MetacriticScoreRepository : DapperRepository<MetacriticScore>
+    public class MetacriticScoreRepository : DapperRepository<MetacriticScore>, IMetacriticScoreRepository
     {
         private const string TableName = "metacritic";
         private const string BootstrapSql = @"CREATE TABLE metacritic (
                                                 appId INTEGER NOT NULL,
                                                 score REAL NOT NULL,
-                                                url VARCHAR(1000) NULL
+                                                url VARCHAR(1000) NULL,
+                                                UNIQUE(appId, score, url)
                                               );";
 
-        public MetacriticScoreRepository() 
+        public MetacriticScoreRepository()
             : base(Constants.SQLite.ConnectionString, TableName, BootstrapSql)
         {
         }
@@ -30,7 +31,8 @@ namespace GameTracker.Plugins.Steam.Data
         public async Task SetMetacriticScore(int appId, MetacriticScore metacriticScore)
         {
             var sql = @"INSERT INTO metacritic (appId, score, url)
-                        VALUES (@appId, @score, @url)";
+                        VALUES (@appId, @score, @url)
+                        ON CONFLICT DO NOTHING";
 
             await SetValue(sql, new { appId, score = metacriticScore.Score, url = metacriticScore.Url });
         }

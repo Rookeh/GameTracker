@@ -1,5 +1,5 @@
 ﻿using GameTracker.Plugins.Steam.Helpers;
-using GameTracker.Plugins.Steam.Interfaces;
+using GameTracker.Plugins.Steam.Interfaces.Data;
 using GameTracker.Plugins.Steam.Models.StoreApi;
 
 namespace GameTracker.Plugins.Steam.Data
@@ -20,22 +20,27 @@ namespace GameTracker.Plugins.Steam.Data
                                                 website VARCHAR(1000) NULL
                                               );";
 
-        private readonly CategoryRepository _categoryRepository;
-        private readonly DeveloperRepository _developerRepository;
-        private readonly GenreRepository _genreRepository;
-        private readonly MetacriticScoreRepository _metacriticRepository;
-        private readonly PlatformsRepository _platformsRepository;
-        private readonly ReleaseDateRepository _releaseDateRepository;
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly IDeveloperRepository _developerRepository;
+        private readonly IGenreRepository _genreRepository;
+        private readonly IMetacriticScoreRepository _metacriticRepository;
+        private readonly IPlatformsRepository _platformsRepository;
+        private readonly IReleaseDateRepository _releaseDateRepository;
 
-        public SteamGameDetailsRepository()
+        public SteamGameDetailsRepository(ICategoryRepository categoryRepository,
+                                          IDeveloperRepository developerRepository,
+                                          IGenreRepository genreRepository,
+                                          IMetacriticScoreRepository metacriticRepository,
+                                          IPlatformsRepository platformsRepository,
+                                          IReleaseDateRepository releaseDateRepository)
             : base(Constants.SQLite.ConnectionString, TableName, BootstrapSql)
         {
-            _categoryRepository = new CategoryRepository();
-            _developerRepository = new DeveloperRepository();
-            _genreRepository = new GenreRepository();
-            _metacriticRepository = new MetacriticScoreRepository();
-            _platformsRepository = new PlatformsRepository();
-            _releaseDateRepository = new ReleaseDateRepository();
+            _categoryRepository = categoryRepository;
+            _developerRepository = developerRepository;
+            _genreRepository = genreRepository;
+            _metacriticRepository = metacriticRepository;
+            _platformsRepository = platformsRepository;
+            _releaseDateRepository = releaseDateRepository;
         }
 
         public async Task<SteamGameDetails?> GetGameDetails(int appId)

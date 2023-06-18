@@ -3,7 +3,8 @@ using GameTracker.Interfaces;
 using GameTracker.Models;
 using GameTracker.Plugins.Common.Helpers;
 using GameTracker.Plugins.Common.Interfaces;
-using GameTracker.Plugins.Steam.Interfaces;
+using GameTracker.Plugins.Steam.Interfaces.ApiClients;
+using GameTracker.Plugins.Steam.Interfaces.Data;
 using GameTracker.Plugins.Steam.Models;
 using GameTracker.Plugins.Steam.Models.WebApi;
 using System.Text.Json;
@@ -16,17 +17,21 @@ namespace GameTracker.Plugins.Steam
     public class SteamGameProvider : IGameProvider
     {
         private readonly IHttpClientWrapperFactory _httpClientFactory;
-        private readonly ISteamGameDetailsRepository _steamGameDetailsRepository;
+
+        private IRateLimitedSteamApiClient _rateLimitedSteamApiClient;
+        private ISteamGameDetailsRepository _steamGameDetailsRepository;
 
         private readonly Platform _platform;                
-        private readonly List<Game> _games;
-        
+        private readonly List<Game> _games;        
         private bool _initialized;
 
-        public SteamGameProvider(IHttpClientWrapperFactory httpClientFactory, ISteamGameDetailsRepository steamGameDetailsRepository)
+        public SteamGameProvider(IHttpClientWrapperFactory httpClientFactory,
+            IRateLimitedSteamApiClient rateLimitedSteamApiClient,
+            ISteamGameDetailsRepository steamGameDetailsRepository)
         {
             _games = new List<Game>();
             _httpClientFactory = httpClientFactory;
+            _rateLimitedSteamApiClient = rateLimitedSteamApiClient;
             _platform = new Platform
             {
                 Name = "Steam",
@@ -128,7 +133,7 @@ namespace GameTracker.Plugins.Steam
 
             _games.Clear();
 
-            _games.AddRange(userGames.Games.Select(ug => new SteamGame(_steamGameDetailsRepository, ug)));
+            _games.AddRange(userGames.Games.Select(ug => new SteamGame(ref _rateLimitedSteamApiClient, ref _steamGameDetailsRepository, ug)));
 
             _initialized = true;
 

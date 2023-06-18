@@ -1,5 +1,6 @@
 using GameTracker.Plugins.Common.Interfaces;
-using GameTracker.Plugins.Steam.Interfaces;
+using GameTracker.Plugins.Steam.Interfaces.ApiClients;
+using GameTracker.Plugins.Steam.Interfaces.Data;
 using GameTracker.Plugins.Steam.Models.WebApi;
 using Moq;
 using System.Net;
@@ -10,6 +11,7 @@ namespace GameTracker.Plugins.Steam.Tests
     public class SteamGameProviderTests
     {
         private readonly Mock<IHttpClientWrapper> _mockHttpClient;
+        private readonly Mock<IRateLimitedSteamApiClient> _mockSteamApiClient;
         private readonly Mock<ISteamGameDetailsRepository> _mockSteamGameDetailsRepo;
 
         private readonly SteamGameProvider _provider;
@@ -17,14 +19,16 @@ namespace GameTracker.Plugins.Steam.Tests
         public SteamGameProviderTests()
         {
             _mockHttpClient = new Mock<IHttpClientWrapper>();
+            _mockSteamApiClient = new Mock<IRateLimitedSteamApiClient>();
             _mockSteamGameDetailsRepo = new Mock<ISteamGameDetailsRepository>();
 
             var mockHttpClientWrapperFactory = new Mock<IHttpClientWrapperFactory>();
             mockHttpClientWrapperFactory.Setup(x => x.BuildHttpClient())
                 .Returns(_mockHttpClient.Object);
 
-            _provider = new SteamGameProvider(mockHttpClientWrapperFactory.Object, _mockSteamGameDetailsRepo.Object);
-            
+            _provider = new SteamGameProvider(mockHttpClientWrapperFactory.Object,
+                _mockSteamApiClient.Object,
+                _mockSteamGameDetailsRepo.Object);
         }
 
         [Fact]

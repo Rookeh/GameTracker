@@ -1,10 +1,10 @@
-﻿using GameTracker.Data.Repositories;
-using GameTracker.Plugins.Steam.Helpers;
+﻿using GameTracker.Plugins.Steam.Helpers;
+using GameTracker.Plugins.Steam.Interfaces.Data;
 using GameTracker.Plugins.Steam.Models.StoreApi;
 
 namespace GameTracker.Plugins.Steam.Data
 {
-    public class ReleaseDateRepository : DapperRepository<ReleaseDate>
+    public class ReleaseDateRepository : DapperRepository<ReleaseDate>, IReleaseDateRepository
     {
         private const string TableName = "release_date";
         private const string BootstrapSql = @"CREATE TABLE release_date (
@@ -13,7 +13,7 @@ namespace GameTracker.Plugins.Steam.Data
                                                 date TEXT NOT NULL
                                               );";
 
-        public ReleaseDateRepository() 
+        public ReleaseDateRepository()
             : base(Constants.SQLite.ConnectionString, TableName, BootstrapSql)
         {
         }
