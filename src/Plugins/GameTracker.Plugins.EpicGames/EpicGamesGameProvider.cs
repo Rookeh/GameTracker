@@ -22,7 +22,7 @@ namespace GameTracker.Plugins.EpicGames
 
         public Platform Platform => new Platform
         {
-            Name = "Epic Games",
+            Name = "Epic Games Store",
             Description = "The Epic Games Store is a digital storefront for video games, developed by Epic Games and offered on Windows and macOS. " + 
                           "It was launched in 2018 and competes with other distribution platforms on the PC - including Steam, GOG and the Xbox Network.",
             ExtendedInformation = "This integration cannot access your Epic account; therefore, you must specify which titles you own. " + 

@@ -67,7 +67,7 @@ namespace GameTracker.Plugins.EpicGames.Models
 
         public override Review[] Reviews => Array.Empty<Review>();
 
-        public override string ProviderName => "Epic";
+        public override string ProviderName => "Epic Games Store";
 
         public override Studio? Studio => GetStudio();
 
