@@ -39,7 +39,7 @@ namespace GameTracker.Models
         public abstract Publisher? Publisher { get; }
         public abstract DateTime? ReleaseDate { get; }
         public abstract Review[] Reviews { get; }
-        public abstract string StorefrontName { get; }
+        public abstract string ProviderName { get; }
         public abstract Studio? Studio { get; }
         public abstract string[] Tags { get; }
         public abstract string Title { get; }

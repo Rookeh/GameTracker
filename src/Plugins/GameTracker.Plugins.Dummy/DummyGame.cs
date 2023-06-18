@@ -55,7 +55,7 @@ namespace GameTracker.Plugins.Dummy
 
         public override Review[] Reviews => new[] { new Review { Score = new Random().Next(11), Critic = new Critic { Name = "Dummy Critic", UpperBound = 10 } } } ;
 
-        public override string StorefrontName => "Dummy";
+        public override string ProviderName => "Dummy";
 
         public override Studio Studio => new Studio { Name = "Dummy Studio" };
 

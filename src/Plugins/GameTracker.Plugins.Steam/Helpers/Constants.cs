@@ -11,8 +11,8 @@ namespace GameTracker.Plugins.Steam.Helpers
         {
             internal const string OwnedGamesEndpoint = "https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/";
             internal const string AppDetailsEndpoint = "https://store.steampowered.com/api/appdetails?appids={0}";
+            internal const string AlternativeImageBaseUrl = "https://media.steampowered.com/steamcommunity/public/images/apps/{0}/{1}.jpg";
         }
-
 
         internal static class Authentication
         {
@@ -58,27 +58,29 @@ namespace GameTracker.Plugins.Steam.Helpers
             {
                 ["Online PvP"] = MultiplayerAvailability.Online,
                 ["Remote Play Together"] = MultiplayerAvailability.Online,
-                ["Cross-Platform Multiplayer"] = MultiplayerAvailability.Online,
+                ["Cross-Platform Multiplayer"] = MultiplayerAvailability.CrossPlatform,
                 ["Online Co-op"] = MultiplayerAvailability.Online,
                 ["MMO"] = MultiplayerAvailability.Always,
-                ["Single-player"] = MultiplayerAvailability.None,
+                ["Multi-player"] = MultiplayerAvailability.Online,
                 ["Shared/Split Screen PvP"] = MultiplayerAvailability.Local,
                 ["Shared/Split Screen Co-op"] = MultiplayerAvailability.Local,
                 ["Shared/Split Screen"] = MultiplayerAvailability.Local,
                 ["LAN PvP"] = MultiplayerAvailability.LAN,
-                ["LAN Co-op"] = MultiplayerAvailability.LAN
+                ["LAN Co-op"] = MultiplayerAvailability.LAN                
             };
 
             internal static Dictionary<string, GameplayMode> SteamMultiplayerModeMappings => new Dictionary<string, GameplayMode>
             {
-                ["Online PvP"] = GameplayMode.PvP,
-                ["Online Co-op"] = GameplayMode.CoOp,
-                ["MMO"] = GameplayMode.PvE,
-                ["Single-player"] = GameplayMode.Singleplayer,
-                ["Shared/Split Screen PvP"] = GameplayMode.PvP,
-                ["Shared/Split Screen Co-op"] = GameplayMode.CoOp,
+                ["Co-op"] = GameplayMode.CoOp,
+                ["LAN Co-op"] = GameplayMode.CoOp,
                 ["LAN PvP"] = GameplayMode.PvP,
-                ["LAN Co-op"] = GameplayMode.CoOp
+                ["MMO"] = GameplayMode.PvE,
+                ["Online Co-op"] = GameplayMode.CoOp,
+                ["Online PvP"] = GameplayMode.PvP,
+                ["PvP"] = GameplayMode.PvP,
+                ["Shared/Split Screen Co-op"] = GameplayMode.CoOp,
+                ["Shared/Split Screen PvP"] = GameplayMode.PvP,
+                ["Single-player"] = GameplayMode.Singleplayer,
             };
         }
 
@@ -91,15 +93,15 @@ namespace GameTracker.Plugins.Steam.Helpers
                     {
                         IsDefaultValue = true,
                         AppId = 0,
-                        About = "Pending...",
+                        About = string.Empty,
                         Categories = Array.Empty<Category>(),
-                        Description = "Pending...",
+                        Description = string.Empty,
                         Developers = Array.Empty<string>(),
                         Genres = Array.Empty<Genre>(),
-                        HeaderImage = "img\\placeholder.png",
+                        HeaderImage = null,
                         IsFree = false,
                         Languages = string.Empty,
-                        Name = "Pending...",
+                        Name = string.Empty,
                         Platforms = new Platforms
                         {
                             Linux = false,
@@ -112,8 +114,8 @@ namespace GameTracker.Plugins.Steam.Helpers
                             Date = null,
                             Unreleased = true
                         },
-                        ShortDescription = "Pending...",
-                        Type = "Pending...",
+                        ShortDescription = string.Empty,
+                        Type = string.Empty,
                         Website = "https://store.steampowered.com/"
                     }
                 };

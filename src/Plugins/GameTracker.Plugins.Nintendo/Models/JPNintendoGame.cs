@@ -53,7 +53,7 @@ namespace GameTracker.Plugins.Nintendo.Models
 
         public override Review[] Reviews => Array.Empty<Review>();
 
-        public override string StorefrontName => "Nintendo eShop";
+        public override string ProviderName => "Nintendo eShop";
 
         public override Studio? Studio => _studio;
 

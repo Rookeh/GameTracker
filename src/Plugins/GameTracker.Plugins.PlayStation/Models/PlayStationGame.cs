@@ -68,7 +68,7 @@ namespace GameTracker.Plugins.PlayStation.Models
 
         public override Review[] Reviews => Array.Empty<Review>();
 
-        public override string StorefrontName => "PlayStation";
+        public override string ProviderName => "PlayStation";
 
         public override Studio? Studio => null;
 

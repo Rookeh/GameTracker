@@ -5,11 +5,43 @@ using GameTracker.Plugins.Steam.Models.StoreApi;
 
 using Genre = GameTracker.Plugins.Steam.Models.StoreApi.Genre;
 using GenreEnum = GameTracker.Models.Enums.Genre;
+using GameTracker.Plugins.Steam.Models.WebApi;
 
 namespace GameTracker.Plugins.Steam.Helpers
 {
     internal static class SteamGameHelpers
     {
+        internal static Image BuildImage(int appId, SteamGameDto details, SteamGameDetails? extendedDetails)
+        {
+            if (extendedDetails?.HeaderImage != null)
+            {
+                return new Image()
+                {
+                    Url = extendedDetails.HeaderImage,
+                    Width = 460,
+                    Height = 215
+                };
+            }
+            else if (!string.IsNullOrEmpty(details.IconId))
+            {
+                return new Image()
+                {
+                    Url = string.Format(Constants.ApiEndpoints.AlternativeImageBaseUrl, appId, details.IconId),
+                    Width = 184,
+                    Height = 69
+                };
+            }
+            else
+            {
+                return new Image()
+                {
+                    Url = "img\\placeholder.png",
+                    Width = 460,
+                    Height = 215
+                };
+            }
+        }
+
         internal static ControlScheme[] ParseControlScheme(Category[]? categories)
         {
             var controlSchemes = new List<ControlScheme>()

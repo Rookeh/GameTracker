@@ -6,13 +6,15 @@ namespace GameTracker.Frontend.Helpers
     {
         #region Filters
 
-        public static Func<Game, bool> TitleFilter(string? filter) => g => string.IsNullOrEmpty(filter) ? true : g.Title.Contains(filter);
+        public static Func<Game, bool> TitleFilter(string? filter) => g => string.IsNullOrEmpty(filter) ? true : g.Title.ToLower().Contains(filter.ToLower());
 
-        public static Func<Game, bool> PublisherFilter(string? filter) => g => string.IsNullOrEmpty(filter) ? true : g.PublisherName.Contains(filter);
+        public static Func<Game, bool> PublisherFilter(string? filter) => g => string.IsNullOrEmpty(filter) ? true : g.PublisherName.ToLower().Contains(filter.ToLower());
 
-        public static Func<Game, bool> StudioFilter(string? filter) => g => string.IsNullOrEmpty(filter) ? true : g.StudioName.Contains(filter);
+        public static Func<Game, bool> ProviderFilter(string? filter) => g => string.IsNullOrEmpty(filter) ? true : g.ProviderName.ToLower().Contains(filter.ToLower());
 
-        public static Func<Game, bool> GenreFilter(string? filter) => g => string.IsNullOrEmpty(filter) ? true : g.Genres != null && g.Genres.Any(genre => genre.ToString() == filter);
+        public static Func<Game, bool> StudioFilter(string? filter) => g => string.IsNullOrEmpty(filter) ? true : g.StudioName.ToLower().Contains(filter.ToLower());
+
+        public static Func<Game, bool> GenreFilter(string? filter) => g => string.IsNullOrEmpty(filter) ? true : g.Genres != null && g.Genres.Any(genre => genre.ToString().ToLower() == filter.ToLower());
 
         public static Func<Game, bool> ReleaseDateFilter(DateOnly? filter) => g => filter == null ? true : g.ReleaseDate != null && DateOnly.FromDateTime(g.ReleaseDate ?? DateTime.UnixEpoch) >= filter;
 

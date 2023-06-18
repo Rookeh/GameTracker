@@ -78,15 +78,28 @@ else
                 <Accordion>
                     <AccordionItem>
                         <TitleTemplate>
-                            <Icon Name="IconName.CodeSlash" Class="me-1" /> Studio Search...
+                            <Icon Name="IconName.Controller" Class="me-1" /> Genre Search...
                         </TitleTemplate>
                         <Content>
-                            <AutoComplete @bind-Value="_filterProperties.Studio"
-                                          TItem="Studio"
-                                          DataProvider="StudioFilterProvider"
+                            <AutoComplete @bind-Value="_filterProperties.Genre"
+                                          TItem="FilterableGenre"
+                                          DataProvider="GenreFilterProvider"
                                           PropertyName="Name"
-                                          Placeholder="Search for a development studio..."
-                                          OnChanged="(Studio studio) => StudioFilter(studio)" />
+                                          Placeholder="Search for a genre..."
+                                          OnChanged="(FilterableGenre genre) => GenreFilter(genre)" />
+                        </Content>
+                    </AccordionItem>
+                    <AccordionItem>
+                        <TitleTemplate>
+                            <Icon Name="IconName.Shop" Class="me-1" /> Provider Search...
+                        </TitleTemplate>
+                        <Content>
+                            <AutoComplete @bind-Value="_filterProperties.Provider"
+                                          TItem="FilterableProvider"
+                                          DataProvider="ProviderFilterProvider"
+                                          PropertyName="Name"
+                                          Placeholder="Search for a provider..."
+                                          OnChanged="(FilterableProvider provider) => ProviderFilter(provider)" />
                         </Content>
                     </AccordionItem>
                     <AccordionItem>
@@ -104,23 +117,15 @@ else
                     </AccordionItem>
                     <AccordionItem>
                         <TitleTemplate>
-                            <Icon Name="IconName.Clock" Class="me-1" /> Last Played...
+                            <Icon Name="IconName.CodeSlash" Class="me-1" /> Studio Search...
                         </TitleTemplate>
                         <Content>
-                            <DateInput TValue="DateTime?" @bind-Value="@LastPlayedFilter" Placeholder="Not played after..." />
-                        </Content>
-                    </AccordionItem>
-                    <AccordionItem>
-                        <TitleTemplate>
-                            <Icon Name="IconName.Controller" Class="me-1" /> Genre Search...
-                        </TitleTemplate>
-                        <Content>
-                            <AutoComplete @bind-Value="_filterProperties.Genre"
-                                          TItem="FilterableGenre"
-                                          DataProvider="GenreFilterProvider"
+                            <AutoComplete @bind-Value="_filterProperties.Studio"
+                                          TItem="Studio"
+                                          DataProvider="StudioFilterProvider"
                                           PropertyName="Name"
-                                          Placeholder="Search for a genre..."
-                                          OnChanged="(FilterableGenre genre) => GenreFilter(genre)" />
+                                          Placeholder="Search for a development studio..."
+                                          OnChanged="(Studio studio) => StudioFilter(studio)" />
                         </Content>
                     </AccordionItem>
                 </Accordion>
@@ -224,7 +229,7 @@ else
         {
             return;
         }
-        
+
         _fieldOrderDictionary = InitializeGridOrder();
         _ascendingOrder = true;
         _filterPredicates = new Dictionary<string, Func<Game, bool>>();
@@ -272,11 +277,7 @@ else
             .Select(g => new FilterableGenre { Name = g.ToString() })
             .ToList();
 
-        return await Task.FromResult(new AutoCompleteDataProviderResult<FilterableGenre>
-            {
-                Data = genres,
-                TotalCount = genres.Count()
-            });
+        return await Task.FromResult(request.ApplyTo(genres));
     }
 
     private async Task<AutoCompleteDataProviderResult<Publisher>> PublisherFilterProvider(AutoCompleteDataProviderRequest<Publisher> request)
@@ -286,11 +287,17 @@ else
             .DistinctBy(p => p.Name)
             .OrderBy(p => p.Name);
 
-        return await Task.FromResult(new AutoCompleteDataProviderResult<Publisher>
-            {
-                Data = publishers,
-                TotalCount = publishers.Count()
-            });
+        return await Task.FromResult(request.ApplyTo(publishers));
+    }
+
+    private async Task<AutoCompleteDataProviderResult<FilterableProvider>> ProviderFilterProvider(AutoCompleteDataProviderRequest<FilterableProvider> request)
+    {
+        var providers = GameLibraryManager.Games
+            .Select(g => new FilterableProvider { Name = g.ProviderName })
+            .DistinctBy(s => s.Name)
+            .OrderBy(s => s.Name);
+
+        return await Task.FromResult(request.ApplyTo(providers));
     }
 
     private async Task<AutoCompleteDataProviderResult<Studio>> StudioFilterProvider(AutoCompleteDataProviderRequest<Studio> request)
@@ -300,11 +307,7 @@ else
             .DistinctBy(s => s.Name)
             .OrderBy(s => s.Name);
 
-        return await Task.FromResult(new AutoCompleteDataProviderResult<Studio>
-            {
-                Data = studios,
-                TotalCount = studios.Count()
-            });
+        return await Task.FromResult(request.ApplyTo(studios));
     }
 
     #endregion
@@ -354,7 +357,7 @@ else
                 _orderSelector = LinqHelper.TitleSelector;
                 break;
         }
-                
+
         // This should not be necessary, but somehow the grid data source is not being refreshed until after
         // the render event, meaning that otherwise the grid state will be at least one step behind where it should be.
         // So, we have to forcibly reset the data source to pick up changes to the collection order.
@@ -429,6 +432,12 @@ else
     private async Task GenreFilter(FilterableGenre genre)
     {
         _filterPredicates[nameof(GenreFilter)] = LinqHelper.GenreFilter(genre?.Name);
+        await _gameGrid.RefreshDataAsync();
+    }
+
+    private async Task ProviderFilter(FilterableProvider provider)
+    {
+        _filterPredicates[nameof(ProviderFilter)] = LinqHelper.ProviderFilter(provider?.Name);
         await _gameGrid.RefreshDataAsync();
     }
 

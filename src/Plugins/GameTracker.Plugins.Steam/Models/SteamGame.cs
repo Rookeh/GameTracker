@@ -6,7 +6,6 @@ using GameTracker.Plugins.Steam.Models.StoreApi;
 using GenreEnum = GameTracker.Models.Enums.Genre;
 using GameTracker.Plugins.Steam.Models.WebApi;
 using GameTracker.Plugins.Steam.Interfaces.Data;
-using GameTracker.Plugins.Steam.ApiClients;
 using GameTracker.Plugins.Steam.Interfaces.ApiClients;
 
 namespace GameTracker.Plugins.Steam.Models
@@ -16,7 +15,8 @@ namespace GameTracker.Plugins.Steam.Models
         private readonly IRateLimitedSteamApiClient _rateLimitedApiClient;
         private readonly ISteamGameDetailsRepository _gameDetailsRepository;
 
-        private SteamGameDetails? _gameDetails;
+        private SteamGameDetails? _extendedGameDetails;
+        private SteamGameDto _gameDetails;
         private readonly DateTime _lastPlayed;
         private readonly TimeSpan _playTime;
         private readonly string _title;
@@ -27,6 +27,7 @@ namespace GameTracker.Plugins.Steam.Models
             _gameDetailsRepository = steamGameDetailsRepository;
             
             PlatformId = steamGameDto.AppId;
+            _gameDetails = steamGameDto;
             _title = steamGameDto.Name;
             _lastPlayed = DateTime.UnixEpoch.AddSeconds(steamGameDto.LastPlayedTimestamp);
             _playTime = TimeSpan.FromMinutes(steamGameDto.Playtime);
@@ -34,23 +35,18 @@ namespace GameTracker.Plugins.Steam.Models
 
         public override async Task Preload()
         {
-            _gameDetails = await LazyLoadGameDetails();
+            _extendedGameDetails = await LazyLoadGameDetails();
         }
 
-        public override ControlScheme[] ControlSchemes => SteamGameHelpers.ParseControlScheme(_gameDetails?.Categories);
+        public override ControlScheme[] ControlSchemes => SteamGameHelpers.ParseControlScheme(_extendedGameDetails?.Categories);
 
-        public override string Description => _gameDetails?.ShortDescription ?? string.Empty;
+        public override string Description => _extendedGameDetails?.ShortDescription ?? string.Empty;
 
-        public override GameplayMode[] GameplayModes => SteamGameHelpers.ParseMultiplayerModes(_gameDetails?.Categories);
+        public override GameplayMode[] GameplayModes => SteamGameHelpers.ParseMultiplayerModes(_extendedGameDetails?.Categories);
 
-        public override GenreEnum[] Genres => SteamGameHelpers.ParseGenres(_gameDetails?.Genres).Distinct().ToArray();
+        public override GenreEnum[] Genres => SteamGameHelpers.ParseGenres(_extendedGameDetails?.Genres).Distinct().ToArray();
 
-        public override Image Image => new Image()
-        {
-            Url = _gameDetails?.HeaderImage ?? "img\\placeholder.png",
-            Width = 460,
-            Height = 215
-        };
+        public override Image Image => SteamGameHelpers.BuildImage(PlatformId, _gameDetails, _extendedGameDetails);
 
         public override DateTime? LastPlayed => _lastPlayed;
 
@@ -62,21 +58,21 @@ namespace GameTracker.Plugins.Steam.Models
             Url = $"steam://run/{PlatformId}"
         };
 
-        public override MultiplayerAvailability[] MultiplayerAvailability => SteamGameHelpers.ParseMultiplayerAvailability(_gameDetails?.Categories);
+        public override MultiplayerAvailability[] MultiplayerAvailability => SteamGameHelpers.ParseMultiplayerAvailability(_extendedGameDetails?.Categories);
 
-        public override Platform[] Platforms => SteamGameHelpers.ParsePlatforms(_gameDetails?.Platforms).ToArray();
+        public override Platform[] Platforms => SteamGameHelpers.ParsePlatforms(_extendedGameDetails?.Platforms).ToArray();
 
         public override TimeSpan? Playtime => _playTime;
 
-        public override Publisher? Publisher => SteamGameHelpers.ParsePublisher(_gameDetails);
+        public override Publisher? Publisher => SteamGameHelpers.ParsePublisher(_extendedGameDetails);
 
         public override DateTime? ReleaseDate
         {
             get
             {
-                if (_gameDetails?.ReleaseDate?.Date != null)
+                if (_extendedGameDetails?.ReleaseDate?.Date != null)
                 {
-                    if (DateTime.TryParse(_gameDetails.ReleaseDate.Date, out var releaseDate))
+                    if (DateTime.TryParse(_extendedGameDetails.ReleaseDate.Date, out var releaseDate))
                     {
                         return releaseDate;
                     }                    
@@ -86,13 +82,13 @@ namespace GameTracker.Plugins.Steam.Models
             }
         }
 
-        public override Review[] Reviews => SteamGameHelpers.ParseMetacriticReview(this, _gameDetails?.Metacritic) ?? Array.Empty<Review>();
+        public override Review[] Reviews => SteamGameHelpers.ParseMetacriticReview(this, _extendedGameDetails?.Metacritic) ?? Array.Empty<Review>();
 
-        public override string StorefrontName => "Steam";
+        public override string ProviderName => "Steam";
 
-        public override Studio? Studio => _gameDetails?.Developers?.Any() ?? false ? new Studio { Name = _gameDetails.Developers.First() } : null;
+        public override Studio? Studio => _extendedGameDetails?.Developers?.Any() ?? false ? new Studio { Name = _extendedGameDetails.Developers.First() } : null;
 
-        public override string[] Tags => _gameDetails?.Categories.Select(c => c.Description).ToArray() ?? Array.Empty<string>();    
+        public override string[] Tags => _extendedGameDetails?.Categories.Select(c => c.Description).ToArray() ?? Array.Empty<string>();    
         
         public override string Title => _title;
 
@@ -104,7 +100,7 @@ namespace GameTracker.Plugins.Steam.Models
          * multiple titles into a single operation. Instead, we have to query their store API individually for each game.
          * 
          * To make this slightly less terrible, there is a SQLite cache which will store any metadata for a game once it has been
-         * retrieved at least once. There is also a client-side rate limiter, which will prevent more than 15 requests every few 
+         * retrieved at least once. There is also a client-side rate limiter, which will prevent more than 20 requests every few 
          * minutes (beyond this, it seems that we trigger a temporary block on Steam's CDN). Any games that fail to obtain metadata
          * due to rate-limiting will have some basic information populated, but extended metadata + images will be replaced by
          * placeholders, until a successful request can be made.

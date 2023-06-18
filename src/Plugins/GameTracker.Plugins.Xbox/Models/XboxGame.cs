@@ -59,7 +59,7 @@ namespace GameTracker.Plugins.Xbox.Models
 
         public override Review[] Reviews => Array.Empty<Review>();
 
-        public override string StorefrontName => "Xbox";
+        public override string ProviderName => "Xbox";
 
         public override Studio? Studio => null;
 

@@ -67,7 +67,7 @@ namespace GameTracker.Plugins.GOG.Models
 
         public override Review[] Reviews => Array.Empty<Review>();
 
-        public override string StorefrontName => "GOG";
+        public override string ProviderName => "GOG";
 
         public override Studio? Studio => null;
 

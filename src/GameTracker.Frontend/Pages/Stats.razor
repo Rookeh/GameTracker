@@ -74,9 +74,9 @@ else
                             </div>                            
                         </td>
                         <td>
-                            <span class="chart-label"><h3>By Storefront</h3></span>
+                            <span class="chart-label"><h3>By Provider</h3></span>
                             <div>
-                                <DoughnutChart @ref="_storeFrontChart" Width="400" Class="mb-4" />
+                                <DoughnutChart @ref="_providerChart" Width="400" Class="mb-4" />
                             </div>                            
                         </td>
                     </tr>
@@ -106,8 +106,8 @@ else
     private ChartData _multiPlayerData = new ChartData();
     private DoughnutChart _multiPlayerChart = new DoughnutChart();
 
-    private ChartData _storeFrontData = new ChartData();
-    private DoughnutChart _storeFrontChart = new DoughnutChart();
+    private ChartData _providerData = new ChartData();
+    private DoughnutChart _providerChart = new DoughnutChart();
 
     private DoughnutChartOptions _doughnutChartOptions = new DoughnutChartOptions();
     private bool _isAuthenticated;
@@ -140,7 +140,7 @@ else
         SetupMultiplayerChart();
         SetupPlatformChart();
         SetupPlayedUnplayedChart();
-        SetupStoreFrontChart();
+        SetupProviderChart();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -152,7 +152,7 @@ else
             await _multiPlayerChart.InitializeAsync(_multiPlayerData, _doughnutChartOptions);
             await _platformChart.InitializeAsync(_platformData, _doughnutChartOptions);
             await _playedUnplayedChart.InitializeAsync(_playedUnplayedData, _doughnutChartOptions);
-            await _storeFrontChart.InitializeAsync(_storeFrontData, _doughnutChartOptions);
+            await _providerChart.InitializeAsync(_providerData, _doughnutChartOptions);
         }
 
         await base.OnAfterRenderAsync(firstRender);
@@ -282,20 +282,20 @@ else
             };
     }
 
-    private void SetupStoreFrontChart()
+    private void SetupProviderChart()
     {
-        var grouped = GameLibraryManager.Games.GroupBy(g => g.StorefrontName);
+        var grouped = GameLibraryManager.Games.GroupBy(g => g.ProviderName);
 
         var chartDataSet = new DoughnutChartDataset()
-            {
-                Data = grouped.Select(g => Convert.ToDouble(g.Count())).ToList(),
-                BackgroundColor = grouped.Select(g => ColourHelper.GetRandomColour().ToRgbString()).ToList()
-            };
+        {
+            Data = grouped.Select(g => Convert.ToDouble(g.Count())).ToList(),
+            BackgroundColor = grouped.Select(g => ColourHelper.GetRandomColour().ToRgbString()).ToList()
+        };
 
-        _storeFrontData = new ChartData()
-            {
-                Labels = grouped.Select(g => g.Key).ToList(),
-                Datasets = new List<IChartDataset>() { chartDataSet }
-            };
+        _providerData = new ChartData()
+        {
+            Labels = grouped.Select(g => g.Key).ToList(),
+            Datasets = new List<IChartDataset>() { chartDataSet }
+        };
     }
 }

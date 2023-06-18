@@ -4,6 +4,7 @@
     {
         Always,
         Online,
+        CrossPlatform,
         LAN,
         Local,
         None

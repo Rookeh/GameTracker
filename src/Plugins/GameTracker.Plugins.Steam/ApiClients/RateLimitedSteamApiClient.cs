@@ -8,7 +8,7 @@ namespace GameTracker.Plugins.Steam.ApiClients
     public class RateLimitedSteamApiClient : RateLimitedHttpClient<Dictionary<string, SteamGameDetailsRoot>>, IRateLimitedSteamApiClient
     {
         private const int BackOffMinutes = 5;
-        private const int MaxRequests = 18;
+        private const int MaxRequests = 20;
 
         public RateLimitedSteamApiClient()
             : base(TimeSpan.FromMinutes(BackOffMinutes), MaxRequests)
