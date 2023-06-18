@@ -54,8 +54,6 @@ Not all game providers expose the same level of detail, and there are some cavea
 
 ## What doesn't work (yet!)
 
- - Library sorting!
- - The grid view sometimes does not update when a filter is changed, selecting another UI element or changing another filter may cause the state to update when this happens.
  - Probably a whole bunch of other stuff I haven't noticed yet. :)
 
 ## What needs to be added / improved:
