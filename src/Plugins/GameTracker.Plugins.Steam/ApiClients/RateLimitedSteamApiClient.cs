@@ -2,6 +2,7 @@
 using GameTracker.Plugins.Steam.Helpers;
 using GameTracker.Plugins.Steam.Interfaces.ApiClients;
 using GameTracker.Plugins.Steam.Models.StoreApi;
+using System.Globalization;
 
 namespace GameTracker.Plugins.Steam.ApiClients
 {
@@ -17,7 +18,7 @@ namespace GameTracker.Plugins.Steam.ApiClients
 
         public async Task<SteamGameDetails> GetSteamGameDetails(int appId)
         {
-            var url = string.Format(Constants.ApiEndpoints.AppDetailsEndpoint, appId);
+            var url = string.Format(Constants.ApiEndpoints.AppDetailsEndpoint, appId, LocalizationHelper.GetSteamLocaleString());
             var response = await GetFromJson(url, new Dictionary<string, SteamGameDetailsRoot>()
             {
                 [appId.ToString()] = Constants.DefaultValues.DefaultSteamGameDetails

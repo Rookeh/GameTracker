@@ -8,7 +8,7 @@ namespace GameTracker.Plugins.Steam.Data
     {
         private const string TableName = "game_details";
         private const string BootstrapSql = @"CREATE TABLE game_details (
-                                                appId INTEGER NOT NULL,                                                
+                                                appId INTEGER NOT NULL UNIQUE,                                                
                                                 name VARCHAR(1000) NOT NULL,
                                                 type VARCHAR(1000) NULL,
                                                 isFree INTEGER NULL,
@@ -68,7 +68,8 @@ namespace GameTracker.Plugins.Steam.Data
         public async Task SetGameDetails(SteamGameDetails steamGameDetails)
         {
             var sql = @"INSERT INTO game_details (type, name, appId, isFree, description, about, shortDescription, languages, headerImage, website)
-                        VALUES (@type, @name, @appId, @isFree, @description, @about, @shortDescription, @languages, @headerImage, @website)";
+                        VALUES (@type, @name, @appId, @isFree, @description, @about, @shortDescription, @languages, @headerImage, @website)
+                        ON CONFLICT DO NOTHING";
 
             await SetValue(sql, new
             {
