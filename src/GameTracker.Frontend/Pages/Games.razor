@@ -179,7 +179,7 @@ else
           GridSettingsChanged="OnGridUpdated"
           PageSize="@_pageSize"
           PageSizeSelectorVisible="false"
-          PageSizeSelectorItems="@(new int[] { 4 })"
+          PageSizeSelectorItems="@(new int[] { 3 })"
           PaginationItemsTextFormat="@_paginationText"
           Responsive="true"
           TItem="GameRow">
@@ -241,7 +241,7 @@ else
         PreloadService.Hide();
         _isInitializing = false;
 
-        _pageSize = 4;
+        _pageSize = 3;
         RefreshPaginationText(1, _pageSize, GameLibraryManager.Games.Count());
     }
 
