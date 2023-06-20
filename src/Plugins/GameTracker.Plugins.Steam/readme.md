@@ -9,7 +9,7 @@ To find your SteamID64 value, use a tool like [steamid.io](https://steamid.io).
 
 Due to the propensity for most Steam users to have large game libraries, combined with the 'unique' design and rate limits imposed by Valve's API, this integration loads game titles slightly differently from others:
 
- 1. On startup, or when you select 'Load Games' from the provider menu, this integration will fetch basic details for all the games linked to your Steam account - this consists of the application ID, title and playtime. These basic fields will be available to query/filter on immediately.
+ 1. On startup, or when you select 'Load Games' from the provider menu, this integration will fetch basic details for all the games linked to your Steam account - this consists of the application ID, title, playtime and a basic low-resolution icon image. These basic fields will be available to query/filter on immediately.
  2. When the game library is opened, details and artwork for Steam games are lazily loaded. This is because Valve does not provide an API endpoint to bulk query for game details (e.g. description, genre, rating, artwork, etc), and each title has to be requested individually.
  3. As such, only games for which extended details have been populated will have those fields available to query/filter on in the game library view.
  4. Due to rate limits, only 20 game detail requests can be made every 5 minutes. Once this limit is reached, any further Steam titles will show a placeholder image and description in their details pane until further requests can be made.
