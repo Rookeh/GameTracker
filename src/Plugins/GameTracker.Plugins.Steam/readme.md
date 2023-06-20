@@ -28,7 +28,7 @@ The below grid indicates which fields are returned or supported by titles return
 | Data Point | Available |
 |--|--|
 | Artwork | 🟠 Low-res initially, high-res lazily loaded |
-| Control Schemes | 🟢 Yes |
+| Control Schemes | 🟠 Lazily Loaded |
 | Date/Time Last Played: | 🟢 Yes |
 | Development Studio | 🟠 Lazily Loaded |
 | Description | 🟠 Lazily Loaded |
