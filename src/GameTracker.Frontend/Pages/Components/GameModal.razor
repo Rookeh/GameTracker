@@ -10,229 +10,34 @@
     <div class="game-details">
         <div class="modal-body">
             <div class="header">
-                <img src="@Game.Image.Url" width="@Game.Image.Width" height="@Game.Image.Height" alt="@Game.Title">
+                <img src="@GameImage.Url" width="@GameImage.Width" height="@GameImage.Height" alt="@GameTitle">
             </div>
-            <div class="info">
-                <h2 class="title">@Game.Title</h2>
-                @if (Game.ReleaseDate != null)
+            <Tabs>
+                @foreach (var game in GameGroup)
                 {
-                    <div class="release-date">
-                        <span class="label">Release Date:</span>
-                        <span class="value">@GetReleaseDate(Game.ReleaseDate)</span>
-                    </div>
+                    <Tab Title="@game.ProviderName">
+                        <Content>
+                            <GameModalTab Game="@game"/>
+                        </Content>
+                    </Tab>
                 }
-                @if (Game.Publisher != null)
-                {
-                    <div class="publisher">
-                        <span class="label">Publisher:</span>
-                        <span class="value">@GetName(Game.Publisher)</span>
-                    </div>
-                }
-                @if (Game.Studio != null)
-                {
-                    <div class="studio">
-                        <span class="label">Development Studio:</span>
-                        <span class="value">@GetName(Game.Studio)</span>
-                    </div>
-                }
-                @if (Game.Genres.Any())
-                {
-                    <div class="genre">
-                        <span class="label">Genres:</span>
-                        <span class="value">@string.Join(", ", Game.Genres)</span>
-                    </div>
-                }
-                @if (Game.MultiplayerAvailability.Any())
-                {
-                    <div class="multiplayer-avail">
-                        <span class="label">Multiplayer Type:</span>
-                        <span class="value">@string.Join(", ", Game.MultiplayerAvailability)</span>
-                    </div>
-                }
-                @if (Game.GameplayModes.Any())
-                {
-                    <div class="gameplay-mode">
-                        <span class="label">Gameplay Modes:</span>
-                        <span class="value">@string.Join(", ", Game.GameplayModes)</span>
-                    </div>
-                }
-                @if (!string.IsNullOrEmpty(Game.Description))
-                {
-                    <div class="synopsis">
-                        <span class="label">Synopsis:</span>
-                        <span class="value">@Game.Description</span>
-                    </div>
-                }
-                @if (Game.Playtime != null)
-                {
-                    <div class="game-time">
-                        <span class="label">Game Time:</span>
-                        <span class="value">@GetGameTimeString(Game.Playtime)</span>
-                    </div>
-                }
-                @if (Game.LastPlayed != null)
-                {
-                    <div class="last-played">
-                        <span class="label">Last Played:</span>
-                        <span class="value">@GetLastPlayedString(Game.LastPlayed)</span>
-                    </div>
-                }
-                <div class="platforms">
-                    <span class="label">Platforms:</span>
-                    <span class="value">
-                        <table>
-                            <tr>
-                                @foreach (var platform in Game.Platforms)
-                                {
-                                    <td>
-                                        <Icon Name="@IconHelper.GetIconEnum(platform.Icon, IconName.QuestionCircle)"/> @platform.Name
-                                    </td>
-                                    <td/>
-                                }
-                            </tr>
-                        </table>
-                    </span>
-                </div>
-                @if (Game.ControlSchemes.Any())
-                {
-                    <div class="controls">
-                        <span class="label">Controls:</span>
-                        <span class="value">
-                            <table>
-                                <tr>
-                                    @foreach (var controlScheme in Game.ControlSchemes)
-                                    {
-                                        <td>
-                                            @switch (controlScheme)
-                                            {
-                                                case ControlScheme.KeyboardMouse:
-                                                    <Icon Name="IconName.Mouse2Fill" /> <span>Keyboard / Mouse</span>
-                                                    break;
-                                                case ControlScheme.PartialController:
-                                                    <Icon Name="IconName.Dpad" /> <span>Controller (Partial)</span>
-                                                    break;
-                                                case ControlScheme.Controller:
-                                                    <Icon Name="IconName.DpadFill" /> <span>Controller</span>
-                                                    break;
-                                                case ControlScheme.VRSupported:
-                                                    <Icon Name="IconName.BadgeVr" /> <span>VR Supported</span>
-                                                    break;
-                                                case ControlScheme.VROnly:
-                                                    <Icon Name="IconName.BadgeVrFill" /> <span>VR Only</span>
-                                                    break;
-                                            }
-                                        </td>
-                                        <td />
-                                    }
-                                </tr>
-                            </table>
-                        </span>
-                    </div>
-                }
-                @foreach (var review in Game.Reviews)
-                {
-                    <div class="rating">
-                        <span class="label">@review.Critic.Name Rating:</span>
-                        <span class="value">@review.Score / @review.Critic.UpperBound</span>
-                    </div>
-                }
-                @if (Game.AverageCriticalReview != null)
-                {
-                    <div class="rating">
-                        <span class="label">Average Critic Rating:</span>
-                        <span class="value">@Game.AverageCriticalReview%</span>
-                    </div>
-                }
-                @if (Game.Tags != null && Game.Tags.Any())
-                {
-                    <div class="tags">
-                        <span class="label">Tags:</span>
-                        <span class="value">@string.Join(", ", Game.Tags)</span>
-                    </div>
-                }
-                <Button Color="ButtonColor.Primary" @onclick="OnLaunchGameClick">
-                    <Icon Name="@IconHelper.GetIconEnum(@Game.LaunchCommand.Icon, IconName.Controller)" />
-                    @Game.LaunchCommand.Text
-                </Button>
-            </div>
+            </Tabs>
         </div>
     </div>
 </div>
 
 
 @code {
-    [Parameter] public Game Game { get; set; }
+    [Parameter]
+    public IGrouping<string, Game> GameGroup { get; set; }
 
-    private static string GetName(CorporateEntity entity)
+    public Image GameImage;
+    public string GameTitle;
+
+    protected override void OnParametersSet()
     {
-        return entity != null ? entity.Name : "Unknown";
-    }
-
-    private static string GetGameTimeString(TimeSpan? gameTime)
-    {
-        if (gameTime == null)
-        {
-            return "Unknown";
-        }
-
-        var gameTimeStringBuilder = new StringBuilder();
-
-        if (gameTime.Value.Days >= 1)
-        {
-            gameTimeStringBuilder.Append($"{gameTime.Value.Days} {(gameTime.Value.Days == 1 ? "day " : "days ")}");
-        }
-
-        if (gameTime.Value.Hours >= 1)
-        {
-            gameTimeStringBuilder.Append($"{gameTime.Value.Hours} {(gameTime.Value.Hours == 1 ? "hour " : "hours ")}");
-        }
-
-        if (gameTime.Value.Minutes >= 1)
-        {
-            gameTimeStringBuilder.Append($"{gameTime.Value.Minutes} {(gameTime.Value.Minutes == 1 ? "minute " : "minutes ")}");
-        }
-        else
-        {
-            gameTimeStringBuilder.Append("< 1 minute");
-        }
-
-        return gameTimeStringBuilder.ToString();
-    }
-
-    private static string GetLastPlayedString(DateTime? dateTime)
-    {
-        if (dateTime == null)
-        {
-            return "Unknown";
-        }
-
-        if (dateTime.Value <= DateTime.UnixEpoch.AddDays(5))
-        {
-            return "Never";
-        }
-
-        return dateTime.Value.ToString();
-    }
-
-    private static string GetReleaseDate(DateTime? releaseDate)
-    {
-        if (releaseDate == null)
-        {
-            return "Unknown";
-        }
-
-        return releaseDate.Value.ToLongDateString();
-    }
-
-    private async Task OnLaunchGameClick()
-    {
-        if (Game.LaunchCommand.NewTab)
-        {
-            await JSRuntime.InvokeVoidAsync("open", Game.LaunchCommand.Url, "_blank");
-        }
-        else
-        {
-            NavigationManager.NavigateTo(Game.LaunchCommand.Url);
-        }
-    }
+        GameImage = GameGroup.FirstOrDefault(gg => gg.Image != null).Image;
+        GameTitle = GameGroup.Key;
+        base.OnParametersSet();
+    }    
 }

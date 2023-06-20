@@ -71,7 +71,7 @@ namespace GameTracker.Plugins.Steam.Tests
                 .Verifiable();
 
             // Act
-            await _provider.Refresh(userId, apiKey, steamId);
+            await _provider.Refresh(userId, apiKey, steamId, true, true);
 
             // Assert
             Assert.Single(_provider.Games);
@@ -79,6 +79,68 @@ namespace GameTracker.Plugins.Steam.Tests
             Assert.Equal(title, _provider.Games.First().Title);
             Assert.Equal(DateTime.Today, _provider.Games.First().LastPlayed);
             Assert.Equal(playTime, _provider.Games.First().Playtime);
+            _mockHttpClient.Verify();
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public async Task Refresh_RespectsExcludedTitles(bool includeTools, bool includeBetas)
+        {
+            // Arrange
+            var userId = "test";
+            var apiKey = "abcd";
+            var steamId = "1234";
+            var ownedGamesResponse = new SteamGameResponseRoot
+            {
+                Response = new SteamGameResponse
+                {
+                    GameCount = 1,
+                    Games = new[]
+                    {
+                        new SteamGameDto
+                        {
+                            Name = "Test Title",
+                        },
+                        new SteamGameDto
+                        {
+                            Name = "Test Dedicated Server"
+                        },
+                        new SteamGameDto
+                        {
+                            Name = "Test Driver Updater"
+                        },
+                        new SteamGameDto
+                        {
+                            Name = "Test Beta"
+                        }
+                    }
+                }
+            };
+
+            _mockHttpClient.Setup(x => x.GetAsync(It.Is<Uri>(u => u.AbsoluteUri.Contains(apiKey) && u.AbsoluteUri.Contains(steamId))))
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent(JsonSerializer.Serialize(ownedGamesResponse))
+                })
+                .Verifiable();
+
+            // Act
+            await _provider.Refresh(userId, apiKey, steamId, includeBetas, includeTools);
+
+            // Assert
+            int expectedCount = (includeTools, includeBetas) switch
+            {
+                (false, false) => 1,
+                (false, true) => 2,
+                (true, false) => 3,
+                (true, true) => 4,
+            };
+
+            Assert.Equal(expectedCount, _provider.Games.Count());
             _mockHttpClient.Verify();
         }
 
@@ -98,7 +160,7 @@ namespace GameTracker.Plugins.Steam.Tests
                 .Verifiable();
 
             // Act / Assert
-            await Assert.ThrowsAsync<ApplicationException>(() => _provider.Refresh(userId, apiKey, steamId));
+            await Assert.ThrowsAsync<ApplicationException>(() => _provider.Refresh(userId, apiKey, steamId, true, true));
             _mockHttpClient.Verify();
         }
     }

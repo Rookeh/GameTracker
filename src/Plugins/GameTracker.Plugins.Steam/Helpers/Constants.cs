@@ -22,7 +22,7 @@ namespace GameTracker.Plugins.Steam.Helpers
 
         internal static class Filters
         {
-            internal static string[] BetaSubstrings = new[] { "beta", "staging", "unstable" };
+            internal static string[] BetaSubstrings = new[] { "beta", "public test", "staging", "unstable" };
             internal static string[] ServerToolSubstrings = new[] { "dedicated server", "driver updater", "script" };
         }
 

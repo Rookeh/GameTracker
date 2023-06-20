@@ -23,13 +23,12 @@
 else if (_isInitializing)
 {
 }
-else if (GameLibraryManager.Games == null || !GameLibraryManager.Games.Any())
+else if (GameLibraryManager.GamesGroupedByTitle == null || !GameLibraryManager.GamesGroupedByTitle.Any())
 {
     <p><em>No games loaded. Please configure a game provider.</em></p>
 }
 else
 {
-    <Modal @ref="_modal" IsVerticallyCentered=true Size="ModalSize.Large" />
     <table class="table">
         <tr>
             <td>
@@ -185,17 +184,17 @@ else
           TItem="GameRow">
         <GridColumn TItem="GameRow" PropertyName="Game1" Filterable="false" Sortable="false" TextAlignment="Alignment.Center">
             <ChildContent>
-                <GameCell Game="@context.Game1" Modal="@_modal" />
+                <GameCell GameGroup="@context.Game1"/>
             </ChildContent>
         </GridColumn>
         <GridColumn TItem="GameRow" PropertyName="Game2" Filterable="false" Sortable="false" TextAlignment="Alignment.Center">
             <ChildContent>
-                <GameCell Game="@context.Game2" Modal="@_modal" />
+                <GameCell GameGroup="@context.Game2"/>
             </ChildContent>
         </GridColumn>
         <GridColumn TItem="GameRow" PropertyName="Game3" Filterable="false" Sortable="false" TextAlignment="Alignment.Center">
             <ChildContent>
-                <GameCell Game="@context.Game3" Modal="@_modal" />
+                <GameCell GameGroup="@context.Game3"/>
             </ChildContent>
         </GridColumn>
     </Grid>
@@ -208,14 +207,14 @@ else
 
     private FilterProperties _filterProperties = new();
     private Grid<GameRow> _gameGrid;
-    private Modal _modal;
+    //private Modal _modal;
 
     private bool _ascendingOrder;
     private Dictionary<SortField, bool> _fieldOrderDictionary;
-    private Dictionary<string, Func<Game, bool>> _filterPredicates { get; set; }
+    private Dictionary<string, Func<IGrouping<string, Game>, bool>> _filterPredicates { get; set; }
     private bool _isAuthenticated;
     private bool _isInitializing;
-    private Func<Game, object?> _orderSelector { get; set; }
+    private Func<IGrouping<string, Game>, object?> _orderSelector { get; set; }
     private int _pageSize;
     private string _paginationText;
 
@@ -232,7 +231,7 @@ else
 
         _fieldOrderDictionary = InitializeGridOrder();
         _ascendingOrder = true;
-        _filterPredicates = new Dictionary<string, Func<Game, bool>>();
+        _filterPredicates = new Dictionary<string, Func<IGrouping<string, Game>, bool>>();
         _orderSelector = LinqHelper.TitleSelector;
 
         _isInitializing = true;
@@ -242,14 +241,14 @@ else
         _isInitializing = false;
 
         _pageSize = 3;
-        RefreshPaginationText(1, _pageSize, GameLibraryManager.Games.Count());
+        RefreshPaginationText(1, _pageSize, GameLibraryManager.GamesGroupedByTitle.Count());
     }
 
-    private IEnumerable<Game> FilteredOrderedGames
+    private IEnumerable<IGrouping<string, Game>> FilteredOrderedGames
     {
         get
         {
-            var filtered = GameLibraryManager.Games.Where(g => _filterPredicates.Any() ? _filterPredicates.All(p => p.Value(g)) : true);
+            var filtered = GameLibraryManager.GamesGroupedByTitle.Where(gameGroup => _filterPredicates.Any() ? _filterPredicates.All(predicate => predicate.Value(gameGroup)) : true);
 
             if (_ascendingOrder)
             {
@@ -266,12 +265,12 @@ else
 
     private async Task<AutoCompleteDataProviderResult<Game>> GameFilterProvider(AutoCompleteDataProviderRequest<Game> request)
     {
-        return await Task.FromResult(request.ApplyTo(GameLibraryManager.Games));
+        return await Task.FromResult(request.ApplyTo(GameLibraryManager.GamesGroupedByTitle.SelectMany(g => g).DistinctBy(g => g.Title)));
     }
 
     private async Task<AutoCompleteDataProviderResult<FilterableGenre>> GenreFilterProvider(AutoCompleteDataProviderRequest<FilterableGenre> request)
     {
-        var genres = GameLibraryManager.Games.SelectMany(g => g.Genres)
+        var genres = GameLibraryManager.GamesGroupedByTitle.SelectMany(g => g.Select(g2 => g2.Genres))
             .Distinct()
             .OrderBy(g => g.ToString())
             .Select(g => new FilterableGenre { Name = g.ToString() })
@@ -282,8 +281,8 @@ else
 
     private async Task<AutoCompleteDataProviderResult<Publisher>> PublisherFilterProvider(AutoCompleteDataProviderRequest<Publisher> request)
     {
-        var publishers = GameLibraryManager.Games.Where(g => g.Publisher != null)
-            .Select(g => g.Publisher)
+        var publishers = GameLibraryManager.GamesGroupedByTitle.Where(g => g.Any(g2 => g2.Publisher != null))
+            .SelectMany(g => g.Where(g2 => g2.Publisher != null).Select(g2 => g2.Publisher))
             .DistinctBy(p => p.Name)
             .OrderBy(p => p.Name);
 
@@ -292,8 +291,8 @@ else
 
     private async Task<AutoCompleteDataProviderResult<FilterableProvider>> ProviderFilterProvider(AutoCompleteDataProviderRequest<FilterableProvider> request)
     {
-        var providers = GameLibraryManager.Games
-            .Select(g => new FilterableProvider { Name = g.ProviderName })
+        var providers = GameLibraryManager.GamesGroupedByTitle
+            .SelectMany(g => g.Select(g2 => new FilterableProvider { Name = g2.ProviderName }))
             .DistinctBy(s => s.Name)
             .OrderBy(s => s.Name);
 
@@ -302,8 +301,8 @@ else
 
     private async Task<AutoCompleteDataProviderResult<Studio>> StudioFilterProvider(AutoCompleteDataProviderRequest<Studio> request)
     {
-        var studios = GameLibraryManager.Games.Where(g => g.Studio != null)
-            .Select(g => g.Studio)
+        var studios = GameLibraryManager.GamesGroupedByTitle.Where(g => g.Any(g2 => g2.Studio != null))
+            .SelectMany(g => g.Where(g2 => g2.Studio != null).Select(g2 => g2.Studio))
             .DistinctBy(s => s.Name)
             .OrderBy(s => s.Name);
 

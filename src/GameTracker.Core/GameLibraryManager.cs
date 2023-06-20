@@ -15,11 +15,13 @@ namespace GameTracker.Core
             _parameterCacheRepository = parameterCacheRepository;
             _providerFactory = providerFactory;
             _providerGameDictionary = new Dictionary<Guid, IEnumerable<Game>>();
-        }
+        }       
 
         public IEnumerable<Game> Games => _providerGameDictionary.Values.SelectMany(g => g)
                                             .OrderBy(g => g.Title)
                                             .ToList();
+
+        public IEnumerable<IGrouping<string, Game>> GamesGroupedByTitle => Games.GroupBy(g => g.Title);
 
         public async Task InitialiseProviders(string userId)
         {

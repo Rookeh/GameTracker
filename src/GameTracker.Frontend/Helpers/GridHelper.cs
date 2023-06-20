@@ -5,7 +5,7 @@ namespace GameTracker.Frontend.Helpers
 {
     public static class GridHelper
     {
-        public static IEnumerable<GameRow> ToGameRows(this IEnumerable<Game> games)
+        public static IEnumerable<GameRow> ToGameRows(this IEnumerable<IGrouping<string, Game>> games)
         {
             return games.Chunk(3).Select(c => new GameRow
             {

@@ -1,10 +1,11 @@
 ﻿@using GameTracker.Models;
 
-@if (Game != null)
+@if (GameGroup != null)
 {
-    @if (canShowGameDetails)
-    {        
-        <img height="@Game.Image.Height" width="@Game.Image.Width" src="@Game.Image.Url" alt="@Game.Title" @onclick="@(e => OnShowGameModalClick(Game))" />
+    @if (_canShowGameDetails)
+    {
+        <Modal @ref="_modal" IsVerticallyCentered=true Size="ModalSize.Large" />
+        <img height="@_gameImage.Height" width="@_gameImage.Width" src="@_gameImage.Url" alt="@_gameTitle" @onclick="@(e => OnShowGameModalClick(GameGroup))" />
     }
     else
     {
@@ -19,27 +20,35 @@
 @code {
 
     [Parameter]
-    public Game Game { get; set; }
+    public IGrouping<string, Game> GameGroup { get; set; }
 
-    [Parameter]
-    public Modal Modal { get; set; }
-
-    private bool canShowGameDetails = false;
+    private bool _canShowGameDetails = false;
+    private Image _gameImage;
+    private Modal _modal;
+    private string _gameTitle;
 
     protected override async Task OnParametersSetAsync()
     {
-        if (Game != null)
+        if (GameGroup != null)
         {
-            canShowGameDetails = false;
-            await Game.Preload();
-            canShowGameDetails = true;
+            _canShowGameDetails = false;
+
+            foreach(var game in GameGroup)
+            {
+                await game.Preload();
+            }
+
+            _gameImage = GameGroup.FirstOrDefault(gg => gg.Image != null)?.Image;
+            _gameTitle = GameGroup.Key;
+
+            _canShowGameDetails = true;
         }
     }
 
-    private async Task OnShowGameModalClick(Game game)
+    private async Task OnShowGameModalClick(IGrouping<string, Game> gameGroup)
     {
         var modalParams = new Dictionary<string, object>();
-        modalParams.Add("Game", game);
-        await Modal.ShowAsync<GameModal>(title: game.Title, parameters: modalParams);
+        modalParams.Add("GameGroup", gameGroup);
+        await _modal.ShowAsync<GameModal>(title: gameGroup.Key, parameters: modalParams);
     }
 }

@@ -1,6 +1,9 @@
 ﻿using GameTracker.Plugins.Common.Interfaces;
+using GameTracker.Plugins.PlayStation.Helpers;
 using GameTracker.Plugins.PlayStation.Interfaces;
 using GameTracker.Plugins.PlayStation.Models.GraphQL;
+using GameTracker.Plugins.PlayStation.Models.GraphQL.GameLibrary;
+using GameTracker.Plugins.PlayStation.Models.GraphQL.StoreInfo;
 using Moq;
 using System.Net;
 using System.Text.Json;
@@ -48,7 +51,7 @@ namespace GameTracker.Plugins.PlayStation.Tests
 
             var response = new GameResponse
             {
-                Data = new Data
+                Data = new Models.GraphQL.GameLibrary.Data
                 {
                     GameLibraryTitlesRetrieve = new GameLibraryTitlesRetrieve
                     {
@@ -81,6 +84,23 @@ namespace GameTracker.Plugins.PlayStation.Tests
                 }
             };
 
+            var storeResponse = new StoreInfoRoot
+            {
+                Data = new Models.GraphQL.StoreInfo.Data
+                {
+                    ProductRetrieve = new ProductRetrieve
+                    {
+                        LocalizedGenres = new[]
+                        {
+                            new LocalizedGenre
+                            {
+                                Value = "Test"
+                            }
+                        }
+                    }
+                }
+            };
+
             _mockAuthenticationHelper.Setup(x => x.ExchangeNpssoForCode(npsso))
                 .ReturnsAsync(code)
                 .Verifiable();
@@ -94,6 +114,14 @@ namespace GameTracker.Plugins.PlayStation.Tests
                 {
                     StatusCode = HttpStatusCode.OK,
                     Content = new StringContent(JsonSerializer.Serialize(response))
+                })
+                .Verifiable();
+
+            _mockHttpClient.Setup(x => x.SendAsync(It.Is<HttpRequestMessage>(r => r.RequestUri.AbsoluteUri.Contains(Constants.GraphQL.GetStoreDetailsOperation))))
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent(JsonSerializer.Serialize(storeResponse))
                 })
                 .Verifiable();
 

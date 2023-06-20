@@ -1,0 +1,46 @@
+﻿.game-details {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 20px;
+    border-radius: 5px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: left !important;
+}
+
+.info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-align: left !important;
+}
+
+.modal-body {
+    flex: 1;
+    text-align: left !important;
+}
+
+.modal-content {
+    background-color: transparent;
+    border: none;
+    text-align: left !important;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center !important;
+}
+
+.rating, .publisher, .studio, .synopsis .gameplay-mode .game-time .genre .last-played .multiplayer-avail .platforms .release-date .tags .controls {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    text-align: left !important;
+}
+
+.label {
+    font-weight: bold;
+    text-align: left !important;
+}
