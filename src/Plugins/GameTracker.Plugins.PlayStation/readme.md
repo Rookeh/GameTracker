@@ -19,7 +19,7 @@ The below grid indicates which fields are returned or supported by titles return
 | Description | 🔴 No |
 | Direct Launch | 🔴 No |
 | Gameplay Modes | 🔴 No |
-| Genres | 🔴 No |
+| Genres | 🟢 Yes |
 | Multiplayer Availability | 🔴 No |
 | Platforms | 🟢 Yes |
 | Playtime | 🔴 No |

@@ -5,10 +5,13 @@ using GameTracker.Plugins.Common.Interfaces;
 using GameTracker.Plugins.PlayStation.Helpers;
 using GameTracker.Plugins.PlayStation.Interfaces;
 using GameTracker.Plugins.PlayStation.Models;
-using GameTracker.Plugins.PlayStation.Models.GraphQL;
+using GameTracker.Plugins.PlayStation.Models.GraphQL.GameLibrary;
+using GameTracker.Plugins.PlayStation.Models.GraphQL.StoreInfo;
+using System.Linq;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using Game = GameTracker.Models.Game;
+using PSNGame = GameTracker.Plugins.PlayStation.Models.GraphQL.GameLibrary.Game;
 
 namespace GameTracker.Plugins.PlayStation
 {
@@ -119,7 +122,7 @@ namespace GameTracker.Plugins.PlayStation
                 }
 
                 _games.Clear();
-                _games.AddRange(gameTitles.Select(g => new PlayStationGame(g)));
+                _games.AddRange(gameTitles.Select(g => new PlayStationGame(g, GetGenres(g))));
             }
 
             _initialized = true;
@@ -130,6 +133,42 @@ namespace GameTracker.Plugins.PlayStation
                 ProviderId = ProviderId,
                 UserId = userId
             };
+        }
+
+        private string[] GetGenres(PSNGame g)
+        {
+            if (string.IsNullOrEmpty(g.ProductId))
+            {
+                return Array.Empty<string>();
+            }
+
+            using var httpClient = _httpClientWrapperFactory.BuildHttpClient();
+            var queryParams = new Dictionary<string, string>()
+            {
+                ["operationName"] = Constants.GraphQL.GetStoreDetailsOperation,
+                ["variables"] = string.Format(Constants.GraphQL.GetStoreDetailsQueryFormat, g.ProductId),
+                ["extensions"] = Constants.GraphQL.GetStoreDetailsExtensions
+            };
+
+            Uri storeRequestUri = UriHelper.BuildQueryString(Constants.GraphQL.GraphQLBaseUrl, queryParams);
+            var storeRequest = new HttpRequestMessage(HttpMethod.Get, storeRequestUri);
+
+            var storeResponseTask = httpClient.SendAsync(storeRequest);
+            storeResponseTask.Wait();
+            var storeResponseResult = storeResponseTask.Result;
+
+            if (!storeResponseResult.IsSuccessStatusCode)
+            {
+                throw new ApplicationException($"PlayStation Store API call failed with status code {storeResponseResult.StatusCode}.");
+            }
+
+            var storeResponseJsonTask = storeResponseResult.Content.ReadAsStringAsync();
+            storeResponseTask.Wait();
+            var storeResponseJsonResult = storeResponseJsonTask.Result;
+
+            var storeDetails = JsonSerializer.Deserialize<StoreInfoRoot>(storeResponseJsonResult);
+
+            return storeDetails?.Data?.ProductRetrieve?.LocalizedGenres?.Select(g => g.Value).ToArray() ?? Array.Empty<string>();
         }
     }
 }

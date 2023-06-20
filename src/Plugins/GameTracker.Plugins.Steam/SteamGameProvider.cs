@@ -97,13 +97,26 @@ namespace GameTracker.Plugins.Steam
              * 
              */
 
-            if (providerSpecificParameters.Length != 2)
+            if (providerSpecificParameters.Length != 4)
             {
-                throw new ArgumentException("Steam Web API key and SteamID64 must be provided.");
+                throw new ArgumentException("Incorrect number of arguments.");
+            }
+
+            if (!(providerSpecificParameters[0] is string) || string.IsNullOrEmpty(providerSpecificParameters[0].ToString()))
+            {
+                throw new ArgumentException("Steam Web API key must be provided.");
+            }
+
+            if (!(providerSpecificParameters[1] is string) || string.IsNullOrEmpty(providerSpecificParameters[1].ToString()))
+            {
+                throw new ArgumentException("SteamID64 must be provided.");
             }
 
             var apiKey = providerSpecificParameters[0].ToString();
             var steamId = providerSpecificParameters[1].ToString();
+            var includeBetas = (bool)providerSpecificParameters[2];
+            var includeServersAndTools = (bool)providerSpecificParameters[3];
+
             var ownedGameParams = new Dictionary<string, string>()
             {
                 ["key"] = apiKey,
@@ -129,11 +142,24 @@ namespace GameTracker.Plugins.Steam
             }
 
             var userGameResponseJson = await userGameResponse.Content.ReadAsStringAsync();
-            var userGames = JsonSerializer.Deserialize<SteamGameResponseRoot>(userGameResponseJson).Response;
+            var userGames = JsonSerializer.Deserialize<SteamGameResponseRoot>(userGameResponseJson)?.Response;
+
+            var excludedSubstrings = new List<string>();            
+
+            if (!includeBetas)
+            {
+                excludedSubstrings.AddRange(Constants.Filters.BetaSubstrings);
+            }
+
+            if (!includeServersAndTools)
+            {
+                excludedSubstrings.AddRange(Constants.Filters.ServerToolSubstrings);                
+            }
+
+            var filteredGames = userGames?.Games.Where(g => !excludedSubstrings.Any(s => g.Name.ToLower().Contains(s))).ToArray() ?? Enumerable.Empty<SteamGameDto>();
 
             _games.Clear();
-
-            _games.AddRange(userGames.Games.Select(ug => new SteamGame(ref _rateLimitedSteamApiClient, ref _steamGameDetailsRepository, ug)));
+            _games.AddRange(filteredGames.Select(ug => new SteamGame(ref _rateLimitedSteamApiClient, ref _steamGameDetailsRepository, ug)));
 
             _initialized = true;
 
@@ -147,8 +173,10 @@ namespace GameTracker.Plugins.Steam
 
         public Dictionary<string, Type> RequiredParameters => new()
         {
-            { "Steam Web API Key", typeof(string) },
-            { "SteamID64", typeof(string) }
+            ["Steam Web API Key"] = typeof(string),
+            ["SteamID64"] = typeof(string),
+            ["Include Betas"] = typeof(bool),
+            ["Include Dedicated Servers & Tools"] = typeof(bool)
         };
     }
 }

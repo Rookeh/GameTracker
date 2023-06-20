@@ -2,7 +2,9 @@
 using GameTracker.Models.Enums;
 using GameTracker.Plugins.PlayStation.Helpers;
 using System.Globalization;
-using PSNGame = GameTracker.Plugins.PlayStation.Models.GraphQL.Game;
+using Game = GameTracker.Models.Game;
+using Image = GameTracker.Models.Image;
+using PSNGame = GameTracker.Plugins.PlayStation.Models.GraphQL.GameLibrary.Game;
 
 namespace GameTracker.Plugins.PlayStation.Models
 {
@@ -10,13 +12,15 @@ namespace GameTracker.Plugins.PlayStation.Models
     {
         private readonly string _imageUrl;
         private readonly DateTime? _lastPlayed;
+        private readonly Genre[] _genres;
         private readonly Platform[] _platforms;
         private readonly string _launchUrl;
         private readonly string _title;
 
-        internal PlayStationGame(PSNGame psnGame)
+        internal PlayStationGame(PSNGame psnGame, string[] genres)
         {            
             PlatformId = Convert.ToInt32(psnGame.ConceptId);
+            _genres = PlayStationGameHelpers.GenresFromGenreStrings(genres).Distinct().ToArray();
             _imageUrl = psnGame.Image.URL;
             _lastPlayed = psnGame.LastPlayedDateTime;
             _launchUrl = string.IsNullOrEmpty(psnGame.ProductId)
@@ -37,7 +41,7 @@ namespace GameTracker.Plugins.PlayStation.Models
 
         public override GameplayMode[] GameplayModes => Array.Empty<GameplayMode>();
 
-        public override Genre[] Genres => Array.Empty<Genre>();
+        public override Genre[] Genres => _genres;
 
         public override Image Image => new Image
         {

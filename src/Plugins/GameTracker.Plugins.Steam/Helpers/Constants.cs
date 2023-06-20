@@ -20,6 +20,12 @@ namespace GameTracker.Plugins.Steam.Helpers
             internal const string SteamIdUrl = "https://steamid.io";
         }
 
+        internal static class Filters
+        {
+            internal static string[] BetaSubstrings = new[] { "beta", "staging", "unstable" };
+            internal static string[] ServerToolSubstrings = new[] { "dedicated server", "driver updater", "script" };
+        }
+
         internal static class SQLite
         {
             internal const string ConnectionString = "Data Source=SteamGames.sqlite";

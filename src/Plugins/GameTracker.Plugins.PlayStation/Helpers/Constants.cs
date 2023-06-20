@@ -1,4 +1,5 @@
 ﻿using GameTracker.Models;
+using GameTracker.Models.Enums;
 
 namespace GameTracker.Plugins.PlayStation.Helpers
 {
@@ -46,13 +47,47 @@ namespace GameTracker.Plugins.PlayStation.Helpers
             };
         }
 
+        public static class Mappings
+        {
+            public static Dictionary<string, Genre> PSNGenreMappings = new Dictionary<string, Genre>
+            {
+                ["Action"] = Genre.Action,
+                ["Adventure"] = Genre.Adventure,
+                ["Adult"] = Genre.Other,
+                ["Arcade"] = Genre.Arcade,
+                ["Brain Training"] = Genre.Other,
+                ["Casual"] = Genre.Casual,
+                ["Driving/Racing"] = Genre.Racing,
+                ["Educational"] = Genre.Puzzle,
+                ["Family"] = Genre.Casual,
+                ["Fighting"] = Genre.Fighting,
+                ["Fitness"] = Genre.Other,
+                ["Horror"] = Genre.Horror,
+                ["Music/Rhythm"] = Genre.Music,
+                ["Party"] = Genre.Party,
+                ["Puzzle"] = Genre.Puzzle,
+                ["Quiz"] = Genre.Trivia,
+                ["Role Playing Games"] = Genre.RPG,
+                ["Shooter"] = Genre.Shooter,
+                ["Simulation"] = Genre.Simulation,                
+                ["Sport"] = Genre.Sports,
+                ["Strategy"] = Genre.Strategy,
+                ["Unique"] = Genre.Other
+            };
+        }
+
         public static class GraphQL
         {
+            // public const string StoreDetailsEndpoint = "https://web.np.playstation.com/api/graphql/v1//op?operationName=queryRetrieveTelemetryDataPDPProduct&variables={\"conceptId\":null,\"productId\":\"{0}\"}&extensions={\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"07746553f497a2ef237b7b3a5e7a971e21f2b1f5dcb9df2d038ded681daee79c\"}}";
+
             public const string GraphQLBaseUrl = "https://web.np.playstation.com/api/graphql/v1/op";
             public const string GetUserGameOperation = "getUserGameList";
             public const string GetUserGameFilter = "[\"ps4_game\", \"ps5_native_game\"]";
             public const string GetUserGameListHash = "e780a6d8b921ef0c59ec01ea5c5255671272ca0d819edb61320914cf7a78b3ae";
             public const string GameType = "GameLibraryTitle";
+            public const string GetStoreDetailsOperation = "queryRetrieveTelemetryDataPDPProduct";
+            public const string GetStoreDetailsQueryFormat = "{{\"conceptId\":null,\"productId\":\"{0}\"}}";
+            public const string GetStoreDetailsExtensions = "{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"07746553f497a2ef237b7b3a5e7a971e21f2b1f5dcb9df2d038ded681daee79c\"}}";
         }
 
         public static class LaunchCommands

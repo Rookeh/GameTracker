@@ -88,7 +88,7 @@ namespace GameTracker.Plugins.Steam.Models
 
         public override Studio? Studio => _extendedGameDetails?.Developers?.Any() ?? false ? new Studio { Name = _extendedGameDetails.Developers.First() } : null;
 
-        public override string[] Tags => _extendedGameDetails?.Categories.Select(c => c.Description).ToArray() ?? Array.Empty<string>();    
+        public override string[] Tags => _extendedGameDetails?.Categories?.Select(c => c.Description).ToArray() ?? Array.Empty<string>();    
         
         public override string Title => _title;
 
