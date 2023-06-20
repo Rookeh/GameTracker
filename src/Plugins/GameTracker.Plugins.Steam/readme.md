@@ -27,18 +27,18 @@ The below grid indicates which fields are returned or supported by titles return
 
 | Data Point | Available |
 |--|--|
-| Artwork | 🟢 Yes |
+| Artwork | 🟠 Low-res initially, high-res lazily loaded |
 | Control Schemes | 🟢 Yes |
 | Date/Time Last Played: | 🟢 Yes |
-| Development Studio | 🟢 Yes |
-| Description | 🟢 Yes |
+| Development Studio | 🟠 Lazily Loaded |
+| Description | 🟠 Lazily Loaded |
 | Direct Launch | 🟢 Yes |
-| Gameplay Modes | 🟢 Yes |
-| Genres | 🟢 Yes |
-| Multiplayer Availability | 🟢 Yes |
-| Platforms | 🟢 Yes |
+| Gameplay Modes | 🟠 Lazily Loaded |
+| Genres | 🟠 Lazily Loaded |
+| Multiplayer Availability | 🟠 Lazily Loaded |
+| Platforms | 🟠 Lazily Loaded |
 | Playtime | 🟢 Yes |
-| Publisher | 🟢 Yes |
-| Release Date | 🟢 Yes |
-| Reviews | 🟢 Yes |
-| Tags | 🟢 Yes |
+| Publisher | 🟠 Lazily Loaded |
+| Release Date | 🟠 Lazily Loaded |
+| Reviews | 🟠 Lazily Loaded |
+| Tags | 🟠 Lazily Loaded |
