@@ -78,8 +78,6 @@ namespace GameTracker.Plugins.PlayStation.Helpers
 
         public static class GraphQL
         {
-            // public const string StoreDetailsEndpoint = "https://web.np.playstation.com/api/graphql/v1//op?operationName=queryRetrieveTelemetryDataPDPProduct&variables={\"conceptId\":null,\"productId\":\"{0}\"}&extensions={\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"07746553f497a2ef237b7b3a5e7a971e21f2b1f5dcb9df2d038ded681daee79c\"}}";
-
             public const string GraphQLBaseUrl = "https://web.np.playstation.com/api/graphql/v1/op";
             public const string GetUserGameOperation = "getUserGameList";
             public const string GetUserGameFilter = "[\"ps4_game\", \"ps5_native_game\"]";
