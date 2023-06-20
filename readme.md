@@ -42,6 +42,8 @@ Currently, this project supports importing game libraries from the following pro
 
 Not all game providers expose the same level of detail, and there are some caveats that apply to certain providers. For more details, see the links above.
 
+**NOTE:** Needless to say, this project is not affiliated with any of the above organisations.
+
 ## What works (mostly!):
 
  - User accounts, so that multiple users can each manage their own aggregated game libraries.
