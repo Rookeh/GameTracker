@@ -16,6 +16,11 @@ Due to the propensity for most Steam users to have large game libraries, combine
  5. All Steam game details are cached and, over time, the entire Steam library will be populated and no further API calls will be required, except for the initial call to verify which titles you own.
  6. **Note:** Even with this quite aggressive client-side throttling, it may still be possible to be rate-limited by Steam's API. If this happens, a toast message will notify you.
 
+Optionally, you can choose to include or exclude the following types of application from your Steam library:
+
+* Servers and Tools (e.g. dedicated servers, driver utilities).
+* Beta/unstable editions of games.
+
 ## Integration Features
 
 The below grid indicates which fields are returned or supported by titles returned by this provider.
