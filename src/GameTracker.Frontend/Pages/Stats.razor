@@ -32,13 +32,19 @@ else
                     <tr>
                         <td>
                             <div>
-                                <span class="chart-label"><h3>Played vs Unplayed</h3></span>
-                                <DoughnutChart @ref="_playedUnplayedChart" Width="400" Class="mb-4" />                                
+                                <div class="chart">
+                                    <h3>Played vs Unplayed</h3>
+                                </div>
+                                <div class="chart">
+                                    <DoughnutChart @ref="_playedUnplayedChart" Width="400" Class="mb-4" />
+                                </div>                               
                             </div>
                         </td>
                         <td>
-                            <div>
-                                <span class="chart-label"><h3>Hours Played</h3></span>
+                            <div class="chart">
+                                <h3>Hours Played</h3>
+                            </div>
+                            <div class="chart">                                
                                 <DoughnutChart @ref="_hoursPlayedChart" Width="400" Class="mb-4" />                                
                             </div>
                         </td>
@@ -54,29 +60,47 @@ else
                 <table>
                     <tr>
                         <td>
-                            <span class="chart-label"><h3>By Genre</h3></span>
-                            <div>
+                            <div class ="chart">
+                                <h3>By Genre</h3>
+                            </div>
+                            <div class="chart">                                                               
                                 <DoughnutChart @ref="_genreChart" Width="400" Class="mb-4" />
                             </div>                            
                         </td>
                         <td>
-                            <span class="chart-label"><h3>By Multiplayer Type</h3></span>
-                            <div>
+                            <div class="chart">
+                                <h3>By Multiplayer Type</h3>
+                            </div>
+                            <div class="chart">
                                 <DoughnutChart @ref="_multiPlayerChart" Width="400" Class="mb-4" />
                             </div>                            
                         </td>
                     </tr>
                     <tr>
                         <td>
-                            <span class="chart-label"><h3>By Platform</h3></span>
-                            <div>
+                            <div class="chart">
+                                <h3>By Platform</h3>
+                            </div>
+                            <div class="chart">
                                 <DoughnutChart @ref="_platformChart" Width="400" Class="mb-4" />
                             </div>                            
                         </td>
                         <td>
-                            <span class="chart-label"><h3>By Provider</h3></span>
-                            <div>
+                            <div class="chart">
+                                <h3>By Provider</h3>
+                            </div>
+                            <div class="chart">
                                 <DoughnutChart @ref="_providerChart" Width="400" Class="mb-4" />
+                            </div>                            
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <div class="chart">
+                                <h3>By Year of Release</h3>
+                            </div>
+                            <div class="chart">
+                                <BarChart @ref="_releaseYearChart" Width="800" Class="mb-4" />
                             </div>                            
                         </td>
                     </tr>
@@ -91,24 +115,28 @@ else
     [CascadingParameter]
     private Task<AuthenticationState> _authenticationStateTask { get; set; }
 
-    private ChartData _playedUnplayedData = new ChartData();
-    private DoughnutChart _playedUnplayedChart = new DoughnutChart();
+    private ChartData _genreData = new ChartData();
+    private DoughnutChart _genreChart = new DoughnutChart();
 
     private ChartData _hoursPlayedData = new ChartData();
     private DoughnutChart _hoursPlayedChart = new DoughnutChart();
 
+    private ChartData _multiPlayerData = new ChartData();
+    private DoughnutChart _multiPlayerChart = new DoughnutChart();
+
     private ChartData _platformData = new ChartData();
     private DoughnutChart _platformChart = new DoughnutChart();
 
-    private ChartData _genreData = new ChartData();
-    private DoughnutChart _genreChart = new DoughnutChart();
-
-    private ChartData _multiPlayerData = new ChartData();
-    private DoughnutChart _multiPlayerChart = new DoughnutChart();
+    private ChartData _playedUnplayedData = new ChartData();
+    private DoughnutChart _playedUnplayedChart = new DoughnutChart();
 
     private ChartData _providerData = new ChartData();
     private DoughnutChart _providerChart = new DoughnutChart();
 
+    private ChartData _releaseYearData = new ChartData();
+    private BarChart _releaseYearChart = new BarChart();
+
+    private BarChartOptions _barChartOptions = new BarChartOptions();
     private DoughnutChartOptions _doughnutChartOptions = new DoughnutChartOptions();
     private bool _isAuthenticated;
     private bool _isInitializing;
@@ -130,10 +158,15 @@ else
         PreloadService.Hide();
         _isInitializing = false;
 
+        _barChartOptions = new BarChartOptions
+        {
+            Responsive = true
+        };
+
         _doughnutChartOptions = new DoughnutChartOptions
-            {
-                Responsive = true,
-            };
+        {
+            Responsive = true
+        };
 
         SetupGenreChart();
         SetupHoursPlayedChart();
@@ -141,6 +174,7 @@ else
         SetupPlatformChart();
         SetupPlayedUnplayedChart();
         SetupProviderChart();
+        SetupReleaseYearChart();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -153,6 +187,7 @@ else
             await _platformChart.InitializeAsync(_platformData, _doughnutChartOptions);
             await _playedUnplayedChart.InitializeAsync(_playedUnplayedData, _doughnutChartOptions);
             await _providerChart.InitializeAsync(_providerData, _doughnutChartOptions);
+            await _releaseYearChart.InitializeAsync(_releaseYearData, _barChartOptions);
         }
 
         await base.OnAfterRenderAsync(firstRender);
@@ -165,23 +200,23 @@ else
                                               .Select(group => new { Genre = group.Key, Games = group.Select(g => g.game).ToList() });
 
         var chartDataSet = new DoughnutChartDataset()
-            {
-                Data = grouped.Select(g => Convert.ToDouble(g.Games.Count())).ToList(),
-                BackgroundColor = grouped.Select(g => ColourHelper.GetRandomColour().ToRgbString()).ToList()
-            };
+        {
+            Data = grouped.Select(g => Convert.ToDouble(g.Games.Count())).ToList(),
+            BackgroundColor = grouped.Select(g => ColourHelper.GetRandomColour().ToRgbString()).ToList()
+        };
 
         _genreData = new ChartData()
-            {
-                Labels = grouped.Select(g => g.Genre.ToString()).ToList(),
-                Datasets = new List<IChartDataset>() { chartDataSet }
-            };
+        {
+            Labels = grouped.Select(g => g.Genre.ToString()).ToList(),
+            Datasets = new List<IChartDataset>() { chartDataSet }
+        };
     }
 
     private void SetupHoursPlayedChart()
     {
         var chartDataSet = new DoughnutChartDataset()
-            {
-                Data = new List<double>
+        {
+            Data = new List<double>
             {
                 GameLibraryManager.Games.Count(g => g.Playtime == null),
                 GameLibraryManager.Games.Count(g => g.Playtime != null && g.Playtime == TimeSpan.Zero),
@@ -191,7 +226,7 @@ else
                 GameLibraryManager.Games.Count(g => g.Playtime != null && g.Playtime > TimeSpan.FromHours(100) && g.Playtime <= TimeSpan.FromHours(250)),
                 GameLibraryManager.Games.Count(g => g.Playtime != null && g.Playtime > TimeSpan.FromHours(250)),
             },
-                BackgroundColor = new List<string>
+            BackgroundColor = new List<string>
             {
                 ColourHelper.ChartColours.Neutral.ToRgbString(),
                 ColourHelper.GetRandomColour().ToRgbString(),
@@ -201,11 +236,11 @@ else
                 ColourHelper.GetRandomColour().ToRgbString(),
                 ColourHelper.GetRandomColour().ToRgbString()
             }
-            };
+        };
 
         _hoursPlayedData = new ChartData()
-            {
-                Labels = new List<string>
+        {
+            Labels = new List<string>
             {
                 "No data",
                 "Never played",
@@ -215,8 +250,8 @@ else
                 "> 100 to 250 hours",
                 "250+ hours"
             },
-                Datasets = new List<IChartDataset>() { chartDataSet }
-            };
+            Datasets = new List<IChartDataset>() { chartDataSet }
+        };
     }
 
     private void SetupMultiplayerChart()
@@ -226,16 +261,16 @@ else
                                               .Select(group => new { Multiplayer = group.Key, Games = group.Select(g => g.game).ToList() });
 
         var chartDataSet = new DoughnutChartDataset()
-            {
-                Data = grouped.Select(g => Convert.ToDouble(g.Games.Count())).ToList(),
-                BackgroundColor = grouped.Select(g => ColourHelper.GetRandomColour().ToRgbString()).ToList()
-            };
+        {
+            Data = grouped.Select(g => Convert.ToDouble(g.Games.Count())).ToList(),
+            BackgroundColor = grouped.Select(g => ColourHelper.GetRandomColour().ToRgbString()).ToList()
+        };
 
         _multiPlayerData = new ChartData()
-            {
-                Labels = grouped.Select(g => g.Multiplayer.ToString()).ToList(),
-                Datasets = new List<IChartDataset>() { chartDataSet }
-            };
+        {
+            Labels = grouped.Select(g => g.Multiplayer.ToString()).ToList(),
+            Datasets = new List<IChartDataset>() { chartDataSet }
+        };
     }
 
     private void SetupPlatformChart()
@@ -245,41 +280,41 @@ else
                                               .Select(group => new { Platform = group.Key, Games = group.Select(g => g.game).ToList() });
 
         var chartDataSet = new DoughnutChartDataset()
-            {
-                Data = grouped.Select(g => Convert.ToDouble(g.Games.Count())).ToList(),
-                BackgroundColor = grouped.Select(g => ColourHelper.GetRandomColour().ToRgbString()).ToList()
-            };
+        {
+            Data = grouped.Select(g => Convert.ToDouble(g.Games.Count())).ToList(),
+            BackgroundColor = grouped.Select(g => ColourHelper.GetRandomColour().ToRgbString()).ToList()
+        };
 
         _platformData = new ChartData()
-            {
-                Labels = grouped.Select(g => g.Platform).ToList(),
-                Datasets = new List<IChartDataset>() { chartDataSet }
-            };
+        {
+            Labels = grouped.Select(g => g.Platform).ToList(),
+            Datasets = new List<IChartDataset>() { chartDataSet }
+        };
     }
 
     private void SetupPlayedUnplayedChart()
     {
         var chartDataSet = new DoughnutChartDataset()
-            {
-                Data = new List<double>
+        {
+            Data = new List<double>
             {
                 GameLibraryManager.Games.Count(g => g.Playtime == null && g.LastPlayed == null),
                 GameLibraryManager.Games.Count(g => g.Playtime != null && g.Playtime == TimeSpan.Zero),
                 GameLibraryManager.Games.Count(g => (g.Playtime != null && g.Playtime > TimeSpan.Zero) || (g.Playtime == null && g.LastPlayed != null))
             },
-                BackgroundColor = new List<string>
+            BackgroundColor = new List<string>
             {
                 ColourHelper.ChartColours.Neutral.ToRgbString(),
                 ColourHelper.GetRandomColour().ToRgbString(),
                 ColourHelper.GetRandomColour().ToRgbString()
             }
-            };
+        };
 
         _playedUnplayedData = new ChartData()
-            {
-                Labels = new List<string> { "No data", "Unplayed", "Played" },
-                Datasets = new List<IChartDataset>() { chartDataSet }
-            };
+        {
+            Labels = new List<string> { "No data", "Unplayed", "Played" },
+            Datasets = new List<IChartDataset>() { chartDataSet }
+        };
     }
 
     private void SetupProviderChart()
@@ -296,6 +331,26 @@ else
         {
             Labels = grouped.Select(g => g.Key).ToList(),
             Datasets = new List<IChartDataset>() { chartDataSet }
+        };
+    }
+
+    private void SetupReleaseYearChart()
+    {
+        var grouped = GameLibraryManager.GamesGroupedByTitle.Where(gg => gg.Any(g => g.ReleaseDate.HasValue))
+                                                            .Select(gg => gg.Where(g => g.ReleaseDate.HasValue).OrderBy(g => g.ReleaseDate).First())
+                                                            .GroupBy(g => g.ReleaseDate?.Year)
+                                                            .OrderBy(g => g.Key);        
+        var chartDataSet = new BarChartDataset
+        {
+            BackgroundColor = grouped.Select(g => ColourHelper.GetRandomColour().ToRgbString()).ToList(),        
+            Data = grouped.Select(g => Convert.ToDouble(g.Count())).ToList(),
+            Label = "Release Year"
+        };
+
+        _releaseYearData = new ChartData
+        {
+            Labels = grouped.Select(g => g.Key.ToString()).ToList(),
+            Datasets = new List<IChartDataset> { chartDataSet }
         };
     }
 }
