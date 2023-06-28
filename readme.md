@@ -12,6 +12,7 @@ GameTracker is a project I started with the intent of aggregating all of my game
  - .NET 6.0 LTS
  - Blazor Server (UI)
  - SQLite (cached game data, user accounts)
+ - Dapper
 
 ## Setup Instructions
 
