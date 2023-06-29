@@ -75,6 +75,14 @@ else
                                 <DoughnutChart @ref="_multiPlayerChart" Width="400" Class="mb-4" />
                             </div>                            
                         </td>
+                        <td>
+                            <div class="chart">
+                                <h3>By Game Mode</h3>
+                            </div>
+                            <div class="chart">
+                                <DoughnutChart @ref="_gameModeChart" Width="400" Class="mb-4" />
+                            </div>
+                        </td>
                     </tr>
                     <tr>
                         <td>
@@ -93,9 +101,11 @@ else
                                 <DoughnutChart @ref="_providerChart" Width="400" Class="mb-4" />
                             </div>                            
                         </td>
+                        <td>
+                        </td>
                     </tr>
                     <tr>
-                        <td colspan="2">
+                        <td colspan="3">
                             <div class="chart">
                                 <h3>By Year of Release</h3>
                             </div>
@@ -113,7 +123,10 @@ else
 @code {
 
     [CascadingParameter]
-    private Task<AuthenticationState> _authenticationStateTask { get; set; }
+    private Task<AuthenticationState> AuthenticationStateTask { get; set; }
+
+    private ChartData _gameModeData = new ChartData();
+    private DoughnutChart _gameModeChart = new DoughnutChart();
 
     private ChartData _genreData = new ChartData();
     private DoughnutChart _genreChart = new DoughnutChart();
@@ -143,7 +156,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var authState = await _authenticationStateTask;
+        var authState = await AuthenticationStateTask;
         _isAuthenticated = authState?.User?.Identity?.IsAuthenticated ?? false;
         var userName = authState?.User?.Identity?.Name;
 
@@ -168,6 +181,7 @@ else
             Responsive = true
         };
 
+        SetupGameModeChart();
         SetupGenreChart();
         SetupHoursPlayedChart();
         SetupMultiplayerChart();
@@ -181,6 +195,7 @@ else
     {
         if (firstRender && GameLibraryManager.Games.Any())
         {
+            await _gameModeChart.InitializeAsync(_gameModeData, _doughnutChartOptions);
             await _genreChart.InitializeAsync(_genreData, _doughnutChartOptions);
             await _hoursPlayedChart.InitializeAsync(_hoursPlayedData, _doughnutChartOptions);
             await _multiPlayerChart.InitializeAsync(_multiPlayerData, _doughnutChartOptions);
@@ -191,6 +206,25 @@ else
         }
 
         await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private void SetupGameModeChart()
+    {
+        var grouped = GameLibraryManager.Games.SelectMany(game => game.GameplayModes.Select(gameplay => new { game, gameplay }))
+                                      .GroupBy(x => x.gameplay)
+                                      .Select(group => new { Gameplay = group.Key, Games = group.Select(g => g.game).ToList() });
+
+        var chartDataSet = new DoughnutChartDataset()
+        {
+            Data = grouped.Select(g => Convert.ToDouble(g.Games.Count())).ToList(),
+            BackgroundColor = grouped.Select(g => ColourHelper.GetRandomColour().ToRgbString()).ToList()
+        };
+
+        _gameModeData = new ChartData()
+        {
+            Labels = grouped.Select(g => g.Gameplay.ToString()).ToList(),
+            Datasets = new List<IChartDataset>() { chartDataSet }
+        };
     }
 
     private void SetupGenreChart()

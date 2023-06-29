@@ -1,0 +1,117 @@
+﻿@page "/discover";
+@using GameTracker.Frontend.Pages.Components
+@using GameTracker.Interfaces;
+@using GameTracker.Models;
+
+@inject PreloadService PreloadService;
+@inject ToastService ToastService;
+
+@inject IGameLibraryManager GameLibraryManager;
+
+<PageTitle>Discover</PageTitle>
+
+@if (!_isAuthenticated)
+{
+    <p><em>Unauthorized.</em></p>
+}
+else if (_isInitializing)
+{
+}
+else if (GameLibraryManager.GamesGroupedByTitle == null || !GameLibraryManager.GamesGroupedByTitle.Any())
+{
+    <p><em>No games loaded. Please configure a game provider.</em></p>
+}
+else
+{
+    <div class="selection-container">
+        <Button @onclick="() => SelectRandomGame()" Color="ButtonColor.Primary">Random</Button>
+        <Button @onclick="() => SelectRandomUnplayedGame()" Color="ButtonColor.Primary">Random Unplayed</Button>
+        <Button @onclick="() => SelectTopRatedUnplayedGame()" Color="ButtonColor.Primary">Random Top 10 Unplayed</Button>
+        <Button @onclick="() => SelectTopRatedGameUnderTenHours()" Color="ButtonColor.Primary">Random Top 10 &lt; 10 Hours</Button>
+    </div>
+    <div class="game-container">
+        @if (_selectedGame == null)
+        {
+            <em>Choose one of the above options.</em>
+        }
+        else
+        {
+            <GameCell GameGroup="@_selectedGame"/>
+        }
+    </div>
+}
+
+@code {
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationStateTask { get; set; }
+   
+    private bool _isAuthenticated;
+    private bool _isInitializing;
+    private Random _rng;
+    private IGrouping<string, Game> _selectedGame;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateTask;
+        _isAuthenticated = authState?.User?.Identity?.IsAuthenticated ?? false;
+        var userName = authState?.User?.Identity?.Name;
+
+        if (!_isAuthenticated || string.IsNullOrEmpty(userName))
+        {
+            return;
+        }
+
+        _rng = new Random();
+
+        _isInitializing = true;
+        PreloadService.Show();
+        await GameLibraryManager.InitialiseProviders(userName);
+        PreloadService.Hide();
+        _isInitializing = false;
+    }
+
+    private async Task SelectRandomGame()
+    {
+        if (GameLibraryManager.GamesGroupedByTitle.Any())
+        {
+            var selectionIndex = _rng.Next(0, GameLibraryManager.GamesGroupedByTitle.Count());
+            _selectedGame = GameLibraryManager.GamesGroupedByTitle.ToList()[selectionIndex];
+        }
+    }
+
+    private async Task SelectRandomUnplayedGame()
+    {
+        var filteredGames = GameLibraryManager.GamesGroupedByTitle.Where(gg => gg.Any(g => g.Playtime.HasValue) && gg.Any(g => g.Playtime == TimeSpan.Zero))
+                                                                  .ToList();
+        if (filteredGames.Any())
+        {
+            var selectionIndex = _rng.Next(0, filteredGames.Count);
+            _selectedGame = filteredGames[selectionIndex];            
+        }
+    }
+
+    private async Task SelectTopRatedUnplayedGame()
+    {
+        var filteredGames = GameLibraryManager.GamesGroupedByTitle.Where(gg => gg.Any(g => g.Reviews.Any()) && gg.Any(g => g.Playtime.HasValue) && gg.Any(g => g.Playtime == TimeSpan.Zero))
+                                                                  .OrderByDescending(gg => gg.Max(g => g.AverageCriticalReview ?? 0))
+                                                                  .ToList();
+        if (filteredGames.Any())
+        {
+            var selectionIndex = _rng.Next(0, filteredGames.Count < 10 ? filteredGames.Count : 10);
+            _selectedGame = filteredGames[selectionIndex];
+        }
+    }
+
+    private async Task SelectTopRatedGameUnderTenHours()
+    {
+        var filteredGames = GameLibraryManager.GamesGroupedByTitle.Where(gg => gg.Any(g => g.Reviews.Any()) && gg.Any(g => g.Playtime.HasValue) && gg.Any(g => g.Playtime > TimeSpan.Zero && g.Playtime < TimeSpan.FromHours(10)))
+                                                                  .OrderByDescending(gg => gg.Max(g => g.AverageCriticalReview ?? 0))
+                                                                  .ToList();
+        if (filteredGames.Any())
+        {
+            var selectionIndex = _rng.Next(0, filteredGames.Count < 10 ? filteredGames.Count : 10);
+            _selectedGame = filteredGames[selectionIndex];
+        }
+    }
+}

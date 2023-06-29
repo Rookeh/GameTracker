@@ -202,12 +202,11 @@ else
 
 @code {
 
-    [CascadingParameter]
-    private Task<AuthenticationState> _authenticationStateTask { get; set; }
+        [CascadingParameter]
+        private Task<AuthenticationState> AuthenticationStateTask { get; set; }
 
     private FilterProperties _filterProperties = new();
     private Grid<GameRow> _gameGrid;
-    //private Modal _modal;
 
     private bool _ascendingOrder;
     private Dictionary<SortField, bool> _fieldOrderDictionary;
@@ -220,7 +219,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var authState = await _authenticationStateTask;
+        var authState = await AuthenticationStateTask;
         _isAuthenticated = authState?.User?.Identity?.IsAuthenticated ?? false;
         var userName = authState?.User?.Identity?.Name;
 
@@ -270,7 +269,7 @@ else
 
     private async Task<AutoCompleteDataProviderResult<FilterableGenre>> GenreFilterProvider(AutoCompleteDataProviderRequest<FilterableGenre> request)
     {
-        var genres = GameLibraryManager.GamesGroupedByTitle.SelectMany(g => g.Select(g2 => g2.Genres))
+        var genres = GameLibraryManager.GamesGroupedByTitle.SelectMany(g => g.SelectMany(g2 => g2.Genres))
             .Distinct()
             .OrderBy(g => g.ToString())
             .Select(g => new FilterableGenre { Name = g.ToString() })

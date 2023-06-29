@@ -1,30 +1,50 @@
 ﻿@page "/"
+@using GameTracker.Interfaces;
+
+@inject IGameLibraryManager GameLibraryManager;
 
 <PageTitle>Game Tracker</PageTitle>
 
-<h1>Game Tracker</h1>
-
-@if (isAuthenticated)
+@if (!_isAuthenticated)
 {
-    <span>Please select an option from the left menu.</span>
+    <span>Please log in to configure your game library.</span>
+}
+else if (_isInitializing)
+{
+    <PlaceholderContainer Animation="PlaceholderAnimation.Glow">
+        <Placeholder Width="PlaceholderWidth.Col7" />
+        <Placeholder Width="PlaceholderWidth.Col9" />
+        <Placeholder Width="PlaceholderWidth.Col6" />
+    </PlaceholderContainer>
 }
 else
 {
-    <span>Please log in to configure your game library.</span>
+    <h1>Welcome, @_userName</h1>
+    <p>Your library contains @GameLibraryManager.GamesGroupedByTitle.Count() titles, from @GameLibraryManager.InitialisedProviders providers.</p>
+    <p>Please select an option from the left menu.</p>
 }
 
 
 @code {
 
     [CascadingParameter]
-    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    private Task<AuthenticationState> AuthenticationStateTask { get; set; }
 
-    private bool isAuthenticated;
+    private bool _isAuthenticated;
+    private bool _isInitializing;
+    private string? _userName;
 
     protected override async Task OnInitializedAsync()
     {
-        var authState = await authenticationStateTask;
-        isAuthenticated = authState?.User?.Identity?.IsAuthenticated ?? false;
-    }
+        var authState = await AuthenticationStateTask;
+        _isAuthenticated = authState?.User?.Identity?.IsAuthenticated ?? false;
+        _userName = authState?.User?.Identity?.Name;
 
+        if (_isAuthenticated)
+        {
+            _isInitializing = true;
+            await GameLibraryManager.InitialiseProviders(_userName);
+            _isInitializing = false;
+        }
+    }
 }
