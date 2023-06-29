@@ -14,6 +14,12 @@ GameTracker is a project I started with the intent of aggregating all of my game
  - SQLite (cached game data, user accounts)
  - Dapper
 
+## Screenshots
+
+![Game Library](/docs/Library.PNG?raw=true "Game Library")
+![Game Providers](/docs/Providers.png?raw=true "Game Providers")
+![Stats](/docs/Stats.png?raw=true "Stats")
+
 ## Setup Instructions
 
 The endgame for this project is for it to run as a container hosted on a local network, so that it can be accessed by multiple devices on the same LAN e.g. PC, laptop, Steam Deck, etc. 
