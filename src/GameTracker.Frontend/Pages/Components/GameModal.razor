@@ -10,10 +10,10 @@
     <div class="game-details">
         <div class="modal-body">
             <div class="header">
-                <img src="@GameImage.Url" width="@GameImage.Width" height="@GameImage.Height" alt="@GameTitle">
+                <img src="@_gameImage.Url" width="@_gameImage.Width" height="@_gameImage.Height" alt="@_gameTitle">
             </div>
             <Tabs>
-                @foreach (var game in GameGroup)
+                @foreach (var game in _games)
                 {
                     <Tab Title="@game.ProviderName">
                         <Content>
@@ -31,13 +31,15 @@
     [Parameter]
     public IGrouping<string, Game> GameGroup { get; set; }
 
-    public Image GameImage;
-    public string GameTitle;
+    public List<Game> _games;
+    public Image _gameImage;
+    public string _gameTitle;
 
     protected override void OnParametersSet()
     {
-        GameImage = GameGroup.FirstOrDefault(gg => gg.Image != null).Image;
-        GameTitle = GameGroup.Key;
+        _games = GameGroup.DistinctBy(g => g.ProviderName).ToList();
+        _gameImage = _games.FirstOrDefault(gg => gg.Image != null).Image;
+        _gameTitle = GameGroup.Key;
         base.OnParametersSet();
     }    
 }
