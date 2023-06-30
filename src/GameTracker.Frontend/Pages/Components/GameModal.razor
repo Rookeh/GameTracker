@@ -37,9 +37,27 @@
 
     protected override void OnParametersSet()
     {
-        _games = GameGroup.DistinctBy(g => g.ProviderName).ToList();
+        var distinctGamesFromSameProvider = GameGroup.Select(g => g)
+                                                     .GroupBy(g => g.ProviderName)
+                                                     .Where(gg => gg.Count() > 1 && gg.All(g => g.ReleaseDate.HasValue))                                                     
+                                                     .SelectMany(g => g)
+                                                     .OrderByDescending(g => g.ReleaseDate)
+                                                     .ToList();
+
+        if (distinctGamesFromSameProvider.Any())
+        {
+            _games = distinctGamesFromSameProvider;
+        }
+        else
+        {
+            _games = GameGroup.OrderByDescending(g => g.ReleaseDate ?? DateTime.MinValue)
+                              .DistinctBy(g => g.ProviderName)
+                              .ToList();
+        }
+
         _gameImage = _games.FirstOrDefault(gg => gg.Image != null).Image;
         _gameTitle = GameGroup.Key;
+        
         base.OnParametersSet();
     }    
 }

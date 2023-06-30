@@ -38,7 +38,7 @@
                 await game.Preload();
             }
 
-            _gameImage = GameGroup.FirstOrDefault(gg => gg.Image != null)?.Image;
+            _gameImage = GameGroup.OrderByDescending(gg => gg.ReleaseDate ?? DateTime.MinValue).FirstOrDefault(gg => gg.Image != null)?.Image;
             _gameTitle = GameGroup.Key;
 
             _canShowGameDetails = true;
