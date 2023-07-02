@@ -167,7 +167,7 @@ namespace GameTracker.Plugins.Steam.Helpers
 
         internal static Publisher? ParsePublisher(SteamGameDetails gameDetails)
         {
-            if (gameDetails.Publishers == null || !gameDetails.Publishers.Any())
+            if (gameDetails?.Publishers == null || !gameDetails.Publishers.Any())
             {
                 return null;
             }
