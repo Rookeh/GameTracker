@@ -2,6 +2,7 @@
 @using GameTracker.Frontend.Pages.Components
 @using GameTracker.Interfaces;
 @using GameTracker.Models;
+@using GameTracker.Models.Enums;
 
 @inject PreloadService PreloadService;
 @inject ToastService ToastService;
@@ -25,6 +26,7 @@ else
 {
     <div class="selection-container">
         <Button @onclick="() => SelectRandomGame()" Color="ButtonColor.Primary">Random</Button>
+        <Button @onclick="() => SelectRandomCoOpGame()" Color="ButtonColor.Primary">Random Co-Op</Button>
         <Button @onclick="() => SelectRandomUnplayedGame()" Color="ButtonColor.Primary">Random Unplayed</Button>
         <Button @onclick="() => SelectTopRatedUnplayedGame()" Color="ButtonColor.Primary">Random Top 10 Unplayed</Button>
         <Button @onclick="() => SelectTopRatedGameUnderTenHours()" Color="ButtonColor.Primary">Random Top 10 &lt; 10 Hours</Button>
@@ -77,6 +79,17 @@ else
         {
             var selectionIndex = _rng.Next(0, GameLibraryManager.GamesGroupedByTitle.Count());
             _selectedGame = GameLibraryManager.GamesGroupedByTitle.ToList()[selectionIndex];
+        }
+    }
+
+    private async Task SelectRandomCoOpGame()
+    {
+        var filteredGames = GameLibraryManager.GamesGroupedByTitle.Where(gg => gg.Any(g => g.GameplayModes.Contains(GameplayMode.CoOp)))
+                                                                  .ToList();
+        if (filteredGames.Any())
+        {
+            var selectionIndex = _rng.Next(0, filteredGames.Count);
+            _selectedGame = filteredGames[selectionIndex];
         }
     }
 

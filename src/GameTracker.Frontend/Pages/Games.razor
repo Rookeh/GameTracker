@@ -29,13 +29,13 @@ else if (GameLibraryManager.GamesGroupedByTitle == null || !GameLibraryManager.G
 }
 else
 {
-    <table class="table">
+    <table class="table search-fields">
         <tr>
             <td>
                 <Accordion>
                     <AccordionItem>
                         <TitleTemplate>
-                            <Icon Name="IconName.Search" Class="me-1" />Title Search
+                            <Icon Name="IconName.Search" Class="me-1" />Title Search...
                         </TitleTemplate>
                         <Content>
                             <AutoComplete @bind-Value="_filterProperties.Name"
@@ -44,6 +44,19 @@ else
                                           PropertyName="Title"
                                           Placeholder="Search for a game title..."
                                           OnChanged="(Game game) => TitleFilter(game)" />
+                        </Content>
+                    </AccordionItem>
+                    <AccordionItem>
+                        <TitleTemplate>
+                            <Icon Name="IconName.Tag" Class="me-1" /> Keyword Search...
+                        </TitleTemplate>
+                        <Content>
+                            <AutoComplete @bind-Value="_filterProperties.Keyword"
+                                          TItem="FilterableKeyword"
+                                          DataProvider="KeywordFilterProvider"
+                                          PropertyName="Name"
+                                          Placeholder="Search for a keyword..."
+                                          OnChanged="(FilterableKeyword keyword) => KeywordFilter(keyword)" />
                         </Content>
                     </AccordionItem>
                     <AccordionItem>
@@ -86,6 +99,19 @@ else
                                           PropertyName="Name"
                                           Placeholder="Search for a genre..."
                                           OnChanged="(FilterableGenre genre) => GenreFilter(genre)" />
+                        </Content>
+                    </AccordionItem>
+                    <AccordionItem>
+                        <TitleTemplate>
+                            <Icon Name="IconName.WindowDesktop" Class="me-1" /> Platform Search...
+                        </TitleTemplate>
+                        <Content>
+                            <AutoComplete @bind-Value="_filterProperties.Platform"
+                                          TItem="Platform"
+                                          DataProvider="PlatformFilterProvider"
+                                          PropertyName="Name"
+                                          Placeholder="Search for a platform..."
+                                          OnChanged="(Platform platform) => PlatformFilter(platform)" />
                         </Content>
                     </AccordionItem>
                     <AccordionItem>
@@ -202,8 +228,8 @@ else
 
 @code {
 
-        [CascadingParameter]
-        private Task<AuthenticationState> AuthenticationStateTask { get; set; }
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationStateTask { get; set; }
 
     private FilterProperties _filterProperties = new();
     private Grid<GameRow> _gameGrid;
@@ -267,6 +293,17 @@ else
         return await Task.FromResult(request.ApplyTo(GameLibraryManager.GamesGroupedByTitle.SelectMany(g => g).DistinctBy(g => g.Title)));
     }
 
+    private async Task<AutoCompleteDataProviderResult<FilterableKeyword>> KeywordFilterProvider(AutoCompleteDataProviderRequest<FilterableKeyword> request)
+    {
+        var keywords = GameLibraryManager.GamesGroupedByTitle.SelectMany(g => g.SelectMany(g2 => !string.IsNullOrEmpty(g2.Description) ? g2.Description.ToSanitizedKeywordArray() : Array.Empty<string>()))
+            .Distinct()
+            .OrderBy(k => k)
+            .Select(k => new FilterableKeyword { Name = k })
+            .ToList();
+
+        return await Task.FromResult(request.ApplyTo(keywords));
+    }
+
     private async Task<AutoCompleteDataProviderResult<FilterableGenre>> GenreFilterProvider(AutoCompleteDataProviderRequest<FilterableGenre> request)
     {
         var genres = GameLibraryManager.GamesGroupedByTitle.SelectMany(g => g.SelectMany(g2 => g2.Genres))
@@ -276,6 +313,16 @@ else
             .ToList();
 
         return await Task.FromResult(request.ApplyTo(genres));
+    }
+
+    private async Task<AutoCompleteDataProviderResult<Platform>> PlatformFilterProvider(AutoCompleteDataProviderRequest<Platform> request)
+    {
+        var platforms = GameLibraryManager.GamesGroupedByTitle.SelectMany(g => g.SelectMany(g2 => g2.Platforms))
+            .DistinctBy(p => p.Name)
+            .OrderBy(p => p.Name)
+            .ToList();
+
+        return await Task.FromResult(request.ApplyTo(platforms));
     }
 
     private async Task<AutoCompleteDataProviderResult<Publisher>> PublisherFilterProvider(AutoCompleteDataProviderRequest<Publisher> request)
@@ -430,6 +477,18 @@ else
     private async Task GenreFilter(FilterableGenre genre)
     {
         _filterPredicates[nameof(GenreFilter)] = LinqHelper.GenreFilter(genre?.Name);
+        await _gameGrid.RefreshDataAsync();
+    }
+
+    private async Task KeywordFilter(FilterableKeyword keyword)
+    {
+        _filterPredicates[nameof(KeywordFilter)] = LinqHelper.KeywordFilter(keyword?.Name);
+        await _gameGrid.RefreshDataAsync();
+    }
+
+    private async Task PlatformFilter(Platform platform)
+    {
+        _filterPredicates[nameof(PlatformFilter)] = LinqHelper.PlatformFilter(platform?.Name);
         await _gameGrid.RefreshDataAsync();
     }
 

@@ -11,10 +11,12 @@ namespace GameTracker.Frontend.Helpers
         public static Func<IGrouping<string, Game>, bool> ProviderFilter(string? filter) => g => string.IsNullOrEmpty(filter) ? true : g.Any(g2 => g2.ProviderName.ToLower().Contains(filter.ToLower()));
         public static Func<IGrouping<string, Game>, bool> StudioFilter(string? filter) => g => string.IsNullOrEmpty(filter) ? true : g.Any(g2 => g2.StudioName.ToLower().Contains(filter.ToLower()));
         public static Func<IGrouping<string, Game>, bool> GenreFilter(string? filter) => g => string.IsNullOrEmpty(filter) ? true : g.Any(g2 => g2.Genres != null && g2.Genres.Any(genre => genre.ToString().ToLower() == filter.ToLower()));
+        public static Func<IGrouping<string, Game>, bool> KeywordFilter(string? filter) => g => string.IsNullOrEmpty(filter) ? true : g.Any(g2 => g2.Description.ToLower().Contains(filter.ToLower()));
         public static Func<IGrouping<string, Game>, bool> ReleaseDateFilter(DateOnly? filter) => g => filter == null ? true : g.Any(g2 => g2.ReleaseDate != null && DateOnly.FromDateTime(g2.ReleaseDate ?? DateTime.UnixEpoch) >= filter);
         public static Func<IGrouping<string, Game>, bool> LastPlayedFilter(DateTime? filter) => g => filter == null ? true : g.Any(g2 => g2.LastPlayed != null && g2.LastPlayed > DateTime.UnixEpoch.AddDays(5) && g2.LastPlayed <= filter);
         public static Func<IGrouping<string, Game>, bool> MinPlaytimeFilter(TimeSpan? filter) => g => filter == null ? true : g.Any(g2 => g2.Playtime != null && g2.Playtime >= filter);
         public static Func<IGrouping<string, Game>, bool> MaxPlaytimeFilter(TimeSpan? filter) => g => filter == null ? true : g.Any(g2 => g2.Playtime != null && g2.Playtime <= filter);
+        public static Func<IGrouping<string, Game>, bool> PlatformFilter(string? filter) => g => string.IsNullOrEmpty(filter) ? true : g.Any(g2 => g2.Platforms.Any(p => p.Name.ToLower().Contains(filter.ToLower())));
         public static Func<IGrouping<string, Game>, bool> ReviewScoreFilter(int? filter) => g => filter == null ? true : g.Any(g2 => g2.AverageCriticalReview >= filter);
 
         #endregion
