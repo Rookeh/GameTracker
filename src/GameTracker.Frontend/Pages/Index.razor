@@ -20,7 +20,8 @@ else if (_isInitializing)
 else
 {
     <h1>Welcome, @_userName!</h1>
-    <p>Your library contains @GameLibraryManager.GamesGroupedByTitle.Count() titles (with @GetDuplicateCount() duplicates) from @GameLibraryManager.InitialisedProviders providers.</p>
+    <p>Your library contains @GameLibraryManager.GamesGroupedByTitle.Count().ToString("N0") titles (with @GetDuplicateCount() duplicates) from @GameLibraryManager.InitialisedProviders providers.</p>
+    <p>You have played ~@GetHoursPlayed() hours across all titles over the last ~@GetYearsSinceEarliestPlayedTitle() years.</p>
     <p>Please select an option from the left menu.</p>
 }
 
@@ -51,5 +52,19 @@ else
     private int GetDuplicateCount()
     {
         return GameLibraryManager.GamesGroupedByTitle.Where(gg => gg.Count() > 1 && gg.DistinctBy(g => g.ProviderName).Count() > 1).Count();
+    }
+
+    private string GetHoursPlayed()
+    {
+        return TimeSpan.FromMilliseconds(GameLibraryManager.Games.Where(g => g.Playtime != null)
+                                                                 .Sum(g => g.Playtime.Value.TotalMilliseconds)).TotalHours
+                                                                 .ToString("N0");
+    }
+
+    private string GetYearsSinceEarliestPlayedTitle()
+    {
+        return ((DateTime.Now - GameLibraryManager.Games.Where(g => g.LastPlayed != null && g.LastPlayed > DateTime.UnixEpoch.AddDays(5))
+                                                        .Min(g => g.LastPlayed.Value)).TotalDays / 365)
+                                                        .ToString("F");
     }
 }
