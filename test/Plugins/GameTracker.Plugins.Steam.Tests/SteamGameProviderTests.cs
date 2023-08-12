@@ -2,7 +2,6 @@ using GameTracker.Plugins.Common.Interfaces;
 using GameTracker.Plugins.Steam.Interfaces.ApiClients;
 using GameTracker.Plugins.Steam.Interfaces.Data;
 using GameTracker.Plugins.Steam.Models.WebApi;
-using Moq;
 using System.Net;
 using System.Text.Json;
 
@@ -10,25 +9,24 @@ namespace GameTracker.Plugins.Steam.Tests
 {
     public class SteamGameProviderTests
     {
-        private readonly Mock<IHttpClientWrapper> _mockHttpClient;
-        private readonly Mock<IRateLimitedSteamApiClient> _mockSteamApiClient;
-        private readonly Mock<ISteamGameDetailsRepository> _mockSteamGameDetailsRepo;
+        private readonly IHttpClientWrapper _mockHttpClient;
+        private readonly IRateLimitedSteamApiClient _mockSteamApiClient;
+        private readonly ISteamGameDetailsRepository _mockSteamGameDetailsRepo;
 
         private readonly SteamGameProvider _provider;
 
         public SteamGameProviderTests()
         {
-            _mockHttpClient = new Mock<IHttpClientWrapper>();
-            _mockSteamApiClient = new Mock<IRateLimitedSteamApiClient>();
-            _mockSteamGameDetailsRepo = new Mock<ISteamGameDetailsRepository>();
+            _mockHttpClient = Substitute.For<IHttpClientWrapper>();
+            _mockSteamApiClient = Substitute.For<IRateLimitedSteamApiClient>();
+            _mockSteamGameDetailsRepo = Substitute.For<ISteamGameDetailsRepository>();
 
-            var mockHttpClientWrapperFactory = new Mock<IHttpClientWrapperFactory>();
-            mockHttpClientWrapperFactory.Setup(x => x.BuildHttpClient())
-                .Returns(_mockHttpClient.Object);
+            var mockHttpClientWrapperFactory = Substitute.For<IHttpClientWrapperFactory>();
+            mockHttpClientWrapperFactory.BuildHttpClient()
+                .Returns(_mockHttpClient);
 
-            _provider = new SteamGameProvider(mockHttpClientWrapperFactory.Object,
-                _mockSteamApiClient.Object,
-                _mockSteamGameDetailsRepo.Object);
+            _provider = new SteamGameProvider(mockHttpClientWrapperFactory, _mockSteamApiClient,
+                _mockSteamGameDetailsRepo);
         }
 
         [Fact]
@@ -62,13 +60,12 @@ namespace GameTracker.Plugins.Steam.Tests
                 }
             };
 
-            _mockHttpClient.Setup(x => x.GetAsync(It.Is<Uri>(u => u.AbsoluteUri.Contains(apiKey) && u.AbsoluteUri.Contains(steamId))))
-                .ReturnsAsync(new HttpResponseMessage
+            _mockHttpClient.GetAsync(Arg.Is<Uri>(u => u.AbsoluteUri.Contains(apiKey) && u.AbsoluteUri.Contains(steamId)))
+                .Returns(new HttpResponseMessage
                 {
                     StatusCode = HttpStatusCode.OK,
                     Content = new StringContent(JsonSerializer.Serialize(ownedGamesResponse))
-                })
-                .Verifiable();
+                });
 
             // Act
             await _provider.Refresh(userId, apiKey, steamId, true, true);
@@ -79,7 +76,7 @@ namespace GameTracker.Plugins.Steam.Tests
             Assert.Equal(title, _provider.Games.First().Title);
             Assert.Equal(DateTime.Today, _provider.Games.First().LastPlayed);
             Assert.Equal(playTime, _provider.Games.First().Playtime);
-            _mockHttpClient.Verify();
+            await _mockHttpClient.Received(1).GetAsync(Arg.Any<Uri>());
         }
 
         [Theory]
@@ -120,13 +117,12 @@ namespace GameTracker.Plugins.Steam.Tests
                 }
             };
 
-            _mockHttpClient.Setup(x => x.GetAsync(It.Is<Uri>(u => u.AbsoluteUri.Contains(apiKey) && u.AbsoluteUri.Contains(steamId))))
-                .ReturnsAsync(new HttpResponseMessage
+            _mockHttpClient.GetAsync(Arg.Is<Uri>(u => u.AbsoluteUri.Contains(apiKey) && u.AbsoluteUri.Contains(steamId)))
+                .Returns(new HttpResponseMessage
                 {
                     StatusCode = HttpStatusCode.OK,
                     Content = new StringContent(JsonSerializer.Serialize(ownedGamesResponse))
-                })
-                .Verifiable();
+                });
 
             // Act
             await _provider.Refresh(userId, apiKey, steamId, includeBetas, includeTools);
@@ -141,7 +137,7 @@ namespace GameTracker.Plugins.Steam.Tests
             };
 
             Assert.Equal(expectedCount, _provider.Games.Count());
-            _mockHttpClient.Verify();
+            await _mockHttpClient.Received(1).GetAsync(Arg.Any<Uri>());
         }
 
         [Fact]
@@ -152,16 +148,15 @@ namespace GameTracker.Plugins.Steam.Tests
             var apiKey = "abcd";
             var steamId = "1234";
 
-            _mockHttpClient.Setup(x => x.GetAsync(It.Is<Uri>(u => u.AbsoluteUri.Contains(apiKey) && u.AbsoluteUri.Contains(steamId))))
-                .ReturnsAsync(new HttpResponseMessage
+            _mockHttpClient.GetAsync(Arg.Is<Uri>(u => u.AbsoluteUri.Contains(apiKey) && u.AbsoluteUri.Contains(steamId)))
+                .Returns(new HttpResponseMessage
                 {
                     StatusCode = HttpStatusCode.Unauthorized
-                })
-                .Verifiable();
+                });
 
             // Act / Assert
             await Assert.ThrowsAsync<ApplicationException>(() => _provider.Refresh(userId, apiKey, steamId, true, true));
-            _mockHttpClient.Verify();
+            await _mockHttpClient.Received(1).GetAsync(Arg.Any<Uri>());
         }
     }
 }
