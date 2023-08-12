@@ -4,8 +4,8 @@
     {
         public static string[] ToSanitizedKeywordArray(this string input)
         {
-            var unpunctuated = new string(input.Where(c => !char.IsPunctuation(c)).ToArray()).ToLower();
-            return unpunctuated.Split(' ').Select(s => s.Trim()).ToArray();
+            var unpunctuated = new string(input.Replace('-', ' ').Where(c => char.IsWhiteSpace(c) || char.IsLetterOrDigit(c)).ToArray()).ToLower();
+            return unpunctuated.Split(' ').Select(s => s.Trim()).Distinct().ToArray();
         }
     }
 }
