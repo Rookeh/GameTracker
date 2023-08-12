@@ -1,19 +1,18 @@
 using GameTracker.Plugins.Xbox.Interfaces;
 using GameTracker.Plugins.Xbox.Models.OpenXBL;
-using Moq;
 using System.Net.Http.Headers;
 
 namespace GameTracker.Plugins.Xbox.Tests
 {
     public class XboxGameProviderTests
     {
-        private readonly Mock<IRateLimitedXboxHttpClient> _mockRateLimitedClient;
+        private readonly IRateLimitedXboxHttpClient _mockRateLimitedClient;
         private readonly XboxGameProvider _provider;
 
         public XboxGameProviderTests()
         {
-            _mockRateLimitedClient = new Mock<IRateLimitedXboxHttpClient>();
-            _provider = new XboxGameProvider(_mockRateLimitedClient.Object);
+            _mockRateLimitedClient = Substitute.For<IRateLimitedXboxHttpClient>();
+            _provider = new XboxGameProvider(_mockRateLimitedClient);
         }
 
         [Theory]
@@ -92,9 +91,8 @@ namespace GameTracker.Plugins.Xbox.Tests
                 }
             };
 
-            _mockRateLimitedClient.Setup(x => x.GetFromJson(It.IsAny<string>(), It.IsAny<XboxLiveTitleResponse>(), It.IsAny<NameValueHeaderValue[]>()))
-                .ReturnsAsync(response)
-                .Verifiable();
+            _mockRateLimitedClient.GetFromJson(Arg.Any<string>(), Arg.Any<XboxLiveTitleResponse>(), Arg.Any<NameValueHeaderValue[]>())
+                .Returns(response);
 
             // Act
             await _provider.Refresh(userId, apiKey, includeGamePass, includeLegacy);
@@ -115,7 +113,7 @@ namespace GameTracker.Plugins.Xbox.Tests
             Assert.Equal(publisher, _provider.Games.First().PublisherName);
             Assert.Equal(platform, _provider.Games.First().Platforms.FirstOrDefault()?.Name);
             Assert.Equal(title, _provider.Games.First().Title);
-            _mockRateLimitedClient.Verify();
+            await _mockRateLimitedClient.Received(1).GetFromJson(Arg.Any<string>(), Arg.Any<XboxLiveTitleResponse>(), Arg.Any<NameValueHeaderValue[]>());
         }
 
         [Fact]

@@ -2,24 +2,23 @@ using GameTracker.Models.Enums;
 using GameTracker.Plugins.Common.Interfaces;
 using GameTracker.Plugins.Nintendo.Models;
 using GameTracker.Plugins.Nintendo.Models.EU;
-using Moq;
 
 namespace GameTracker.Plugins.Nintendo.Tests
 {
     public class NintendoGameProviderTests
     {
-        private readonly Mock<IHttpClientWrapper> _mockHttpClient;        
+        private readonly IHttpClientWrapper _mockHttpClient;        
         private readonly NintendoGameProvider _provider;
 
         public NintendoGameProviderTests()
         {
-            _mockHttpClient = new Mock<IHttpClientWrapper>();
+            _mockHttpClient = Substitute.For<IHttpClientWrapper>();
 
-            var httpClientFactory = new Mock<IHttpClientWrapperFactory>();
-            httpClientFactory.Setup(x => x.BuildHttpClient())
-                .Returns(_mockHttpClient.Object);
+            var httpClientFactory = Substitute.For<IHttpClientWrapperFactory>();
+            httpClientFactory.BuildHttpClient()
+                .Returns(_mockHttpClient);
 
-            _provider = new NintendoGameProvider(httpClientFactory.Object);
+            _provider = new NintendoGameProvider(httpClientFactory);
         }
 
         [Fact]
@@ -56,9 +55,8 @@ namespace GameTracker.Plugins.Nintendo.Tests
                 }
             };
 
-            _mockHttpClient.Setup(x => x.GetFromJsonAndTypeAsync(It.Is<Uri>(u => u.AbsoluteUri.Contains("http://search.nintendo-europe.com")), typeof(EUGameResponseRoot)))
-                .ReturnsAsync(euTitle)
-                .Verifiable();
+            _mockHttpClient.GetFromJsonAndTypeAsync(Arg.Is<Uri>(u => u.AbsoluteUri.Contains("http://search.nintendo-europe.com")), typeof(EUGameResponseRoot))
+                .Returns(euTitle);
 
             // Act
             await _provider.Refresh(userName, regionCode, titles);
@@ -73,7 +71,7 @@ namespace GameTracker.Plugins.Nintendo.Tests
             Assert.Equal(euTitle.Response.Docs[0].DatesReleased.FirstOrDefault(), _provider.Games.First().ReleaseDate);
             Assert.Equal("Game Studio", _provider.Games.First().Studio.Name);
             Assert.Equal(euTitle.Response.Docs[0].Title, _provider.Games.First().Title);
-            _mockHttpClient.Verify();
+            await _mockHttpClient.Received(1).GetFromJsonAndTypeAsync(Arg.Any<Uri>(), Arg.Any<Type>());
         }
 
         [Fact]
@@ -82,18 +80,18 @@ namespace GameTracker.Plugins.Nintendo.Tests
             // Arrange
             var userName = "Test";
             var regionCode = "EU";
-            var titles = "Title";           
+            var titles = "Title";
 
-            _mockHttpClient.Setup(x => x.GetFromJsonAndTypeAsync(It.Is<Uri>(u => u.AbsoluteUri.Contains("http://search.nintendo-europe.com")), typeof(EUGameResponseRoot)))
-                .ReturnsAsync(null)
-                .Verifiable();
+            EUGameResponseRoot returnValue = null;
+            _mockHttpClient.GetFromJsonAndTypeAsync(Arg.Is<Uri>(u => u.AbsoluteUri.Contains("http://search.nintendo-europe.com")), typeof(EUGameResponseRoot))
+                .Returns(returnValue);
 
             // Act
             await _provider.Refresh(userName, regionCode, titles);
 
             // Assert
             Assert.Empty(_provider.Games);
-            _mockHttpClient.Verify();
+            await _mockHttpClient.Received(1).GetFromJsonAndTypeAsync(Arg.Any<Uri>(), Arg.Any<Type>());
         }
 
         [Fact]
@@ -118,9 +116,8 @@ namespace GameTracker.Plugins.Nintendo.Tests
                                    </TitleInfo>
                                  </TitleInfoList>";
 
-            _mockHttpClient.Setup(x => x.GetStringAsync(It.Is<string>(u => u.Contains("https://www.nintendo.co.jp"))))
-                .ReturnsAsync(responseXml)
-                .Verifiable();
+            _mockHttpClient.GetStringAsync(Arg.Is<string>(u => u.Contains("https://www.nintendo.co.jp")))
+                .Returns(responseXml);
 
             // Act
             await _provider.Refresh(userName, regionCode, titles);
@@ -133,7 +130,7 @@ namespace GameTracker.Plugins.Nintendo.Tests
             Assert.Equal(DateTime.Today, _provider.Games.First().ReleaseDate);
             Assert.Equal("Test Studio", _provider.Games.First().StudioName);
             Assert.Equal("Test Title", _provider.Games.First().Title);
-            _mockHttpClient.Verify();
+            await _mockHttpClient.Received().GetStringAsync(Arg.Any<string>());
         }
 
         [Fact]
@@ -144,16 +141,15 @@ namespace GameTracker.Plugins.Nintendo.Tests
             var regionCode = "JP";
             var titles = "Title";
 
-            _mockHttpClient.Setup(x => x.GetStringAsync(It.Is<string>(u => u.Contains("https://www.nintendo.co.jp"))))
-                .ReturnsAsync(string.Empty)
-                .Verifiable();
+            _mockHttpClient.GetStringAsync(Arg.Is<string>(u => u.Contains("https://www.nintendo.co.jp")))
+                .Returns(string.Empty);
 
             // Act
             await _provider.Refresh(userName, regionCode, titles);
 
             // Assert
             Assert.Empty(_provider.Games);
-            _mockHttpClient.Verify();
+            await _mockHttpClient.Received(1).GetStringAsync(Arg.Any<string>());
         }
 
         [Fact]

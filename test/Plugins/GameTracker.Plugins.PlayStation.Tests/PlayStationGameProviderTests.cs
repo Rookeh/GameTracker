@@ -1,10 +1,9 @@
 ﻿using GameTracker.Plugins.Common.Interfaces;
 using GameTracker.Plugins.PlayStation.Helpers;
 using GameTracker.Plugins.PlayStation.Interfaces;
-using GameTracker.Plugins.PlayStation.Models.GraphQL;
 using GameTracker.Plugins.PlayStation.Models.GraphQL.GameLibrary;
 using GameTracker.Plugins.PlayStation.Models.GraphQL.StoreInfo;
-using Moq;
+using NSubstitute.ExceptionExtensions;
 using System.Net;
 using System.Text.Json;
 
@@ -12,21 +11,21 @@ namespace GameTracker.Plugins.PlayStation.Tests
 {
     public class PlayStationGameProviderTests
     {
-        private readonly Mock<IAuthenticationHelper> _mockAuthenticationHelper;
-        private readonly Mock<IHttpClientWrapper> _mockHttpClient;
+        private readonly IAuthenticationHelper _mockAuthenticationHelper;
+        private readonly IHttpClientWrapper _mockHttpClient;
 
         private readonly PlayStationGameProvider _provider;
 
         public PlayStationGameProviderTests()
         {
-            _mockAuthenticationHelper = new Mock<IAuthenticationHelper>();
-            _mockHttpClient = new Mock<IHttpClientWrapper>();
+            _mockAuthenticationHelper = Substitute.For<IAuthenticationHelper>();
+            _mockHttpClient = Substitute.For<IHttpClientWrapper>();
 
-            var mockHttpClientFactory = new Mock<IHttpClientWrapperFactory>();
-            mockHttpClientFactory.Setup(x => x.BuildHttpClient())
-                .Returns(_mockHttpClient.Object);
+            var mockHttpClientFactory = Substitute.For<IHttpClientWrapperFactory>();
+            mockHttpClientFactory.BuildHttpClient()
+                .Returns(_mockHttpClient);
 
-            _provider = new PlayStationGameProvider(_mockAuthenticationHelper.Object, mockHttpClientFactory.Object);
+            _provider = new PlayStationGameProvider(_mockAuthenticationHelper, mockHttpClientFactory);
         }
 
         [Theory]
@@ -101,29 +100,25 @@ namespace GameTracker.Plugins.PlayStation.Tests
                 }
             };
 
-            _mockAuthenticationHelper.Setup(x => x.ExchangeNpssoForCode(npsso))
-                .ReturnsAsync(code)
-                .Verifiable();
+            _mockAuthenticationHelper.ExchangeNpssoForCode(npsso)
+                .Returns(code);
 
-            _mockAuthenticationHelper.Setup(x => x.ExchangeCodeForToken(code))
-                .ReturnsAsync(token)
-                .Verifiable();
+            _mockAuthenticationHelper.ExchangeCodeForToken(code)
+                .Returns(token);
 
-            _mockHttpClient.Setup(x => x.SendAsync(It.Is<HttpRequestMessage>(r => r.Headers.Authorization.Parameter == token)))
-                .ReturnsAsync(new HttpResponseMessage
+            _mockHttpClient.SendAsync(Arg.Is<HttpRequestMessage>(r => r.Headers.Authorization.Parameter == token))
+                .Returns(new HttpResponseMessage
                 {
                     StatusCode = HttpStatusCode.OK,
                     Content = new StringContent(JsonSerializer.Serialize(response))
-                })
-                .Verifiable();
+                });
 
-            _mockHttpClient.Setup(x => x.SendAsync(It.Is<HttpRequestMessage>(r => r.RequestUri.AbsoluteUri.Contains(Constants.GraphQL.GetStoreDetailsOperation))))
-                .ReturnsAsync(new HttpResponseMessage
+            _mockHttpClient.SendAsync(Arg.Is<HttpRequestMessage>(r => r.RequestUri.AbsoluteUri.Contains(Constants.GraphQL.GetStoreDetailsOperation)))
+                .Returns(new HttpResponseMessage
                 {
                     StatusCode = HttpStatusCode.OK,
                     Content = new StringContent(JsonSerializer.Serialize(storeResponse))
-                })
-                .Verifiable();
+                });
 
             // Act
             await _provider.Refresh(userId, npsso, includeNonGameTitles);
@@ -135,8 +130,9 @@ namespace GameTracker.Plugins.PlayStation.Tests
             Assert.Equal(conceptId, _provider.Games.First().PlatformId);
             Assert.Equal(fullPlatform, _provider.Games.First().Platforms.FirstOrDefault()?.Name);
             Assert.Equal(title, _provider.Games.First().Title);
-            _mockAuthenticationHelper.Verify();
-            _mockHttpClient.Verify();
+            await _mockAuthenticationHelper.Received(1).ExchangeNpssoForCode(Arg.Any<string>());
+            await _mockAuthenticationHelper.Received(1).ExchangeCodeForToken(Arg.Any<string>());
+            await _mockHttpClient.Received(2).SendAsync(Arg.Any<HttpRequestMessage>());
         }
 
         [Fact]
@@ -148,24 +144,21 @@ namespace GameTracker.Plugins.PlayStation.Tests
             var code = "def456";
             var token = "ghi789";
 
-            _mockAuthenticationHelper.Setup(x => x.ExchangeNpssoForCode(npsso))
-                .ReturnsAsync(code)
-                .Verifiable();
+            _mockAuthenticationHelper.ExchangeNpssoForCode(npsso)
+                .Returns(code);
 
-            _mockAuthenticationHelper.Setup(x => x.ExchangeCodeForToken(code))
-                .ReturnsAsync(token)
-                .Verifiable();
+            _mockAuthenticationHelper.ExchangeCodeForToken(code)
+                .Returns(token);
 
-            _mockHttpClient.Setup(x => x.SendAsync(It.Is<HttpRequestMessage>(r => r.Headers.Authorization.Parameter == token)))
-                .ReturnsAsync(new HttpResponseMessage
+            _mockHttpClient.SendAsync(Arg.Is<HttpRequestMessage>(r => r.Headers.Authorization.Parameter == token))
+                .Returns(new HttpResponseMessage
                 {
                     StatusCode = HttpStatusCode.InternalServerError
-                })
-                .Verifiable();
+                });
 
             // Act / Assert
             await Assert.ThrowsAsync<ApplicationException>(() => _provider.Refresh(userId, npsso, false));
-            _mockHttpClient.Verify();
+            await _mockHttpClient.Received(1).SendAsync(Arg.Any<HttpRequestMessage>());
         }
 
         [Fact]
@@ -176,18 +169,17 @@ namespace GameTracker.Plugins.PlayStation.Tests
             var npsso = "abc123";
             var code = "def456";
 
-            _mockAuthenticationHelper.Setup(x => x.ExchangeNpssoForCode(npsso))
-                .ReturnsAsync(code)
-                .Verifiable();
+            _mockAuthenticationHelper.ExchangeNpssoForCode(npsso)
+                .Returns(code);
 
-            _mockAuthenticationHelper.Setup(x => x.ExchangeCodeForToken(code))
-                .ThrowsAsync(new ApplicationException())
-                .Verifiable();
+            _mockAuthenticationHelper.ExchangeCodeForToken(code)
+                .ThrowsAsync(new ApplicationException());
 
             // Act / Assert
-            await Assert.ThrowsAsync<ApplicationException>(() => _provider.Refresh(userId, npsso, false));
-            _mockAuthenticationHelper.Verify();
-            _mockHttpClient.Verify(x => x.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Never);
+            await Assert.ThrowsAsync<ApplicationException>(() => _provider.Refresh(userId, npsso, false));            
+            await _mockAuthenticationHelper.Received(1).ExchangeNpssoForCode(Arg.Any<string>());
+            await _mockAuthenticationHelper.Received(1).ExchangeCodeForToken(Arg.Any<string>());
+            await _mockHttpClient.Received(0).SendAsync(Arg.Any<HttpRequestMessage>());
         }
 
         [Fact]
@@ -197,15 +189,14 @@ namespace GameTracker.Plugins.PlayStation.Tests
             var userId = "test";
             var npsso = "abc123";
 
-            _mockAuthenticationHelper.Setup(x => x.ExchangeNpssoForCode(npsso))
-                .ThrowsAsync(new ApplicationException())
-                .Verifiable();
+            _mockAuthenticationHelper.ExchangeNpssoForCode(npsso)
+                .ThrowsAsync(new ApplicationException());
 
             // Act / Assert
             await Assert.ThrowsAsync<ApplicationException>(() => _provider.Refresh(userId, npsso, false));
-            _mockAuthenticationHelper.Verify();
-            _mockAuthenticationHelper.Verify(x => x.ExchangeCodeForToken(It.IsAny<string>()), Times.Never);
-            _mockHttpClient.Verify(x => x.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Never);
+            
+            await _mockAuthenticationHelper.Received(0).ExchangeCodeForToken(Arg.Any<string>());
+            await _mockHttpClient.Received(0).SendAsync(Arg.Any<HttpRequestMessage>());
         }
     }
 }

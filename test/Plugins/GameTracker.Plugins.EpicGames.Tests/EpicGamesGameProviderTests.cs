@@ -1,19 +1,19 @@
 using EpicGamesStoreNET.Models;
 using GameTracker.Plugins.EpicGames.Interfaces;
 using GameTracker.Plugins.EpicGames.Tests.Helpers;
-using Moq;
+using NSubstitute.ExceptionExtensions;
 
 namespace GameTracker.Plugins.EpicGames.Tests
 {
     public class EpicGamesGameProviderTests
     {
-        private readonly Mock<IEpicGamesStore> _mockEpicStore;
+        private readonly IEpicGamesStore _mockEpicStore;
         private readonly EpicGamesGameProvider _provider;
 
         public EpicGamesGameProviderTests()
         {
-            _mockEpicStore = new Mock<IEpicGamesStore>();
-            _provider = new EpicGamesGameProvider(_mockEpicStore.Object);
+            _mockEpicStore = Substitute.For<IEpicGamesStore>();
+            _provider = new EpicGamesGameProvider(_mockEpicStore);
         }
 
         [Fact]
@@ -30,15 +30,15 @@ namespace GameTracker.Plugins.EpicGames.Tests
 
             var response = BuildTestResponse(title, description, publisher, developer);
 
-            _mockEpicStore.Setup(x => x.SearchAsync(titleToQuery))
-                .ReturnsAsync(response)
-                .Verifiable();
+            _mockEpicStore.SearchAsync(titleToQuery)
+                .Returns(response);
 
             // Act
             await _provider.Refresh(userId, parameters);
 
             // Assert
-            _mockEpicStore.Verify();
+            await _mockEpicStore.Received(1).SearchAsync(Arg.Any<string>());
+            await _mockEpicStore.Received().SearchAsync(titleToQuery);
             Assert.Single(_provider.Games);
             Assert.Equal(title, _provider.Games.First().Title);
             Assert.Equal(description, _provider.Games.First().Description);
@@ -71,9 +71,8 @@ namespace GameTracker.Plugins.EpicGames.Tests
             var titleToQuery = "title";
             var parameters = new[] { titleToQuery };
 
-            _mockEpicStore.Setup(x => x.SearchAsync(titleToQuery))
-                .ThrowsAsync(new Exception())
-                .Verifiable();
+            _mockEpicStore.SearchAsync(titleToQuery)
+                .Throws(new Exception());
 
             // Act / Assert
             await Assert.ThrowsAsync<Exception>(async () => await _provider.Refresh(userId, parameters));
@@ -123,52 +122,6 @@ namespace GameTracker.Plugins.EpicGames.Tests
             response.SetProtectedValue("Data", data);
 
             return response;
-
-
-            //return new Response()
-            //{
-            //    Data = new Data
-            //    {
-            //        Catalog = new Catalog
-            //        {
-            //            SearchStore = new SearchStore
-            //            {
-            //                Elements = new[]
-            //                {
-            //                    new Element
-            //                    {
-            //                        Description = description,
-            //                        KeyImages = new []
-            //                        {
-            //                            new KeyImage
-            //                            {
-            //                                Type = "OfferImageWide",
-            //                                Url = "http://localhost/test.jpg"
-            //                            }
-            //                        },
-            //                        Seller = new Seller
-            //                        {
-            //                            Id = "SellerId",
-            //                            Name = publisher
-            //                        },
-            //                        EffectiveDate = DateTime.Today,
-            //                        Title = title,
-            //                        Namespace = Guid.NewGuid().ToString(),
-            //                        UrlSlug = "http://localhost",
-            //                        CustomAttributes = new []
-            //                        {
-            //                            new CustomAttribute
-            //                            {
-            //                                Key = "developerName",
-            //                                Value = developer
-            //                            }
-            //                        }
-            //                    }
-            //                }
-            //            }
-            //        }
-            //    }
-            //};
         }
 
         #endregion

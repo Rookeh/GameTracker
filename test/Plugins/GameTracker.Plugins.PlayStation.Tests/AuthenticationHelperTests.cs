@@ -1,7 +1,6 @@
 using GameTracker.Plugins.Common.Interfaces;
 using GameTracker.Plugins.PlayStation.Helpers;
 using GameTracker.Plugins.PlayStation.Models.Authentication;
-using Moq;
 using System.Net;
 using System.Text.Json;
 
@@ -9,18 +8,18 @@ namespace GameTracker.Plugins.PlayStation.Tests
 {
     public class AuthenticationHelperTests
     {
-        private readonly Mock<IHttpClientWrapper> _mockHttpClient;
+        private readonly IHttpClientWrapper _mockHttpClient;
         private readonly AuthenticationHelper _authenticationHelper;
 
         public AuthenticationHelperTests()
         {
-            _mockHttpClient = new Mock<IHttpClientWrapper>();
+            _mockHttpClient = Substitute.For<IHttpClientWrapper>();
 
-            var httpClientWrapperFactory = new Mock<IHttpClientWrapperFactory>();
-            httpClientWrapperFactory.Setup(x => x.BuildHttpClient())
-                .Returns(_mockHttpClient.Object);
+            var httpClientWrapperFactory = Substitute.For<IHttpClientWrapperFactory>();
+            httpClientWrapperFactory.BuildHttpClient()
+                .Returns(_mockHttpClient);
 
-            _authenticationHelper = new AuthenticationHelper(httpClientWrapperFactory.Object);
+            _authenticationHelper = new AuthenticationHelper(httpClientWrapperFactory);
         }
 
         [Fact]
@@ -37,16 +36,15 @@ namespace GameTracker.Plugins.PlayStation.Tests
 
             response.Headers.Location = new Uri($"http://localhost?code={code}");
 
-            _mockHttpClient.Setup(x => x.SendAsync(It.Is<HttpRequestMessage>(m => m.Headers.Any(h => h.Key == "Cookie" && h.Value.Any(v => v.Contains(npsso))))))
-                .ReturnsAsync(response)
-                .Verifiable();
+            _mockHttpClient.SendAsync(Arg.Is<HttpRequestMessage>(m => m.Headers.Any(h => h.Key == "Cookie" && h.Value.Any(v => v.Contains(npsso)))))
+                .Returns(response);
 
             // Act
             var result = await _authenticationHelper.ExchangeNpssoForCode(npsso);
 
             // Assert
             Assert.Equal(code, result);
-            _mockHttpClient.Verify();
+            await _mockHttpClient.Received(1).SendAsync(Arg.Any<HttpRequestMessage>());
         }
 
         [Fact]
@@ -63,13 +61,12 @@ namespace GameTracker.Plugins.PlayStation.Tests
 
             response.Headers.Location = new Uri($"http://localhost?code={code}");
 
-            _mockHttpClient.Setup(x => x.SendAsync(It.Is<HttpRequestMessage>(m => m.Headers.Any(h => h.Key == "Cookie" && h.Value.Any(v => v.Contains(npsso))))))
-                .ReturnsAsync(response)
-                .Verifiable();
+            _mockHttpClient.SendAsync(Arg.Is<HttpRequestMessage>(m => m.Headers.Any(h => h.Key == "Cookie" && h.Value.Any(v => v.Contains(npsso)))))
+                .Returns(response);
 
             // Act / Assert
             await Assert.ThrowsAsync<ApplicationException>(() => _authenticationHelper.ExchangeNpssoForCode(npsso));
-            _mockHttpClient.Verify();
+            await _mockHttpClient.Received(1).SendAsync(Arg.Any<HttpRequestMessage>());
         }
 
         [Fact]
@@ -84,13 +81,12 @@ namespace GameTracker.Plugins.PlayStation.Tests
                 StatusCode = HttpStatusCode.Redirect
             };
 
-            _mockHttpClient.Setup(x => x.SendAsync(It.Is<HttpRequestMessage>(m => m.Headers.Any(h => h.Key == "Cookie" && h.Value.Any(v => v.Contains(npsso))))))
-                .ReturnsAsync(response)
-                .Verifiable();
+            _mockHttpClient.SendAsync(Arg.Is<HttpRequestMessage>(m => m.Headers.Any(h => h.Key == "Cookie" && h.Value.Any(v => v.Contains(npsso)))))
+                .Returns(response);
 
             // Act / Assert
             await Assert.ThrowsAsync<ApplicationException>(() => _authenticationHelper.ExchangeNpssoForCode(npsso));
-            _mockHttpClient.Verify();
+            await _mockHttpClient.Received(1).SendAsync(Arg.Any<HttpRequestMessage>());
         }
 
         [Fact]
@@ -108,16 +104,15 @@ namespace GameTracker.Plugins.PlayStation.Tests
                 Content = new StringContent(JsonSerializer.Serialize(token))
             };
 
-            _mockHttpClient.Setup(x => x.SendAsync(It.IsAny<HttpRequestMessage>()))
-                .ReturnsAsync(response)
-                .Verifiable();
+            _mockHttpClient.SendAsync(Arg.Any<HttpRequestMessage>())
+                .Returns(response);
 
             // Act
             var result = await _authenticationHelper.ExchangeCodeForToken(code);
 
             // Assert
             Assert.Equal(token.AccessToken, result);
-            _mockHttpClient.Verify();
+            await _mockHttpClient.Received(1).SendAsync(Arg.Any<HttpRequestMessage>());
         }
 
         [Fact]
@@ -130,13 +125,12 @@ namespace GameTracker.Plugins.PlayStation.Tests
                 StatusCode = HttpStatusCode.InternalServerError
             };
 
-            _mockHttpClient.Setup(x => x.SendAsync(It.IsAny<HttpRequestMessage>()))
-                .ReturnsAsync(response)
-                .Verifiable();
+            _mockHttpClient.SendAsync(Arg.Any<HttpRequestMessage>())
+                .Returns(response);
 
             // Act / Assert
             await Assert.ThrowsAsync<ApplicationException>(() => _authenticationHelper.ExchangeCodeForToken(code));
-            _mockHttpClient.Verify();
+            await _mockHttpClient.Received(1).SendAsync(Arg.Any<HttpRequestMessage>());
         }
     }
 }
