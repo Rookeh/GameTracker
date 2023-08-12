@@ -1,5 +1,4 @@
 ﻿using GameTracker.Plugins.Common.RateLimiting;
-using Moq;
 
 namespace GameTracker.Plugins.Common.Tests
 {
@@ -9,61 +8,57 @@ namespace GameTracker.Plugins.Common.Tests
         public async Task AttemptOperation_IfCircuitIsClosed_ShouldExecuteOperation()
         {
             // Arrange
-            var testHelper = new Mock<ITestHelper>();
+            var testHelper = Substitute.For<ITestHelper>();
             var circuitBreaker = new CircuitBreaker<string>(TimeSpan.FromSeconds(5));
             var defaultReturn = string.Empty;
             var expectedReturn = "return";
 
-            testHelper.Setup(x => x.CheckCircuitBroken())
-                .Returns(false)
-                .Verifiable();
-
-            testHelper.Setup(x => x.DoSomething())
-                .ReturnsAsync(expectedReturn)
-                .Verifiable();
+            testHelper.CheckCircuitBroken()
+                .Returns(false);
+            testHelper.DoSomething()
+                .Returns(expectedReturn);
 
             // Act
-            var result = await circuitBreaker.AttemptOperation(testHelper.Object.DoSomething, testHelper.Object.CheckCircuitBroken, defaultReturn);
+            var result = await circuitBreaker.AttemptOperation(testHelper.DoSomething, testHelper.CheckCircuitBroken, defaultReturn);
 
             // Assert
             Assert.Equal(expectedReturn, result);
-            testHelper.Verify();
-            testHelper.Verify(x => x.DoSomething(), Times.Once);
+            testHelper.Received(1).CheckCircuitBroken();
+            await testHelper.Received(1).DoSomething();
         }
 
         [Fact]
         public async Task AttemptOperation_IfCircuitBrokenCheckTripped_OperationIsNotExecuted()
         {
             // Arrange
-            var testHelper = new Mock<ITestHelper>();
+            var testHelper = Substitute.For<ITestHelper>();
             var circuitBreaker = new CircuitBreaker<string>(TimeSpan.FromSeconds(5));
             var defaultReturn = string.Empty;
 
-            testHelper.Setup(x => x.CheckCircuitBroken())
-                .Returns(true)
-                .Verifiable();
+            testHelper.CheckCircuitBroken()
+                .Returns(true);
 
             // Act
-            await circuitBreaker.AttemptOperation(testHelper.Object.DoSomething, testHelper.Object.CheckCircuitBroken, defaultReturn);
+            await circuitBreaker.AttemptOperation(testHelper.DoSomething, testHelper.CheckCircuitBroken, defaultReturn);
 
             // Assert
-            testHelper.Verify();
-            testHelper.Verify(x => x.DoSomething(), Times.Never);
+            testHelper.Received(1).CheckCircuitBroken();
+            await testHelper.Received(0).DoSomething();
         }
 
         [Fact]
         public async Task AttemptOperation_IfCircuitIsOpen_ReturnsDefaultValue()
         {
             // Arrange
-            var testHelper = new Mock<ITestHelper>();
+            var testHelper = Substitute.For<ITestHelper>();
             var circuitBreaker = new CircuitBreaker<string>(TimeSpan.FromSeconds(5));
             var defaultReturn = string.Empty;
 
-            testHelper.Setup(x => x.CheckCircuitBroken())
+            testHelper.CheckCircuitBroken()
                 .Returns(true);
 
             // Act
-            var result = await circuitBreaker.AttemptOperation(testHelper.Object.DoSomething, testHelper.Object.CheckCircuitBroken, defaultReturn);
+            var result = await circuitBreaker.AttemptOperation(testHelper.DoSomething, testHelper.CheckCircuitBroken, defaultReturn);
 
             // Assert
             Assert.Equal(defaultReturn, result);
@@ -73,21 +68,21 @@ namespace GameTracker.Plugins.Common.Tests
         public async Task AttemptOperation_IfCircuitIsOpenAndBackoffExpiredAndCircuitBrokenCheckIsFalse_ShouldExecuteOperation()
         {
             // Arrange
-            var testHelper = new Mock<ITestHelper>();
+            var testHelper = Substitute.For<ITestHelper > ();
             var circuitBreaker = new CircuitBreaker<string>(TimeSpan.FromSeconds(1));
             var defaultReturn = string.Empty;
 
-            testHelper.SetupSequence(x => x.CheckCircuitBroken())
-                .Returns(true)
-                .Returns(false);
+            testHelper.CheckCircuitBroken()
+                .Returns(true, false);
 
             // Act
-            await circuitBreaker.AttemptOperation(testHelper.Object.DoSomething, testHelper.Object.CheckCircuitBroken, defaultReturn);
+            await circuitBreaker.AttemptOperation(testHelper.DoSomething, testHelper.CheckCircuitBroken, defaultReturn);
             await Task.Delay(TimeSpan.FromSeconds(1));
-            await circuitBreaker.AttemptOperation(testHelper.Object.DoSomething, testHelper.Object.CheckCircuitBroken, defaultReturn);
+            await circuitBreaker.AttemptOperation(testHelper.DoSomething, testHelper.CheckCircuitBroken, defaultReturn);
 
             // Assert
-            testHelper.Verify(x => x.DoSomething(), Times.Once);
+            testHelper.Received(2).CheckCircuitBroken();
+            await testHelper.Received(1).DoSomething();
         }
 
         public interface ITestHelper
