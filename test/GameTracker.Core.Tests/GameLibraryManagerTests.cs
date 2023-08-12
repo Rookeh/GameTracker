@@ -1,26 +1,24 @@
 using GameTracker.Interfaces;
 using GameTracker.Interfaces.Data;
 using GameTracker.Models;
-using Moq;
 
 namespace GameTracker.Core.Tests
 {
     public class GameLibraryManagerTests
     {
-        private readonly Mock<IGameProvider> _mockGameProvider;
-        private readonly Mock<IParameterCacheRepository> _mockParameterCacheRepo;
+        private readonly IGameProvider _mockGameProvider;
+        private readonly IParameterCacheRepository _mockParameterCacheRepo;
         private readonly IGameLibraryManager _gameLibraryManager;
 
         public GameLibraryManagerTests()
         {
-            _mockGameProvider = new Mock<IGameProvider>();
-            _mockParameterCacheRepo = new Mock<IParameterCacheRepository>();
+            _mockGameProvider = Substitute.For<IGameProvider>();
+            _mockParameterCacheRepo = Substitute.For<IParameterCacheRepository>();
 
-            var gameProviderFactory = new Mock<IGameProviderFactory>();
-            gameProviderFactory.Setup(x => x.GetProviders())
-                .Returns(new[] { _mockGameProvider.Object });
+            var gameProviderFactory = Substitute.For<IGameProviderFactory>();
+            gameProviderFactory.GetProviders().Returns(new[] { _mockGameProvider });
 
-            _gameLibraryManager = new GameLibraryManager(_mockParameterCacheRepo.Object, gameProviderFactory.Object);
+            _gameLibraryManager = new GameLibraryManager(_mockParameterCacheRepo, gameProviderFactory);
         }
 
         [Fact]
@@ -37,27 +35,26 @@ namespace GameTracker.Core.Tests
                 UserId = userId
             };
 
-            _mockGameProvider.Setup(x => x.Initialized).Returns(false).Verifiable();
-            _mockGameProvider.SetupGet(x => x.ProviderId).Returns(providerGuid).Verifiable();
-            _mockGameProvider.SetupGet(x => x.RequiredParameters)
-                .Returns(new Dictionary<string, Type>
-                {
-                    ["test"] = typeof(string)
-                })
-                .Verifiable();
+            _mockGameProvider.Initialized.Returns(false);
+            _mockGameProvider.ProviderId.Returns(providerGuid);
+            _mockGameProvider.RequiredParameters.Returns(new Dictionary<string, Type>
+            {
+                ["test"] = typeof(string)
+            });
 
-            _mockParameterCacheRepo.Setup(x => x.GetParameters(userId, providerGuid))
-                .ReturnsAsync(cachedParams)
-                .Verifiable();
+            _mockParameterCacheRepo.GetParameters(userId, providerGuid)
+                .Returns(cachedParams);
 
             // Act
             await _gameLibraryManager.InitialiseProviders(userId);
 
-            // Assert
-            _mockParameterCacheRepo.Verify();
-            _mockGameProvider.Verify();
-            _mockGameProvider.Verify(x => x.Load(It.IsAny<ParameterCache>()), Times.Once());
-            _mockGameProvider.Verify(x => x.Load(cachedParams));
+            // Assert            
+            _ = _mockGameProvider.Received().Initialized;
+            _ = _mockGameProvider.Received().ProviderId;
+            _ = _mockGameProvider.Received().RequiredParameters;
+            await _mockParameterCacheRepo.Received().GetParameters(userId, providerGuid);
+            await _mockGameProvider.Received(1).Load(Arg.Any<ParameterCache>());
+            await _mockGameProvider.Received().Load(cachedParams);
         }
 
         [Fact]
@@ -74,28 +71,25 @@ namespace GameTracker.Core.Tests
                 UserId = userId
             };
 
-            var mockGame = new Mock<Game>();
+            var mockGame = Substitute.For<Game>();
 
-            _mockGameProvider.Setup(x => x.Initialized).Returns(false);
-            _mockGameProvider.SetupGet(x => x.ProviderId).Returns(providerGuid);
-            _mockGameProvider.SetupGet(x => x.RequiredParameters)
+            _mockGameProvider.Initialized.Returns(false);
+            _mockGameProvider.ProviderId.Returns(providerGuid);
+            _mockGameProvider.RequiredParameters
                 .Returns(new Dictionary<string, Type>
                 {
                     ["test"] = typeof(string)
                 });
-            _mockGameProvider.SetupGet(x => x.Games)
-                .Returns(new[] { mockGame.Object })
-                .Verifiable();
-
-            _mockParameterCacheRepo.Setup(x => x.GetParameters(userId, providerGuid))
-                .ReturnsAsync(cachedParams);
+            _mockGameProvider.Games
+                .Returns(new[] { mockGame });
+            _mockParameterCacheRepo.GetParameters(userId, providerGuid)
+                .Returns(cachedParams);
 
             // Act
             await _gameLibraryManager.InitialiseProviders(userId);
 
             // Assert
-            _mockGameProvider.Verify();
-            mockGame.Verify(x => x.Preload(), Times.Once);
+            await mockGame.Received(1).Preload();
         }
 
         [Fact]
@@ -112,23 +106,19 @@ namespace GameTracker.Core.Tests
                 UserId = userId
             };
 
-            _mockGameProvider.SetupGet(x => x.ProviderId).Returns(providerGuid);
-            _mockGameProvider.Setup(x => x.Refresh(userId, paramValues))
-                .ReturnsAsync(parameters)
-                .Verifiable();
-            _mockParameterCacheRepo.Setup(x => x.GetParameters(userId, providerGuid))
-                .ReturnsAsync((ParameterCache?)null)
-                .Verifiable();
+            _mockGameProvider.ProviderId.Returns(providerGuid);
+            _mockGameProvider.Refresh(userId, paramValues)
+                .Returns(parameters);
+            _mockParameterCacheRepo.GetParameters(userId, providerGuid)
+                .Returns((ParameterCache?)null);
 
             // Act
             await _gameLibraryManager.RefreshProvider(userId, providerGuid, paramValues);
 
             // Assert
-            _mockGameProvider.Verify();
-            _mockParameterCacheRepo.Verify();
-            _mockParameterCacheRepo.Verify(x => x.InsertParameters(It.IsAny<ParameterCache>()), Times.Once);
-            _mockParameterCacheRepo.Verify(x => x.InsertParameters(parameters));
-            _mockParameterCacheRepo.Verify(x => x.UpdateParameters(It.IsAny<ParameterCache>()), Times.Never);
+            await _mockParameterCacheRepo.Received(1).InsertParameters(Arg.Any<ParameterCache>());
+            await _mockParameterCacheRepo.Received().InsertParameters(parameters);
+            await _mockParameterCacheRepo.Received(0).UpdateParameters(Arg.Any<ParameterCache>());
         }
 
         [Fact]
@@ -145,23 +135,19 @@ namespace GameTracker.Core.Tests
                 UserId = userId
             };
 
-            _mockGameProvider.SetupGet(x => x.ProviderId).Returns(providerGuid);
-            _mockGameProvider.Setup(x => x.Refresh(userId, paramValues))
-                .ReturnsAsync(parameters)
-                .Verifiable();
-            _mockParameterCacheRepo.Setup(x => x.GetParameters(userId, providerGuid))
-                .ReturnsAsync(new ParameterCache { Parameters = paramValues })
-                .Verifiable();
+            _mockGameProvider.ProviderId.Returns(providerGuid);
+            _mockGameProvider.Refresh(userId, paramValues)
+                .Returns(parameters);
+            _mockParameterCacheRepo.GetParameters(userId, providerGuid)
+                .Returns(new ParameterCache { Parameters = paramValues });
 
             // Act
             await _gameLibraryManager.RefreshProvider(userId, providerGuid, paramValues);
 
             // Assert
-            _mockGameProvider.Verify();
-            _mockParameterCacheRepo.Verify();
-            _mockParameterCacheRepo.Verify(x => x.UpdateParameters(It.IsAny<ParameterCache>()), Times.Once);
-            _mockParameterCacheRepo.Verify(x => x.UpdateParameters(parameters));
-            _mockParameterCacheRepo.Verify(x => x.InsertParameters(It.IsAny<ParameterCache>()), Times.Never);
+            await _mockParameterCacheRepo.Received(1).UpdateParameters(Arg.Any<ParameterCache>());
+            await _mockParameterCacheRepo.Received().UpdateParameters(parameters);
+            await _mockParameterCacheRepo.Received(0).InsertParameters(Arg.Any<ParameterCache>());
         }
     }
 }
