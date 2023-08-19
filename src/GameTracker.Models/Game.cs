@@ -17,31 +17,34 @@ namespace GameTracker.Models
 
                 return Reviews.Select(r =>
                 {
-                    return (int)Math.Round((double)(100 * r.Score) / r.Critic.UpperBound);
+                    return (int)Math.Round((double)(100 * r.Score) / r.UpperBound);
                 }).Average();
             }
         }
 
-        public string StudioName => Studio?.Name ?? string.Empty;
-        public string PublisherName => Publisher?.Name ?? string.Empty;
-                
-        public abstract Task Preload();        
-        public abstract ControlScheme[] ControlSchemes { get; }
-        public abstract string Description { get; }        
-        public abstract GameplayMode[] GameplayModes { get; }
-        public abstract Genre[] Genres { get; }
-        public abstract Image Image { get; }
+        public List<Review> Reviews { get; set; } = new List<Review>();
+        public DateTime? ReleaseDate { get; set; }
+        public GameplayMode[] GameplayModes { get; set; }
+        public Genre[] Genres { get; set; }
+        public Image Image { get; set; }
+        public string Publisher { get; set; }
+        public string Studio { get; set; }
+        public string Description { get; set; }
+
+        #region Abstract methods/props
+
+        public abstract Task Preload();
+
+        public abstract ControlScheme[] ControlSchemes { get; }                       
         public abstract DateTime? LastPlayed { get; }
         public abstract LaunchCommand LaunchCommand { get; }
         public abstract MultiplayerAvailability[] MultiplayerAvailability { get; }            
-        public abstract Platform[] Platforms { get; }
-        public abstract TimeSpan? Playtime { get; }
-        public abstract Publisher? Publisher { get; }
-        public abstract DateTime? ReleaseDate { get; }
-        public abstract Review[] Reviews { get; }
-        public abstract string ProviderName { get; }
-        public abstract Studio? Studio { get; }
+        public abstract Platforms Platforms { get; }
+        public abstract TimeSpan? Playtime { get; }        
+        public abstract string ProviderName { get; }        
         public abstract string[] Tags { get; }
         public abstract string Title { get; }
+
+        #endregion
     }
 }

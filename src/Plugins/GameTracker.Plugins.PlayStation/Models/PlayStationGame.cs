@@ -1,6 +1,7 @@
 ﻿using GameTracker.Models;
 using GameTracker.Models.Enums;
 using GameTracker.Plugins.PlayStation.Helpers;
+using System;
 using System.Globalization;
 using Game = GameTracker.Models.Game;
 using Image = GameTracker.Models.Image;
@@ -10,23 +11,28 @@ namespace GameTracker.Plugins.PlayStation.Models
 {
     public class PlayStationGame : Game
     {
-        private readonly string _imageUrl;
         private readonly DateTime? _lastPlayed;
-        private readonly Genre[] _genres;
-        private readonly Platform[] _platforms;
+        private readonly Platforms _platforms;
         private readonly string _launchUrl;
         private readonly string _title;
-
         internal PlayStationGame(PSNGame psnGame, string[] genres)
-        {            
+        {
+            Description = string.Empty;
+            GameplayModes = Array.Empty<GameplayMode>();
+            Genres = PlayStationGameHelpers.GenresFromGenreStrings(genres).Distinct().ToArray();
+            Image = new Image
+            {
+                Url = psnGame.Image.URL,
+                Width = 338,
+                Height = 338
+            };
             PlatformId = Convert.ToInt32(psnGame.ConceptId);
-            _genres = PlayStationGameHelpers.GenresFromGenreStrings(genres).Distinct().ToArray();
-            _imageUrl = psnGame.Image.URL;
+
             _lastPlayed = psnGame.LastPlayedDateTime;
             _launchUrl = string.IsNullOrEmpty(psnGame.ProductId)
                 ? string.Format(Constants.LaunchCommands.Media, CultureInfo.CurrentCulture.Name.ToLower(), psnGame.Platform.ToLower())
                 : string.Format(Constants.LaunchCommands.Game, CultureInfo.CurrentCulture.Name.ToLower(), psnGame.ProductId);
-            _platforms = GetPlatforms(psnGame.Platform).ToArray();
+            _platforms = GetPlatforms(psnGame.Platform);
             _title = psnGame.Name;
         }
 
@@ -36,19 +42,6 @@ namespace GameTracker.Plugins.PlayStation.Models
         }
 
         public override ControlScheme[] ControlSchemes => new[] { ControlScheme.Controller };
-
-        public override string Description => string.Empty;
-
-        public override GameplayMode[] GameplayModes => Array.Empty<GameplayMode>();
-
-        public override Genre[] Genres => _genres;
-
-        public override Image Image => new Image
-        {
-            Url = _imageUrl,
-            Width = 338,
-            Height = 338
-        };
 
         public override DateTime? LastPlayed => _lastPlayed;
 
@@ -62,19 +55,11 @@ namespace GameTracker.Plugins.PlayStation.Models
 
         public override MultiplayerAvailability[] MultiplayerAvailability => Array.Empty<MultiplayerAvailability>();        
 
-        public override Platform[] Platforms => _platforms;
+        public override Platforms Platforms => _platforms;
 
         public override TimeSpan? Playtime => null;
 
-        public override Publisher? Publisher => null;
-
-        public override DateTime? ReleaseDate => null;
-
-        public override Review[] Reviews => Array.Empty<Review>();
-
         public override string ProviderName => "PlayStation";
-
-        public override Studio? Studio => null;
 
         public override string[] Tags => Array.Empty<string>();
 
@@ -82,21 +67,18 @@ namespace GameTracker.Plugins.PlayStation.Models
 
         #region Private methods
 
-        private static IEnumerable<Platform> GetPlatforms(string platform)
+        private static Platforms GetPlatforms(string platform)
         {
             switch (platform)
             {
                 case Constants.Consoles.PS3:
-                    yield return Constants.ConsolePlatforms.PlayStation3;
-                    break;
+                    return Platforms.PlayStation3;
                 case Constants.Consoles.PS4:
-                    yield return Constants.ConsolePlatforms.PlayStation4;
-                    break;
+                    return Platforms.PlayStation4;
                 case Constants.Consoles.PS5:
-                    yield return Constants.ConsolePlatforms.PlayStation5;
-                    break;
+                    return Platforms.PlayStation5;
                 default:
-                    yield break;
+                    return Platforms.None;
             }
         }
 

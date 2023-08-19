@@ -1,3 +1,4 @@
+using GameTracker.Models.Enums;
 using GameTracker.Plugins.Common.Interfaces;
 using GameTracker.Plugins.GOG.Helpers;
 using GameTracker.Plugins.GOG.Interfaces;
@@ -83,7 +84,7 @@ namespace GameTracker.Plugins.GOG.Tests
             Assert.Equal(gameDetails.Id, _provider.Games.First().PlatformId);
             Assert.Equal(gameDetails.Images.Logo2x, _provider.Games.First().Image.Url);
             Assert.Equal(gameDetails.ReleaseDate, _provider.Games.First().ReleaseDate.ToString());
-            Assert.Equal(3, _provider.Games.First().Platforms.Count());
+            Assert.Equal(Platforms.Windows | Platforms.Linux | Platforms.MacOS, _provider.Games.First().Platforms);
             await _mockAuthHelper.Received(1).ExchangeGogAuthCodeForToken(Arg.Any<string>());
             await _mockHttpClient.Received(2).SendAsync(Arg.Any<HttpRequestMessage>());
         }

@@ -1,5 +1,4 @@
-﻿using GameTracker.Models.Constants;
-using GameTracker.Models;
+﻿using GameTracker.Models;
 using System.Text.RegularExpressions;
 using GameTracker.Models.Enums;
 
@@ -47,31 +46,34 @@ namespace GameTracker.Plugins.Xbox.Helpers
             };
         }
 
-        internal static IEnumerable<Platform> GetPlatforms(string[] devices)
+        internal static Platforms GetPlatforms(string[] devices)
         {
+            var platforms = Platforms.None;
+
             foreach (var device in devices)
             {
                 switch (device)
                 {
                     case Constants.Devices.PC:
                     case Constants.Devices.Win32:
-                        yield return WellKnownPlatforms.Windows;
+                        platforms |= Platforms.Windows;
                         break;
                     case Constants.Devices.Xbox360:
-                        yield return Constants.ConsolePlatforms.Xbox360;
+                        platforms |= Platforms.Xbox360;
                         break;
                     case Constants.Devices.XboxOne:
-                        yield return Constants.ConsolePlatforms.XboxOne;
+                        platforms |= Platforms.XboxOne;
                         break;
                     case Constants.Devices.XboxSeries:
-                        yield return Constants.ConsolePlatforms.XboxSeries;
+                        platforms |= Platforms.XboxSeries;
                         break;
-                    default: yield break;
                 }
             }
+
+            return platforms;
         }
 
-        internal static Publisher? GetPublisher(string pfn)
+        internal static string GetPublisher(string pfn)
         {
             if (string.IsNullOrEmpty(pfn) || Regex.IsMatch(pfn, "^\\d"))
             {
@@ -86,10 +88,7 @@ namespace GameTracker.Plugins.Xbox.Helpers
                 publisherName = Regex.Replace(pfnArr[0], "([a-z](?=[A-Z]|[0-9])|[A-Z](?=[A-Z][a-z]|[0-9])|[0-9](?=[^0-9]))", "$1 ");
             }
 
-            return new Publisher
-            {
-                Name = publisherName
-            };
+            return publisherName;
         }
     }
 }

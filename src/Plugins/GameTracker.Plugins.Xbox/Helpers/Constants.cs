@@ -8,14 +8,14 @@ namespace GameTracker.Plugins.Xbox.Helpers
     {
         internal static class ConsolePlatforms
         {
-            internal static Platform Xbox360 => new Platform()
+            internal static DataPlatform Xbox360 => new DataPlatform()
             {
                 Name = "Xbox 360",
                 Icon = "Xbox",
                 Description = "The Xbox 360 is a seventh-generation game console, developed and released by Microsoft in 2005."
             };
 
-            internal static Platform XboxOne => new Platform()
+            internal static DataPlatform XboxOne => new DataPlatform()
             {
                 Name = "Xbox One",
                 Icon = "Xbox",
@@ -24,7 +24,7 @@ namespace GameTracker.Plugins.Xbox.Helpers
                               "model and the One X was introduced as a higher-powered version, offering native 4K output and improved visual fidelity, to compete with the PlayStation 4 Pro."
             };
 
-            internal static Platform XboxSeries => new Platform()
+            internal static DataPlatform XboxSeries => new DataPlatform()
             {
                 Name = "Xbox Series",
                 Icon = "Xbox",
@@ -56,7 +56,7 @@ namespace GameTracker.Plugins.Xbox.Helpers
             Titles = Array.Empty<Title>()
         };
 
-        public static Platform XboxPlatform => new Platform
+        public static DataPlatform XboxPlatform => new DataPlatform
         {
             Name = "Xbox",
             Icon = "Xbox",

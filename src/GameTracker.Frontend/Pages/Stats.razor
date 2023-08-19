@@ -305,19 +305,21 @@ else
 
     private void SetupPlatformChart()
     {
-        var grouped = GameLibraryManager.Games.SelectMany(game => game.Platforms.Select(platform => new { game, platformName = platform.Name }))
-                                              .GroupBy(x => x.platformName)
-                                              .Select(group => new { Platform = group.Key, Games = group.Select(g => g.game).ToList() });
+        var platforms = Enum.GetValues<Platforms>();
+
+        var gamesByPlatform = platforms.Where(p => p != Platforms.None && GameLibraryManager.Games.Any(g => g.Platforms.HasFlag(p)))
+                                       .ToDictionary(k => k, v => GameLibraryManager.Games.Count(g => g.Platforms.HasFlag(v)))
+                                       .Select(kvp => new { Platform = kvp.Key, GameCount = kvp.Value });
 
         var chartDataSet = new DoughnutChartDataset()
         {
-            Data = grouped.Select(g => Convert.ToDouble(g.Games.Count())).ToList(),
-            BackgroundColor = grouped.Select(g => ColourHelper.GetRandomColour().ToRgbString()).ToList()
+            Data = gamesByPlatform.Select(g => Convert.ToDouble(g.GameCount)).ToList(),
+            BackgroundColor = gamesByPlatform.Select(g => ColourHelper.GetRandomColour().ToRgbString()).ToList()
         };
 
         _platformData = new ChartData()
         {
-            Labels = grouped.Select(g => g.Platform).ToList(),
+            Labels = gamesByPlatform.Select(g => g.Platform.ToString()).ToList(),
             Datasets = new List<IChartDataset>() { chartDataSet }
         };
     }

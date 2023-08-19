@@ -14,28 +14,28 @@
 @inject ToastService ToastService;
 
 @inject IGameLibraryManager GameLibraryManager;
-@inject IGameProviderFactory ProviderFactory;
+@inject IDataProviderFactory ProviderFactory;
 @inject IParameterCacheRepository ParameterCacheRepository;
 
 @if (!isAuthenticated)
 {
     <p><em>Unauthorized.</em></p>
 }
-else if (_providers == null || !_providers.Any())
+else if (_dataProviders == null || !_dataProviders.Any())
 {
     <p><em>Loading Providers...</em></p>
 }
 else
 {
-    <Grid TItem="IGameProvider"
+    <Grid TItem="IDataProvider"
           Class="table table-hover table-bordered table-striped"
-          Data="_providers"
+          Data="_dataProviders"
           AllowFiltering="false"
           AllowPaging="false"
           PageSizeSelectorVisible="false"
           PageSizeSelectorItems="@(new int[] { })"
           PaginationItemsTextFormat="">
-        <GridColumn TItem="IGameProvider" PropertyName="Platform">
+        <GridColumn TItem="IDataProvider" PropertyName="Platform">
             <HeaderContent>
                 Platform
             </HeaderContent>
@@ -52,22 +52,22 @@ else
                 </div>
             </ChildContent>
         </GridColumn>
-        <GridColumn TItem="IGameProvider" PropertyName="RequiredParameters">
+        <GridColumn TItem="IDataProvider" PropertyName="RequiredParameters">
             <HeaderContent>
                 Required Parameters
             </HeaderContent>
             <ChildContent>
-                <GameProviderParams GameProvider="@context"
+                <GameProviderParams DataProvider="@context"
                                     BoolParameters=@_boolParameters
                                     DateParameters=@_dateParameters
                                     StringParameters=@_stringParameters
                                     IntParameters=@_intParameters />
             </ChildContent>
         </GridColumn>
-        <GridColumn TItem="IGameProvider" PropertyName="Refresh">
+        <GridColumn TItem="IDataProvider" PropertyName="Refresh">
             <div class="btn-container">
                 <Modal @ref="_providerModal" IsVerticallyCentered=true Size="ModalSize.Large" />
-                <Button Color="ButtonColor.Primary" Loading=@IsLoading(context) onclick="@(async () => await LoadGames(context))">
+                <Button Color="ButtonColor.Primary" Loading=@IsLoading(context) onclick="@(async () => await LoadData(context))">
                     <LoadingTemplate>
                         <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                         Loading...
@@ -85,7 +85,7 @@ else
 }
 
 @code {
-    private IGameProvider[]? _providers;
+    private IDataProvider[]? _dataProviders;
     private Dictionary<Guid, bool> _providerLoadingState;
     private Dictionary<string, bool> _boolParameters;
     private Dictionary<string, DateTime> _dateParameters;
@@ -110,14 +110,14 @@ else
         }
 
         userName = authState?.User?.Identity?.Name ?? string.Empty;
-        _providers = ProviderFactory.GetProviders().ToArray();
+        _dataProviders = ProviderFactory.GetAllProviders().ToArray();
         _providerLoadingState = new Dictionary<Guid, bool>();
         _boolParameters = new Dictionary<string, bool>();
         _dateParameters = new Dictionary<string, DateTime>();
         _intParameters = new Dictionary<string, int>();
         _stringParameters = new Dictionary<string, string>();
 
-        foreach (var provider in _providers)
+        foreach (var provider in _dataProviders)
         {
             var parameterCache = await ParameterCacheRepository.GetParameters(userName, provider.ProviderId);
             var existingParams = parameterCache?.Parameters;
@@ -148,7 +148,7 @@ else
         }
     }
 
-    private async Task LoadGames(IGameProvider provider)
+    private async Task LoadData(IDataProvider provider)
     {
         try
         {
@@ -211,14 +211,14 @@ else
         }
     }
 
-    private async Task OnShowProviderModalClick(IGameProvider provider)
+    private async Task OnShowProviderModalClick(IDataProvider provider)
     {
         var modalParams = new Dictionary<string, object>();
         modalParams.Add("Provider", provider.Platform);
         await _providerModal.ShowAsync<ProviderModal>(title: provider.Platform.Name, parameters: modalParams);
     }
 
-    private bool IsLoading(IGameProvider provider)
+    private bool IsLoading(IDataProvider provider)
     {
         return _providerLoadingState.ContainsKey(provider.ProviderId) && _providerLoadingState[provider.ProviderId];
     }

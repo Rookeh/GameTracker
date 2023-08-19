@@ -21,7 +21,7 @@ namespace GameTracker.Plugins.Steam
         private IRateLimitedSteamApiClient _rateLimitedSteamApiClient;
         private ISteamGameDetailsRepository _steamGameDetailsRepository;
 
-        private readonly Platform _platform;                
+        private readonly DataPlatform _platform;                
         private readonly List<Game> _games;        
         private bool _initialized;
 
@@ -32,7 +32,7 @@ namespace GameTracker.Plugins.Steam
             _games = new List<Game>();
             _httpClientFactory = httpClientFactory;
             _rateLimitedSteamApiClient = rateLimitedSteamApiClient;
-            _platform = new Platform
+            _platform = new DataPlatform
             {
                 Name = "Steam",
                 Description = "Steam is a digital storefront and game delivery service for the PC developed and operated by Valve. It was launched in 2003 as an update mechanism " +
@@ -72,7 +72,7 @@ namespace GameTracker.Plugins.Steam
 
         public bool Initialized => _initialized;
 
-        public Platform Platform => _platform;
+        public DataPlatform Platform => _platform;
 
         public Guid ProviderId => new Guid("C53E9BCB-B519-4888-A16C-849BE2B7B77B");
 

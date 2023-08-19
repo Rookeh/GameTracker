@@ -3,10 +3,10 @@ using GameTracker.Models.Enums;
 using GameTracker.Plugins.Steam.Helpers;
 using GameTracker.Plugins.Steam.Models.StoreApi;
 
-using GenreEnum = GameTracker.Models.Enums.Genre;
 using GameTracker.Plugins.Steam.Models.WebApi;
 using GameTracker.Plugins.Steam.Interfaces.Data;
 using GameTracker.Plugins.Steam.Interfaces.ApiClients;
+using PlatformsEnum = GameTracker.Models.Enums.Platforms;
 
 namespace GameTracker.Plugins.Steam.Models
 {
@@ -36,17 +36,24 @@ namespace GameTracker.Plugins.Steam.Models
         public override async Task Preload()
         {
             _extendedGameDetails = await LazyLoadGameDetails();
+            Reviews = SteamGameHelpers.ParseMetacriticReview(this, _extendedGameDetails?.Metacritic) ?? new List<Review>();
+            Description = _extendedGameDetails?.ShortDescription ?? string.Empty;
+            GameplayModes = SteamGameHelpers.ParseMultiplayerModes(_extendedGameDetails?.Categories);
+            Genres = SteamGameHelpers.ParseGenres(_extendedGameDetails?.Genres).Distinct().ToArray();
+            Image = SteamGameHelpers.BuildImage(PlatformId, _gameDetails, _extendedGameDetails);
+            Publisher = _extendedGameDetails.Publishers.FirstOrDefault();
+            Studio = _extendedGameDetails.Developers.FirstOrDefault();
+
+            if (_extendedGameDetails?.ReleaseDate?.Date != null)
+            {
+                if (DateTime.TryParse(_extendedGameDetails.ReleaseDate.Date, out var releaseDate))
+                {
+                    ReleaseDate = releaseDate;
+                }
+            }
         }
 
         public override ControlScheme[] ControlSchemes => SteamGameHelpers.ParseControlScheme(_extendedGameDetails?.Categories);
-
-        public override string Description => _extendedGameDetails?.ShortDescription ?? string.Empty;
-
-        public override GameplayMode[] GameplayModes => SteamGameHelpers.ParseMultiplayerModes(_extendedGameDetails?.Categories);
-
-        public override GenreEnum[] Genres => SteamGameHelpers.ParseGenres(_extendedGameDetails?.Genres).Distinct().ToArray();
-
-        public override Image Image => SteamGameHelpers.BuildImage(PlatformId, _gameDetails, _extendedGameDetails);
 
         public override DateTime? LastPlayed => _lastPlayed;
 
@@ -60,33 +67,11 @@ namespace GameTracker.Plugins.Steam.Models
 
         public override MultiplayerAvailability[] MultiplayerAvailability => SteamGameHelpers.ParseMultiplayerAvailability(_extendedGameDetails?.Categories);
 
-        public override Platform[] Platforms => SteamGameHelpers.ParsePlatforms(_extendedGameDetails?.Platforms).ToArray();
+        public override PlatformsEnum Platforms => SteamGameHelpers.ParsePlatforms(_extendedGameDetails?.Platforms);
 
         public override TimeSpan? Playtime => _playTime;
 
-        public override Publisher? Publisher => SteamGameHelpers.ParsePublisher(_extendedGameDetails);
-
-        public override DateTime? ReleaseDate
-        {
-            get
-            {
-                if (_extendedGameDetails?.ReleaseDate?.Date != null)
-                {
-                    if (DateTime.TryParse(_extendedGameDetails.ReleaseDate.Date, out var releaseDate))
-                    {
-                        return releaseDate;
-                    }                    
-                }
-
-                return null;
-            }
-        }
-
-        public override Review[] Reviews => SteamGameHelpers.ParseMetacriticReview(this, _extendedGameDetails?.Metacritic) ?? Array.Empty<Review>();
-
         public override string ProviderName => "Steam";
-
-        public override Studio? Studio => _extendedGameDetails?.Developers?.Any() ?? false ? new Studio { Name = _extendedGameDetails.Developers.First() } : null;
 
         public override string[] Tags => _extendedGameDetails?.Categories?.Select(c => c.Description).ToArray() ?? Array.Empty<string>();    
         

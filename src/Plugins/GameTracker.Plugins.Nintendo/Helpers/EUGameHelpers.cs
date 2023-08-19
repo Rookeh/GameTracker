@@ -31,15 +31,12 @@ namespace GameTracker.Plugins.Nintendo.Helpers
             };
         }
 
-        internal static Studio? StudioFromCopyright(string copyrightHolder)
+        internal static string StudioFromCopyright(string copyrightHolder)
         {
             var match = Regex.Match(copyrightHolder, Constants.EURegion.StudioRegex);
             if (match.Success)
             {
-                return new Studio
-                {
-                    Name = match.Groups[1].Value,
-                };
+                return match.Groups[1].Value;
             }
 
             return null;

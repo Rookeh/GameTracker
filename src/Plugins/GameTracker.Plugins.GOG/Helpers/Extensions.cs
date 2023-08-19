@@ -1,31 +1,30 @@
-﻿using GameTracker.Models;
-using GameTracker.Models.Constants;
+﻿using GameTracker.Models.Enums;
 using GameTracker.Plugins.GOG.Models.GOGApi;
 
 namespace GameTracker.Plugins.GOG.Helpers
 {
     internal static class Extensions
     {
-        public static Platform[] FromContentSystemCompatibility(this ContentSystemCompatibility contentSystemCompatibility)
+        public static Platforms FromContentSystemCompatibility(this ContentSystemCompatibility contentSystemCompatibility)
         {
-            var platforms = new List<Platform>();
+            var platforms = Platforms.None;
 
-            if (contentSystemCompatibility.Linux)
+            if (contentSystemCompatibility.Windows)
             {
-                platforms.Add(WellKnownPlatforms.Linux);
+                platforms |= Platforms.Windows;
             }
 
             if (contentSystemCompatibility.OSX)
             {
-                platforms.Add(WellKnownPlatforms.MacOS);
+                platforms |= Platforms.MacOS;
             }
 
-            if (contentSystemCompatibility.Windows)
+            if (contentSystemCompatibility.Linux)
             {
-                platforms.Add(WellKnownPlatforms.Windows);
+                platforms |= Platforms.Linux;
             }
 
-            return platforms.ToArray();
+            return platforms;
         }
     }
 }

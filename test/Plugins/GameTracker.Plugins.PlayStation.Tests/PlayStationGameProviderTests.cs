@@ -1,4 +1,5 @@
-﻿using GameTracker.Plugins.Common.Interfaces;
+﻿using GameTracker.Models.Enums;
+using GameTracker.Plugins.Common.Interfaces;
 using GameTracker.Plugins.PlayStation.Helpers;
 using GameTracker.Plugins.PlayStation.Interfaces;
 using GameTracker.Plugins.PlayStation.Models.GraphQL.GameLibrary;
@@ -44,7 +45,6 @@ namespace GameTracker.Plugins.PlayStation.Tests
             var productId = 1234;
             var conceptId = 5678;
             var platform = "PS5";
-            var fullPlatform = "PlayStation 5";
             var title = "Test Title";
             var nonGameTitle = "Non-Game Title";
 
@@ -128,7 +128,7 @@ namespace GameTracker.Plugins.PlayStation.Tests
             Assert.Equal(imageUrl, _provider.Games.First().Image.Url);
             Assert.Equal(lastPlayed, _provider.Games.First().LastPlayed);
             Assert.Equal(conceptId, _provider.Games.First().PlatformId);
-            Assert.Equal(fullPlatform, _provider.Games.First().Platforms.FirstOrDefault()?.Name);
+            Assert.Equal(Platforms.PlayStation5, _provider.Games.First().Platforms);
             Assert.Equal(title, _provider.Games.First().Title);
             await _mockAuthenticationHelper.Received(1).ExchangeNpssoForCode(Arg.Any<string>());
             await _mockAuthenticationHelper.Received(1).ExchangeCodeForToken(Arg.Any<string>());

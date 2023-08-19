@@ -2,10 +2,37 @@
 using GameTracker.Frontend.Models;
 using GameTracker.Models.Enums;
 
+using PlatformEnum = GameTracker.Models.Enums.Platforms;
+
 namespace GameTracker.Frontend.Helpers
 {
     public static class IconHelper
     {
+        public static IconName GetIconFromPlatform(PlatformEnum platform)
+        {           
+            switch (platform)
+            {
+                case PlatformEnum.Windows:
+                    return IconName.Windows;
+                case PlatformEnum.MacOS:
+                    return IconName.Apple;
+                case PlatformEnum.Linux:
+                    return IconName.Ubuntu;
+                case PlatformEnum.NintendoSwitch:
+                    return IconName.NintendoSwitch;
+                case PlatformEnum.PlayStation3:
+                case PlatformEnum.PlayStation4:
+                case PlatformEnum.PlayStation5:
+                    return IconName.Playstation;
+                case PlatformEnum.Xbox360:
+                case PlatformEnum.XboxOne:
+                case PlatformEnum.XboxSeries:
+                    return IconName.Xbox;
+                default: 
+                    return IconName.QuestionCircle;
+            }
+        }
+
         public static IconName GetIconEnum(string iconName, IconName defaultIcon)
         {
             if (string.IsNullOrEmpty(iconName))

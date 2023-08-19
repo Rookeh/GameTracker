@@ -17,7 +17,7 @@ namespace GameTracker.Plugins.GOG
         private readonly IHttpClientWrapperFactory _httpClientFactory;
         
         private readonly List<GOGGame> _games;
-        private readonly Platform _platform;        
+        private readonly DataPlatform _platform;        
         private bool _initialized;
 
         public GOGGameProvider(IAuthenticationHelper authenticationHelper, IHttpClientWrapperFactory httpClientFactory)
@@ -25,7 +25,7 @@ namespace GameTracker.Plugins.GOG
             _games = new List<GOGGame>();
             _authenticationHelper = authenticationHelper;
             _httpClientFactory = httpClientFactory;
-            _platform = new Platform
+            _platform = new DataPlatform
             {
                 Name = "GOG",
                 Description = "GOG.com, previously known as Good Old Games, is a digital video game storefront and distribution platform for the PC with a strong emphasis on DRM-free content. " +
@@ -60,7 +60,7 @@ namespace GameTracker.Plugins.GOG
 
         public Guid ProviderId => new Guid("8301D3D9-C248-4252-82C4-331CCC7A25E9");
 
-        public Platform Platform => _platform;
+        public DataPlatform Platform => _platform;
 
         public IEnumerable<Game> Games => _games;
 

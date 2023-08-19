@@ -22,15 +22,5 @@ namespace GameTracker.Plugins.Nintendo.Helpers
 
             return DateTime.ParseExact(salesDateString, "yyyy.M.d", CultureInfo.InvariantCulture);
         }
-
-        internal static Studio? StudioFromMakerName(string makerName)
-        {
-            if (string.IsNullOrEmpty(makerName)) return null;
-
-            return new Studio
-            {
-                Name = makerName,
-            };
-        }
     }
 }

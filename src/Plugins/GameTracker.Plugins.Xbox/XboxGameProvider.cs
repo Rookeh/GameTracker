@@ -23,7 +23,7 @@ namespace GameTracker.Plugins.Xbox
 
         public Guid ProviderId => new Guid("0E2E958C-8705-4C9E-87AC-92874CA05B30");
 
-        public Platform Platform => Constants.XboxPlatform;
+        public DataPlatform Platform => Constants.XboxPlatform;
 
         public IEnumerable<Game> Games => _games;
 

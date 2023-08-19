@@ -52,11 +52,11 @@ else
                         </TitleTemplate>
                         <Content>
                             <AutoComplete @bind-Value="_filterProperties.Keyword"
-                                          TItem="FilterableKeyword"
+                                          TItem="FilterableItem"
                                           DataProvider="KeywordFilterProvider"
                                           PropertyName="Name"
                                           Placeholder="Search for a keyword..."
-                                          OnChanged="(FilterableKeyword keyword) => KeywordFilter(keyword)" />
+                                          OnChanged="(FilterableItem keyword) => KeywordFilter(keyword)" />
                         </Content>
                     </AccordionItem>
                     <AccordionItem>
@@ -94,11 +94,11 @@ else
                         </TitleTemplate>
                         <Content>
                             <AutoComplete @bind-Value="_filterProperties.Genre"
-                                          TItem="FilterableGenre"
+                                          TItem="FilterableItem"
                                           DataProvider="GenreFilterProvider"
                                           PropertyName="Name"
                                           Placeholder="Search for a genre..."
-                                          OnChanged="(FilterableGenre genre) => GenreFilter(genre)" />
+                                          OnChanged="(FilterableItem genre) => GenreFilter(genre)" />
                         </Content>
                     </AccordionItem>
                     <AccordionItem>
@@ -107,11 +107,11 @@ else
                         </TitleTemplate>
                         <Content>
                             <AutoComplete @bind-Value="_filterProperties.Platform"
-                                          TItem="Platform"
+                                          TItem="FilterableItem"
                                           DataProvider="PlatformFilterProvider"
                                           PropertyName="Name"
                                           Placeholder="Search for a platform..."
-                                          OnChanged="(Platform platform) => PlatformFilter(platform)" />
+                                          OnChanged="(FilterableItem platforms) => PlatformFilter(platforms)" />
                         </Content>
                     </AccordionItem>
                     <AccordionItem>
@@ -120,11 +120,11 @@ else
                         </TitleTemplate>
                         <Content>
                             <AutoComplete @bind-Value="_filterProperties.Provider"
-                                          TItem="FilterableProvider"
+                                          TItem="FilterableItem"
                                           DataProvider="ProviderFilterProvider"
                                           PropertyName="Name"
                                           Placeholder="Search for a provider..."
-                                          OnChanged="(FilterableProvider provider) => ProviderFilter(provider)" />
+                                          OnChanged="(FilterableItem provider) => ProviderFilter(provider)" />
                         </Content>
                     </AccordionItem>
                     <AccordionItem>
@@ -133,11 +133,11 @@ else
                         </TitleTemplate>
                         <Content>
                             <AutoComplete @bind-Value="_filterProperties.Publisher"
-                                          TItem="Publisher"
+                                          TItem="FilterableItem"
                                           DataProvider="PublisherFilterProvider"
                                           PropertyName="Name"
                                           Placeholder="Search for a publisher..."
-                                          OnChanged="(Publisher publisher) => PublisherFilter(publisher)" />
+                                          OnChanged="(FilterableItem publisher) => PublisherFilter(publisher)" />
                         </Content>
                     </AccordionItem>
                     <AccordionItem>
@@ -146,11 +146,11 @@ else
                         </TitleTemplate>
                         <Content>
                             <AutoComplete @bind-Value="_filterProperties.Studio"
-                                          TItem="Studio"
+                                          TItem="FilterableItem"
                                           DataProvider="StudioFilterProvider"
                                           PropertyName="Name"
                                           Placeholder="Search for a development studio..."
-                                          OnChanged="(Studio studio) => StudioFilter(studio)" />
+                                          OnChanged="(FilterableItem studio) => StudioFilter(studio)" />
                         </Content>
                     </AccordionItem>
                 </Accordion>
@@ -293,62 +293,63 @@ else
         return await Task.FromResult(request.ApplyTo(GameLibraryManager.GamesGroupedByTitle.SelectMany(g => g).DistinctBy(g => g.Title)));
     }
 
-    private async Task<AutoCompleteDataProviderResult<FilterableKeyword>> KeywordFilterProvider(AutoCompleteDataProviderRequest<FilterableKeyword> request)
+    private async Task<AutoCompleteDataProviderResult<FilterableItem>> KeywordFilterProvider(AutoCompleteDataProviderRequest<FilterableItem> request)
     {
         var keywords = GameLibraryManager.GamesGroupedByTitle.SelectMany(g => g.SelectMany(g2 => !string.IsNullOrEmpty(g2.Description) ? g2.Description.ToSanitizedKeywordArray() : Array.Empty<string>()))
             .Distinct()
             .OrderBy(k => k)
-            .Select(k => new FilterableKeyword { Name = k })
+            .Select(k => new FilterableItem { Name = k })
             .ToList();
 
         return await Task.FromResult(request.ApplyTo(keywords));
     }
 
-    private async Task<AutoCompleteDataProviderResult<FilterableGenre>> GenreFilterProvider(AutoCompleteDataProviderRequest<FilterableGenre> request)
+    private async Task<AutoCompleteDataProviderResult<FilterableItem>> GenreFilterProvider(AutoCompleteDataProviderRequest<FilterableItem> request)
     {
         var genres = GameLibraryManager.GamesGroupedByTitle.SelectMany(g => g.SelectMany(g2 => g2.Genres))
             .Distinct()
             .OrderBy(g => g.ToString())
-            .Select(g => new FilterableGenre { Name = g.ToString() })
+            .Select(g => new FilterableItem { Name = g.ToString() })
             .ToList();
 
         return await Task.FromResult(request.ApplyTo(genres));
     }
 
-    private async Task<AutoCompleteDataProviderResult<Platform>> PlatformFilterProvider(AutoCompleteDataProviderRequest<Platform> request)
+    private async Task<AutoCompleteDataProviderResult<FilterableItem>> PlatformFilterProvider(AutoCompleteDataProviderRequest<FilterableItem> request)
     {
-        var platforms = GameLibraryManager.GamesGroupedByTitle.SelectMany(g => g.SelectMany(g2 => g2.Platforms))
-            .DistinctBy(p => p.Name)
-            .OrderBy(p => p.Name)
-            .ToList();
+        var platforms = Enum.GetValues<Platforms>()
+                            .Where(p => p != Platforms.None && GameLibraryManager.Games.Any(g => g.Platforms.HasFlag(p)))
+                            .Select(p => new FilterableItem { Name = p.ToString() })
+                            .OrderBy(p => p.Name)
+                            .ToList();
 
         return await Task.FromResult(request.ApplyTo(platforms));
     }
 
-    private async Task<AutoCompleteDataProviderResult<Publisher>> PublisherFilterProvider(AutoCompleteDataProviderRequest<Publisher> request)
+    private async Task<AutoCompleteDataProviderResult<FilterableItem>> PublisherFilterProvider(AutoCompleteDataProviderRequest<FilterableItem> request)
     {
-        var publishers = GameLibraryManager.GamesGroupedByTitle.Where(g => g.Any(g2 => g2.Publisher != null))
-            .SelectMany(g => g.Where(g2 => g2.Publisher != null).Select(g2 => g2.Publisher))
-            .DistinctBy(p => p.Name)
-            .OrderBy(p => p.Name);
+        var publishers = GameLibraryManager.GamesGroupedByTitle.Where(g => g.Any(g2 => !string.IsNullOrEmpty(g2.Publisher)))
+            .SelectMany(g => g.Where(g2 => g2.Studio != null).Select(g2 => new FilterableItem { Name = g2.Publisher }))
+            .DistinctBy(s => s.Name)
+            .OrderBy(s => s.Name);
 
         return await Task.FromResult(request.ApplyTo(publishers));
     }
 
-    private async Task<AutoCompleteDataProviderResult<FilterableProvider>> ProviderFilterProvider(AutoCompleteDataProviderRequest<FilterableProvider> request)
+    private async Task<AutoCompleteDataProviderResult<FilterableItem>> ProviderFilterProvider(AutoCompleteDataProviderRequest<FilterableItem> request)
     {
         var providers = GameLibraryManager.GamesGroupedByTitle
-            .SelectMany(g => g.Select(g2 => new FilterableProvider { Name = g2.ProviderName }))
+            .SelectMany(g => g.Select(g2 => new FilterableItem { Name = g2.ProviderName }))
             .DistinctBy(s => s.Name)
             .OrderBy(s => s.Name);
 
         return await Task.FromResult(request.ApplyTo(providers));
     }
 
-    private async Task<AutoCompleteDataProviderResult<Studio>> StudioFilterProvider(AutoCompleteDataProviderRequest<Studio> request)
+    private async Task<AutoCompleteDataProviderResult<FilterableItem>> StudioFilterProvider(AutoCompleteDataProviderRequest<FilterableItem> request)
     {
-        var studios = GameLibraryManager.GamesGroupedByTitle.Where(g => g.Any(g2 => g2.Studio != null))
-            .SelectMany(g => g.Where(g2 => g2.Studio != null).Select(g2 => g2.Studio))
+        var studios = GameLibraryManager.GamesGroupedByTitle.Where(g => g.Any(g2 => !string.IsNullOrEmpty(g2.Studio)))
+            .SelectMany(g => g.Where(g2 => g2.Studio != null).Select(g2 => new FilterableItem { Name = g2.Studio }))
             .DistinctBy(s => s.Name)
             .OrderBy(s => s.Name);
 
@@ -474,31 +475,31 @@ else
         }
     }
 
-    private async Task GenreFilter(FilterableGenre genre)
+    private async Task GenreFilter(FilterableItem genre)
     {
         _filterPredicates[nameof(GenreFilter)] = LinqHelper.GenreFilter(genre?.Name);
         await _gameGrid.RefreshDataAsync();
     }
 
-    private async Task KeywordFilter(FilterableKeyword keyword)
+    private async Task KeywordFilter(FilterableItem keyword)
     {
         _filterPredicates[nameof(KeywordFilter)] = LinqHelper.KeywordFilter(keyword?.Name);
         await _gameGrid.RefreshDataAsync();
     }
 
-    private async Task PlatformFilter(Platform platform)
+    private async Task PlatformFilter(FilterableItem platforms)
     {
-        _filterPredicates[nameof(PlatformFilter)] = LinqHelper.PlatformFilter(platform?.Name);
+        _filterPredicates[nameof(PlatformFilter)] = LinqHelper.PlatformFilter(Enum.Parse<Platforms>(platforms?.Name ?? Platforms.None.ToString()));
         await _gameGrid.RefreshDataAsync();
     }
 
-    private async Task ProviderFilter(FilterableProvider provider)
+    private async Task ProviderFilter(FilterableItem provider)
     {
         _filterPredicates[nameof(ProviderFilter)] = LinqHelper.ProviderFilter(provider?.Name);
         await _gameGrid.RefreshDataAsync();
     }
 
-    private async Task PublisherFilter(Publisher publisher)
+    private async Task PublisherFilter(FilterableItem publisher)
     {
         _filterPredicates[nameof(StudioFilter)] = LinqHelper.PublisherFilter(publisher?.Name);
         await _gameGrid.RefreshDataAsync();
@@ -510,7 +511,7 @@ else
         await _gameGrid.RefreshDataAsync();
     }
 
-    private async Task StudioFilter(Studio studio)
+    private async Task StudioFilter(FilterableItem studio)
     {
         _filterPredicates[nameof(StudioFilter)] = LinqHelper.StudioFilter(studio?.Name);
         await _gameGrid.RefreshDataAsync();

@@ -10,7 +10,20 @@ namespace GameTracker.Plugins.Dummy
         internal DummyGame()
         {
             _title = "Dummy Title";
+            Description = "Dummy Description";
+            GameplayModes = new[] { GameplayMode.Singleplayer };
+            Genres = new[] { Genre.Other };
+            Image = new Image
+            {
+                Url = "https://upload.wikimedia.org/wikipedia/commons/2/21/Hello_World_Brian_Kernighan_1978.jpg",
+                Width = 460,
+                Height = 215
+            };
             PlatformId = 0;
+            Publisher = "Dummy Publisher";
+            Reviews = new List<Review> { new Review { Score = new Random().Next(11), Critic = "Dummy Critic", UpperBound = 10 } };
+            Studio = "Dummy Studio";
+            ReleaseDate = DateTime.Today;
         }
 
         public override Task Preload()
@@ -19,19 +32,6 @@ namespace GameTracker.Plugins.Dummy
         }
 
         public override ControlScheme[] ControlSchemes => new[] { ControlScheme.KeyboardMouse };
-
-        public override string Description => "Dummy Description";
-
-        public override GameplayMode[] GameplayModes => new[] { GameplayMode.Singleplayer };
-
-        public override Genre[] Genres => new[] { Genre.Other };
-
-        public override Image Image => new Image
-        {
-            Url = "https://upload.wikimedia.org/wikipedia/commons/2/21/Hello_World_Brian_Kernighan_1978.jpg",
-            Width = 460,
-            Height = 215
-        };
 
         public override DateTime? LastPlayed => DateTime.UnixEpoch;
 
@@ -45,19 +45,11 @@ namespace GameTracker.Plugins.Dummy
 
         public override MultiplayerAvailability[] MultiplayerAvailability => new[] { Models.Enums.MultiplayerAvailability.None };        
 
-        public override Platform[] Platforms => new[] { new Platform { Name = "Dummy Platform", Icon = "EggFried" } } ;
+        public override Platforms Platforms => Platforms.Windows;
 
         public override TimeSpan? Playtime => TimeSpan.Zero;
 
-        public override Publisher Publisher => new Publisher { Name = "Dummy Publisher" };
-
-        public override DateTime? ReleaseDate => DateTime.Today;
-
-        public override Review[] Reviews => new[] { new Review { Score = new Random().Next(11), Critic = new Critic { Name = "Dummy Critic", UpperBound = 10 } } } ;
-
         public override string ProviderName => "Dummy";
-
-        public override Studio Studio => new Studio { Name = "Dummy Studio" };
 
         public override string[] Tags => new[] { "test", "hello", "world" } ;        
 

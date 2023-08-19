@@ -42,8 +42,8 @@ namespace GameTracker.Plugins.EpicGames.Tests
             Assert.Single(_provider.Games);
             Assert.Equal(title, _provider.Games.First().Title);
             Assert.Equal(description, _provider.Games.First().Description);
-            Assert.Equal(publisher, _provider.Games.First().PublisherName);
-            Assert.Equal(developer, _provider.Games.First().StudioName);
+            Assert.Equal(publisher, _provider.Games.First().Publisher);
+            Assert.Equal(developer, _provider.Games.First().Studio);
         }
 
         [Theory]

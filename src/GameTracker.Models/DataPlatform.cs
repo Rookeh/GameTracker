@@ -2,7 +2,7 @@
 
 namespace GameTracker.Models
 {
-    public class Platform : CorporateEntity
+    public class DataPlatform : CorporateEntity
     {
         public string Icon { get; set; }
 

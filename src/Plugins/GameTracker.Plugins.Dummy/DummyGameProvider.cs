@@ -8,7 +8,7 @@ namespace GameTracker.Plugins.Dummy
         private IEnumerable<Game> _games = Enumerable.Empty<DummyGame>();
         private bool _initialized = false;
 
-        public Platform Platform => new Platform 
+        public DataPlatform Platform => new DataPlatform
         { 
             Name = "Dummy Provider",
             Description = "A dummy game provider used as an example of how to construct a provider plugin.",

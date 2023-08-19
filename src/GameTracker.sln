@@ -51,6 +51,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameTracker.Plugins.Steam",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameTracker.Plugins.Xbox", "Plugins\GameTracker.Plugins.Xbox\GameTracker.Plugins.Xbox.csproj", "{116824B6-0B81-468D-A0A4-8B523CA11920}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameTracker.Plugins.IGDB", "Plugins\GameTracker.Plugins.IGDB\GameTracker.Plugins.IGDB.csproj", "{1DEB9981-21BC-47B3-B839-1D768DC5FEEC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameTracker.Plugins.IGDB.Tests", "..\test\Plugins\GameTracker.Plugins.IGDB.Tests\GameTracker.Plugins.IGDB.Tests.csproj", "{7C3D91CC-B32D-4E37-8587-7180D71C6BC4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -141,6 +145,14 @@ Global
 		{116824B6-0B81-468D-A0A4-8B523CA11920}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{116824B6-0B81-468D-A0A4-8B523CA11920}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{116824B6-0B81-468D-A0A4-8B523CA11920}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1DEB9981-21BC-47B3-B839-1D768DC5FEEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DEB9981-21BC-47B3-B839-1D768DC5FEEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DEB9981-21BC-47B3-B839-1D768DC5FEEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DEB9981-21BC-47B3-B839-1D768DC5FEEC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C3D91CC-B32D-4E37-8587-7180D71C6BC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C3D91CC-B32D-4E37-8587-7180D71C6BC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C3D91CC-B32D-4E37-8587-7180D71C6BC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C3D91CC-B32D-4E37-8587-7180D71C6BC4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -163,6 +175,8 @@ Global
 		{933EA655-5D64-4910-A9B3-72973BFAC72A} = {14500993-18E7-43F8-948A-C93C6584EED1}
 		{F6F2B51E-5275-47A2-B200-94BDBC550DD0} = {14500993-18E7-43F8-948A-C93C6584EED1}
 		{116824B6-0B81-468D-A0A4-8B523CA11920} = {14500993-18E7-43F8-948A-C93C6584EED1}
+		{1DEB9981-21BC-47B3-B839-1D768DC5FEEC} = {14500993-18E7-43F8-948A-C93C6584EED1}
+		{7C3D91CC-B32D-4E37-8587-7180D71C6BC4} = {A709889C-3446-437C-BAE6-114A7CD90394}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F42E1040-C5D3-46DD-A6B6-B7DD4CF216DC}

@@ -20,14 +20,14 @@
     {
         <div class="publisher">
             <span class="label">Publisher:</span>
-            <span class="value">@GetName(Game.Publisher)</span>
+            <span class="value">@Game.Publisher</span>
         </div>
     }
     @if (Game.Studio != null)
     {
         <div class="studio">
             <span class="label">Development Studio:</span>
-            <span class="value">@GetName(Game.Studio)</span>
+            <span class="value">@Game.Studio</span>
         </div>
     }
     @if (Game.Genres.Any())
@@ -77,10 +77,10 @@
         <span class="value">
             <table>
                 <tr>
-                    @foreach (var platform in Game.Platforms)
+                    @foreach (var platform in Enum.GetValues<Platforms>().Where(p => p != Platforms.None && Game.Platforms.HasFlag(p)))
                     {
                         <td>
-                            <Icon Name="@IconHelper.GetIconEnum(platform.Icon, IconName.QuestionCircle)" /> @platform.Name
+                            <Icon Name="@IconHelper.GetIconFromPlatform(platform)" /> @platform.ToString()
                         </td>
                         <td />
                     }
@@ -127,8 +127,8 @@
     @foreach (var review in Game.Reviews)
     {
         <div class="rating">
-            <span class="label">@review.Critic.Name Rating:</span>
-            <span class="value">@review.Score / @review.Critic.UpperBound</span>
+            <span class="label">@review.Critic Rating:</span>
+            <span class="value">@review.Score.ToString("n0") / @review.UpperBound</span>
         </div>
     }
     @if (Game.AverageCriticalReview != null)
@@ -155,11 +155,6 @@
 
     [Parameter]
     public Game Game { get; set; }
-
-    private static string GetName(CorporateEntity entity)
-    {
-        return entity != null ? entity.Name : "Unknown";
-    }
 
     private static string GetGameTimeString(TimeSpan? gameTime)
     {

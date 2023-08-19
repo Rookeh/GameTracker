@@ -1,3 +1,4 @@
+using GameTracker.Models.Enums;
 using GameTracker.Plugins.Xbox.Interfaces;
 using GameTracker.Plugins.Xbox.Models.OpenXBL;
 using System.Net.Http.Headers;
@@ -28,7 +29,7 @@ namespace GameTracker.Plugins.Xbox.Tests
             var imageUrl = "http://localhost/test.png";
             var title = "Test Title";
             var publisher = "Test Publisher";
-            var platform = "Windows";
+            var platform = Platforms.Windows;
 
             var response = new XboxLiveTitleResponse
             {
@@ -110,8 +111,8 @@ namespace GameTracker.Plugins.Xbox.Tests
             Assert.Equal(expectedCount, _provider.Games.Count());
             Assert.Equal(DateTime.Today, _provider.Games.First().LastPlayed);
             Assert.Equal(imageUrl, _provider.Games.First().Image.Url);
-            Assert.Equal(publisher, _provider.Games.First().PublisherName);
-            Assert.Equal(platform, _provider.Games.First().Platforms.FirstOrDefault()?.Name);
+            Assert.Equal(publisher, _provider.Games.First().Publisher);
+            Assert.Equal(platform, _provider.Games.First().Platforms);
             Assert.Equal(title, _provider.Games.First().Title);
             await _mockRateLimitedClient.Received(1).GetFromJson(Arg.Any<string>(), Arg.Any<XboxLiveTitleResponse>(), Arg.Any<NameValueHeaderValue[]>());
         }

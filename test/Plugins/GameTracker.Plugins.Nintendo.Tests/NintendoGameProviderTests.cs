@@ -69,7 +69,7 @@ namespace GameTracker.Plugins.Nintendo.Tests
             Assert.Equal(euTitle.Response.Docs[0].ImageUrlH2X1, _provider.Games.First().Image.Url);
             Assert.Contains(euTitle.Response.Docs[0].Url, _provider.Games.First().LaunchCommand.Url);
             Assert.Equal(euTitle.Response.Docs[0].DatesReleased.FirstOrDefault(), _provider.Games.First().ReleaseDate);
-            Assert.Equal("Game Studio", _provider.Games.First().Studio.Name);
+            Assert.Equal("Game Studio", _provider.Games.First().Studio);
             Assert.Equal(euTitle.Response.Docs[0].Title, _provider.Games.First().Title);
             await _mockHttpClient.Received(1).GetFromJsonAndTypeAsync(Arg.Any<Uri>(), Arg.Any<Type>());
         }
@@ -128,7 +128,7 @@ namespace GameTracker.Plugins.Nintendo.Tests
             Assert.Equal("https://localhost/test.jpg", _provider.Games.First().Image.Url);
             Assert.Contains("12345", _provider.Games.First().LaunchCommand.Url);
             Assert.Equal(DateTime.Today, _provider.Games.First().ReleaseDate);
-            Assert.Equal("Test Studio", _provider.Games.First().StudioName);
+            Assert.Equal("Test Studio", _provider.Games.First().Studio);
             Assert.Equal("Test Title", _provider.Games.First().Title);
             await _mockHttpClient.Received().GetStringAsync(Arg.Any<string>());
         }

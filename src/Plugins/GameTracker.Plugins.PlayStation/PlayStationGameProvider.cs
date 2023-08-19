@@ -32,7 +32,7 @@ namespace GameTracker.Plugins.PlayStation
 
         public Guid ProviderId => new Guid("A33F4D1B-2B4E-4669-AA98-9207A4F38037");
 
-        public Platform Platform => new Platform
+        public DataPlatform Platform => new DataPlatform
         {
             Name = "PlayStation Network",
             Description = "The PlayStation Network (PSN) is an online gaming and digital storefront owned and operated by Sony Interactive Entertainment. " +

@@ -1,10 +1,10 @@
 ﻿@using GameTracker.Interfaces;
 
-@if (GameProvider.RequiredParameters?.Any() ?? false)
+@if (DataProvider.RequiredParameters?.Any() ?? false)
 {
     <Grid TItem="KeyValuePair<string, Type>"
           Class="table table-bordered"
-          Data="GameProvider.RequiredParameters"
+          Data="DataProvider.RequiredParameters"
           AllowFiltering="false"
           AllowPaging="false"
           PageSizeSelectorVisible="false"
@@ -22,16 +22,16 @@
                 @switch (context.Value)
                 {
                     case Type boolType when boolType == typeof(bool):
-                        <input type="checkbox" @bind="BoolParameters[GameProvider.Platform.Name + context.Key]" />
+                        <input type="checkbox" @bind="BoolParameters[DataProvider.Platform.Name + context.Key]" />
                         break;
                     case Type dateType when dateType == typeof(DateTime):
-                        <input type="date" @bind="DateParameters[GameProvider.Platform.Name + context.Key]" />
+                        <input type="date" @bind="DateParameters[DataProvider.Platform.Name + context.Key]" />
                         break;
                     case Type intType when intType == typeof(int):
-                        <input type="number" @bind="IntParameters[GameProvider.Platform.Name + context.Key]" />
+                        <input type="number" @bind="IntParameters[DataProvider.Platform.Name + context.Key]" />
                         break;
                     case Type stringType when stringType == typeof(string):
-                        <input type="text" @bind="StringParameters[GameProvider.Platform.Name + context.Key]" />
+                        <input type="text" @bind="StringParameters[DataProvider.Platform.Name + context.Key]" />
                         break;
                     default:
                         <em>Unsupported parameter type.</em>
@@ -45,7 +45,7 @@
 @code {
 
     [Parameter]
-    public IGameProvider GameProvider { get; set; }
+    public IDataProvider DataProvider { get; set; }
 
     [Parameter]
     public Dictionary<string, bool> BoolParameters { get; set; }

@@ -7,16 +7,19 @@ namespace GameTracker.Core.Tests
     public class GameLibraryManagerTests
     {
         private readonly IGameProvider _mockGameProvider;
+        private readonly IReviewProvider _mockReviewProvider;
         private readonly IParameterCacheRepository _mockParameterCacheRepo;
         private readonly IGameLibraryManager _gameLibraryManager;
 
         public GameLibraryManagerTests()
         {
+            _mockReviewProvider = Substitute.For<IReviewProvider>();
             _mockGameProvider = Substitute.For<IGameProvider>();
             _mockParameterCacheRepo = Substitute.For<IParameterCacheRepository>();
 
-            var gameProviderFactory = Substitute.For<IGameProviderFactory>();
-            gameProviderFactory.GetProviders().Returns(new[] { _mockGameProvider });
+            var gameProviderFactory = Substitute.For<IDataProviderFactory>();            
+            gameProviderFactory.GetGameProviders().Returns(new[] { _mockGameProvider });
+            gameProviderFactory.GetReviewProviders().Returns(new[] { _mockReviewProvider });
 
             _gameLibraryManager = new GameLibraryManager(_mockParameterCacheRepo, gameProviderFactory);
         }

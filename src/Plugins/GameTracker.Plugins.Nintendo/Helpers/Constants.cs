@@ -56,7 +56,7 @@ namespace GameTracker.Plugins.Nintendo.Helpers
 
         internal static class Platforms
         {
-            internal static Platform NintendoEShop => new Platform
+            internal static DataPlatform NintendoEShop => new DataPlatform
             {
                 Name = "Nintendo eShop",
                 Description = "The Nintendo eShop is a digital distribution service for Nintendo's Switch console. It was formerly available on Nintendo's " + 
@@ -71,7 +71,7 @@ namespace GameTracker.Plugins.Nintendo.Helpers
                 }
             };
 
-            internal static Platform NintendoSwitch = new Platform
+            internal static DataPlatform NintendoSwitch = new DataPlatform
             {
                 Name = "Nintendo Switch",
                 Icon = "NintendoSwitch",

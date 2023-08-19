@@ -20,7 +20,7 @@ namespace GameTracker.Plugins.EpicGames
 
         public Guid ProviderId => new Guid("16C98CD0-3BDC-4A0A-93E1-E992D8C00926");
 
-        public Platform Platform => new Platform
+        public DataPlatform Platform => new DataPlatform
         {
             Name = "Epic Games Store",
             Description = "The Epic Games Store is a digital storefront for video games, developed by Epic Games and offered on Windows and macOS. " + 

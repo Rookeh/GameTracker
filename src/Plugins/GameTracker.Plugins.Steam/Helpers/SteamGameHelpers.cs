@@ -7,6 +7,8 @@ using Genre = GameTracker.Plugins.Steam.Models.StoreApi.Genre;
 using GenreEnum = GameTracker.Models.Enums.Genre;
 using GameTracker.Plugins.Steam.Models.WebApi;
 
+using PlatformsEnum = GameTracker.Models.Enums.Platforms;
+
 namespace GameTracker.Plugins.Steam.Helpers
 {
     internal static class SteamGameHelpers
@@ -126,53 +128,47 @@ namespace GameTracker.Plugins.Steam.Helpers
             }
         }
 
-        internal static Review[] ParseMetacriticReview(Game game, MetacriticScore? metacritic)
+        internal static List<Review> ParseMetacriticReview(Game game, MetacriticScore? metacritic)
         {
             return metacritic == null
-                ? Array.Empty<Review>()
-                : (new[]
+                ? new List<Review>()
+                : (new List<Review>
                 {
                     new Review
                     {
-                        Critic = WellKnownCritics.Metacritic,
-                        Game = game,
-                        Content = metacritic.Url,
-                        Score = metacritic.Score
+                        Critic = "Metacritic",
+                        Score = metacritic.Score,
+                        UpperBound = 100
+
                     }
                 });
         }
 
-        internal static IEnumerable<Platform> ParsePlatforms(Platforms? platforms)
+        internal static PlatformsEnum ParsePlatforms(Platforms? platforms)
         {
+            var result = PlatformsEnum.None;
+
             if (platforms == null)
             {
-                yield break;
+                return result;
             }
 
             if (platforms.Windows)
             {
-                yield return WellKnownPlatforms.Windows;
+                result |= PlatformsEnum.Windows;
             }
 
             if (platforms.Linux)
             {
-                yield return WellKnownPlatforms.Linux;
+                result |= PlatformsEnum.Linux;
             }
 
             if (platforms.Mac)
             {
-                yield return WellKnownPlatforms.MacOS;
-            }
-        }
-
-        internal static Publisher? ParsePublisher(SteamGameDetails gameDetails)
-        {
-            if (gameDetails?.Publishers == null || !gameDetails.Publishers.Any())
-            {
-                return null;
+                result |= PlatformsEnum.MacOS;
             }
 
-            return new Publisher { Name = gameDetails.Publishers.First() };
+            return result;
         }
     }
 }

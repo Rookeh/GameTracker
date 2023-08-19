@@ -25,7 +25,7 @@ namespace GameTracker.Plugins.Nintendo
 
         public Guid ProviderId => new Guid("BD638153-9288-4467-84BE-4EF73CE102DD");
 
-        public Platform Platform => Constants.Platforms.NintendoEShop;
+        public DataPlatform Platform => Constants.Platforms.NintendoEShop;
 
         public IEnumerable<Game> Games => _games;
 

@@ -6,7 +6,7 @@
 @using GameTracker.Core;
 @using GameTracker.Models;
 
-@inject IGameProviderFactory ProviderFactory;
+@inject IDataProviderFactory ProviderFactory;
 
 @if (games == null || !games.Any())
 {
@@ -43,7 +43,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        games = ProviderFactory.GetProviders()
+        games = ProviderFactory.GetGameProviders()
             .ToArray()
             .SelectMany(p => p.Games)
             .Where(g => g.Playtime <= TimeSpan.FromHours(1))

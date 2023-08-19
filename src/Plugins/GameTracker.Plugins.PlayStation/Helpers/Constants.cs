@@ -25,21 +25,21 @@ namespace GameTracker.Plugins.PlayStation.Helpers
 
         public static class ConsolePlatforms
         {
-            public static Platform PlayStation3 => new Platform()
+            public static DataPlatform PlayStation3 => new DataPlatform()
             {
                 Name = "PlayStation 3",
                 Icon = "Playstation",
                 Description = "The PlayStation 3 is a home video game console developed and marketed by Sony Interactive Entertainment. The successor to the PlayStation 2, it is part of the PlayStation brand of consoles."
             };
 
-            public static Platform PlayStation4 => new Platform()
+            public static DataPlatform PlayStation4 => new DataPlatform()
             {
                 Name = "PlayStation 4",
                 Icon = "Playstation",
                 Description = "The PlayStation 4 is a home video game console developed by Sony Interactive Entertainment. Announced as the successor to the PlayStation 3 in February 2013, it was launched on November 15, 2013, in North America, November 29, 2013 in Europe, South America and Australia, and on February 22, 2014 in Japan."
             };
 
-            public static Platform PlayStation5 => new Platform()
+            public static DataPlatform PlayStation5 => new DataPlatform()
             {
                 Name = "PlayStation 5",
                 Icon = "Playstation",

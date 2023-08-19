@@ -7,35 +7,28 @@ namespace GameTracker.Plugins.Nintendo.Models
 {
     public class JPNintendoGame : Game
     {
-        private readonly string _imageUrl;
         private readonly LaunchCommand _launchCommand;
-        private readonly DateTime? _releaseDate;
-        private readonly Studio? _studio;
         private readonly string _title;
 
         public JPNintendoGame(TitleInfoListTitleInfo titleInfo)
         {
-            _imageUrl = titleInfo.ScreenshotImgURL;
-            _launchCommand = JPGameHelpers.LaunchCommandFromUrl(titleInfo.LinkURL);
-            _releaseDate = JPGameHelpers.ReleaseDateFromSalesDateString(titleInfo.SalesDate);
-            _studio = JPGameHelpers.StudioFromMakerName(titleInfo.MakerName);
+            Description = string.Empty;
+            GameplayModes = Array.Empty<GameplayMode>();
+            Genres = Array.Empty<Genre>();
+            Image = new Image
+            {
+                Width = 480,
+                Height = 270,
+                Url = titleInfo.ScreenshotImgURL
+            };
+            ReleaseDate = JPGameHelpers.ReleaseDateFromSalesDateString(titleInfo.SalesDate);
+            Studio = titleInfo.MakerName;
+
+            _launchCommand = JPGameHelpers.LaunchCommandFromUrl(titleInfo.LinkURL);            
             _title = titleInfo.TitleName;
         }
 
         public override ControlScheme[] ControlSchemes => new[] { ControlScheme.Controller };
-
-        public override string Description => string.Empty;
-
-        public override GameplayMode[] GameplayModes => Array.Empty<GameplayMode>();
-
-        public override Genre[] Genres => Array.Empty<Genre>();
-
-        public override Image Image => new Image
-        {
-            Width = 480,
-            Height = 270,
-            Url = _imageUrl
-        };
 
         public override DateTime? LastPlayed => null;
 
@@ -43,19 +36,11 @@ namespace GameTracker.Plugins.Nintendo.Models
 
         public override MultiplayerAvailability[] MultiplayerAvailability => Array.Empty<MultiplayerAvailability>();
 
-        public override Platform[] Platforms => new[] { Constants.Platforms.NintendoSwitch };
+        public override Platforms Platforms => Platforms.NintendoSwitch;
 
         public override TimeSpan? Playtime => null;
 
-        public override Publisher? Publisher => null;
-
-        public override DateTime? ReleaseDate => _releaseDate;
-
-        public override Review[] Reviews => Array.Empty<Review>();
-
         public override string ProviderName => "Nintendo eShop";
-
-        public override Studio? Studio => _studio;
 
         public override string[] Tags => Array.Empty<string>();
 
